@@ -215,8 +215,8 @@ end else begin
 end
 
 assign dac_npnt = dac_pnt + set_step_i;
-assign trig_done_o = (trig_evt_i == 3'b000) && (!dac_rep && trig_in) |
-                     (trig_evt_i == 3'b001) && ((dac_trig && !dac_do) || (dac_do && ~dac_npnt_sub_neg)); // start or wrap or go to start
+assign trig_done_o = ((trig_evt_i == 3'b000) & (~dac_rep & trig_in)) |
+                     ((trig_evt_i == 3'b001) & ((dac_trig & ~dac_do) | (dac_do & ~dac_npnt_sub_neg))); // start or wrap or go to start
 
 //---------------------------------------------------------------------------------
 //
