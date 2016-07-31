@@ -44,7 +44,7 @@ source                            $path_ip/system_bd.tcl
 
 # generate SDK files
 generate_target all [get_files    system.bd]
-write_hwdef              -file    $path_sdk/red_pitaya.hwdef
+write_hwdef              -force -file    $path_sdk/red_pitaya.hwdef
 
 ################################################################################
 # read files:
