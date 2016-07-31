@@ -31,36 +31,39 @@ You will need the following to build the Red Pitaya components:
 1. Various development packages:
 
 ```bash
+# Basic build env
+sudo apt install build-essentials
 # generic dependencies
 sudo apt-get install make curl xz-utils
 # U-Boot build dependencies
 sudo apt-get install libssl-dev device-tree-compiler u-boot-tools
+# Bunch of 32 bit versions of our libraries
+sudo apt-get install libc6:i386 libstdc++6:i386
+sudo apt-get install lib32z1
+# Qemu for debian image compilation
+sudo apt-get install debootstrap qemu-user-static
+sudo ln -s /usr/bin/make /usr/bin/gmake
 ```
 
 2. Xilinx [Vivado 2015.4](http://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vivado-design-tools/2015-4.html) FPGA development tools. The SDK (bare metal toolchain) must also be installed, be careful during the install process to select it. Preferably use the default install location.
-
-3. Linaro [ARM toolchain](https://releases.linaro.org/14.11/components/toolchain/binaries/arm-linux-gnueabihf/) for cross compiling Linux applications. We recommend to install it to `/opt/linaro/` since build process instructions relly on it.
+Download the Xilinx.lic file and load it using the license manager
+sudo chown -R <username >~/.Xilinx
+Chmod 755 -R ~/.Xilinx
+Chgrp -R <username> ~/.Xilinx
+Copy Xilinx.lic to ~/.Xilinx/
 
 ```bash
-TOOLCHAIN="http://releases.linaro.org/14.11/components/toolchain/binaries/arm-linux-gnueabihf/gcc-linaro-4.9-2014.11-x86_64_arm-linux-gnueabihf.tar.xz"
-curl -O $TOOLCHAIN
-sudo mkdir -p /opt/linaro
-sudo chown $USER:$USER /opt/linaro
-tar -xpf *linaro*.tar.xz -C /opt/linaro
-```
-
-**NOTE:** you can skip installing Vivado tools, if you only wish to compile user space software.
-
 # Build process
 
 Go to your preferred development directory and clone the Red Pitaya repository from GitHub.
 ```bash
-git clone https://github.com/RedPitaya/RedPitaya.git
+git clone --branch development https://github.com/bhaskarm/RedPitaya.git
 cd RedPitaya
 ```
 
 An example script `settings.sh` is provided for setting all necessary environment variables. The script assumes some default tool install paths, so it might need editing if install paths other than the ones described above were used.
 ```bash
+source ~/xilinx.bashrc
 . settings.sh
 ```
 
@@ -130,7 +133,8 @@ make build/uramdisk.image.gz
 
 ### Debian OS
 
-[Debian OS instructions](OS/debian/README.md) are detailed elsewhere.
+sudo OS/debian/image.sh
+Sometimes image.sh starts the qemu sshd daemon but it never stop it; this causes the final removal of ./root directory to fail. Kill the qemu sshd daemon, unmount ./root and ./boot. Remove the root 
 
 ### API
 
@@ -162,3 +166,9 @@ scp scpi-server/scpi-server root@192.168.0.100:/opt/redpitaya/bin/
 ### Free applications
 
 To build free applications, follow the instructions given at `apps-free`/[`README.md`](apps-free/README.md) file.
+
+## Builds and changes done on the Red Pitaya board
+
+The Red Pitaya board comes with gcc and g++ installed. Compilation on new code works fine althogh it can be a little slow.
+Copy the librp.so from /opt/redpitaya/lib to the /lib directory once the board is booted up.
+
