@@ -71,9 +71,13 @@ rm $ROOT_DIR/usr/bin/qemu-arm-static
 ################################################################################
 # umount image
 ################################################################################
+# kill straggling qemu sshd process to release file locks
+pkill -9 sshd
 
 # Unmount file systems
-umount $BOOT_DIR $ROOT_DIR
-rmdir $BOOT_DIR $ROOT_DIR
+umount $BOOT_DIR
+umount $ROOT_DIR
+rmdir $BOOT_DIR 
+rmdir $ROOT_DIR
 
 losetup -d $DEVICE

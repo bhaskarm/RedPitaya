@@ -133,8 +133,8 @@ $(DL):
 $(TMP):
 	mkdir -p $@
 
-$(TARGET): $(BOOT_UBOOT) u-boot $(DEVICETREE) $(LINUX) buildroot $(IDGEN) $(NGINX) \
-	   examples $(DISCOVERY) $(HEARTBEAT) ecosystem \
+$(TARGET): $(BOOT_UBOOT) u-boot $(DEVICETREE) $(LINUX) \
+	   examples $(DISCOVERY) ecosystem \
 	   scpi api apps_pro rp_communication
 	mkdir -p               $(TARGET)
 	# copy boot images and select FSBL as default
@@ -203,6 +203,9 @@ $(ENVTOOLS_CFG): $(UBOOT_DIR)
 	mkdir -p $(INSTALL_DIR)/etc/
 	cp $</tools/env/fw_env.config $(INSTALL_DIR)/etc
 
+$(INSTALL_DIR):
+	mkdir $(INSTALL_DIR)
+
 ################################################################################
 # Linux build provides: $(LINUX)
 ################################################################################
@@ -257,14 +260,14 @@ $(BOOT_UBOOT): fpga $(UBOOT)
 
 URAMDISK_DIR    = OS/buildroot
 
-.PHONY: buildroot
+#.PHONY: buildroot
 
-$(INSTALL_DIR):
-	mkdir $(INSTALL_DIR)
+#$(INSTALL_DIR):
+#	mkdir $(INSTALL_DIR)
 
-buildroot: $(INSTALL_DIR)
-	$(MAKE) -C $(URAMDISK_DIR)
-	$(MAKE) -C $(URAMDISK_DIR) install INSTALL_DIR=$(abspath $(INSTALL_DIR))
+#buildroot: $(INSTALL_DIR)
+	#$(MAKE) -C $(URAMDISK_DIR)
+	#$(MAKE) -C $(URAMDISK_DIR) install INSTALL_DIR=$(abspath $(INSTALL_DIR))
 
 ################################################################################
 # API libraries
@@ -320,7 +323,7 @@ LUANGINX_DIR    = Bazaar/nginx/ngx_ext_modules/lua-nginx-module
 NGINX_SRC_DIR   = Bazaar/nginx/nginx-1.5.3
 BOOST_DIR       = Bazaar/nginx/ngx_ext_modules/ws_server/boost
 
-.PHONY: ecosystem nginx 
+.PHONY: ecosystem 
 
 $(WEBSOCKETPP_TAR): | $(DL)
 	curl -L $(WEBSOCKETPP_URL) -o $@
@@ -345,33 +348,33 @@ $(LIBJSON_DIR): $(LIBJSON_TAR)
 	unzip $< -d $(@D)
 	patch -d $@ -p1 < patches/libjson.patch
 
-$(LUANGINX_TAR): | $(DL)
-	curl -L $(LUANGINX_URL) -o $@
+#$(LUANGINX_TAR): | $(DL)
+#	curl -L $(LUANGINX_URL) -o $@
 
-$(LUANGINX_DIR): $(LUANGINX_TAR)
-	mkdir -p $@
-	tar -xzf $< --strip-components=1 --directory=$@
-	patch -d $@ -p1 < patches/lua-nginx-module.patch
+#$(LUANGINX_DIR): $(LUANGINX_TAR)
+#	mkdir -p $@
+#	tar -xzf $< --strip-components=1 --directory=$@
+#	patch -d $@ -p1 < patches/lua-nginx-module.patch
 
-$(NGINX_TAR): | $(DL)
-	curl -L $(NGINX_URL) -o $@
+#$(NGINX_TAR): | $(DL)
+#	curl -L $(NGINX_URL) -o $@
 
-$(NGINX_SRC_DIR): $(NGINX_TAR)
-	mkdir -p $@
-	tar -xzf $< --strip-components=1 --directory=$@
-	patch -d $@ -p1 < patches/nginx.patch
-	cp -f patches/nginx.conf $@/conf/
+#$(NGINX_SRC_DIR): $(NGINX_TAR)
+#	mkdir -p $@
+#	tar -xzf $< --strip-components=1 --directory=$@
+#	patch -d $@ -p1 < patches/nginx.patch
+#	cp -f patches/nginx.conf $@/conf/
 
-$(BOOST_DIR): buildroot
-	ln -sf ../../../../OS/buildroot/buildroot-2014.02/output/build/boost-1.55.0 $@
+#$(BOOST_DIR): buildroot
+#	ln -sf ../../../../OS/buildroot/buildroot-2014.02/output/build/boost-1.55.0 $@
 
-$(NGINX): buildroot libredpitaya $(WEBSOCKETPP_DIR) $(CRYPTOPP_DIR) $(LIBJSON_DIR) $(LUANGINX_DIR) $(NGINX_SRC_DIR) $(BOOST_DIR)
-	$(MAKE) -C $(NGINX_DIR) SYSROOT=$(SYSROOT)
-	$(MAKE) -C $(NGINX_DIR) install DESTDIR=$(abspath $(INSTALL_DIR))
+#$(NGINX): buildroot libredpitaya $(WEBSOCKETPP_DIR) $(CRYPTOPP_DIR) $(LIBJSON_DIR) $(LUANGINX_DIR) $(NGINX_SRC_DIR) $(BOOST_DIR)
+#	$(MAKE) -C $(NGINX_DIR) SYSROOT=$(SYSROOT)
+#	$(MAKE) -C $(NGINX_DIR) install DESTDIR=$(abspath $(INSTALL_DIR))
 
-$(IDGEN): $(NGINX)
-	$(MAKE) -C $(IDGEN_DIR)
-	$(MAKE) -C $(IDGEN_DIR) install DESTDIR=$(abspath $(INSTALL_DIR))
+#$(IDGEN): $(NGINX)
+#	$(MAKE) -C $(IDGEN_DIR)
+#	$(MAKE) -C $(IDGEN_DIR) install DESTDIR=$(abspath $(INSTALL_DIR))
 
 ################################################################################
 # SCPI server
@@ -459,6 +462,7 @@ rp_communication:
 ################################################################################
 
 $(DISCOVERY):
+	mkdir -p $(INSTALL_DIR)/sbin
 	cp $(OS_TOOLS_DIR)/discovery.sh $@
 
 $(HEARTBEAT):
@@ -523,6 +527,8 @@ clean:
 	-make -C $(UBOOT_DIR) clean
 	make -C shared clean
 	# todo, remove downloaded libraries and symlinks
+	rm -rf $(TMP)/*
+	rm -rf $(DL)/*
 	rm -rf Bazaar/tools/cryptopp
 	make -C $(NGINX_DIR) clean
 	make -C $(MONITOR_DIR) clean
@@ -531,7 +537,7 @@ clean:
 	make -C $(CALIB_DIR) clean
 	-make -C $(SCPI_SERVER_DIR) clean
 	make -C $(LIBRP_DIR)    clean
-	make -C $(LIBRPAPP_DIR) clean
+	#make -C $(LIBRPAPP_DIR) clean
 	make -C $(SDK_DIR) clean
 	make -C $(COMM_DIR) clean
 	make -C $(APPS_FREE_DIR) clean
