@@ -1,3 +1,5 @@
+## This is a fork that does high speed ADC transmission over ethernet. It will also include high speed DAC waveform generation over ethernet at a later time.
+
 # Red Pitaya ecosystem and applications
 
 Here you will find the sources of various software components of the
@@ -47,17 +49,17 @@ sudo ln -s /usr/bin/make /usr/bin/gmake
 
 2. Xilinx [Vivado 2015.4](http://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vivado-design-tools/2015-4.html) FPGA development tools. The SDK (bare metal toolchain) must also be installed, be careful during the install process to select it. Preferably use the default install location.
 Download the Xilinx.lic file and load it using the license manager
+```bash
 sudo chown -R <username >~/.Xilinx
 Chmod 755 -R ~/.Xilinx
 Chgrp -R <username> ~/.Xilinx
 Copy Xilinx.lic to ~/.Xilinx/
-
-```bash
+```
 # Build process
 
 Go to your preferred development directory and clone the Red Pitaya repository from GitHub.
 ```bash
-git clone --branch development https://github.com/bhaskarm/RedPitaya.git
+git clone --branch adc_devel https://github.com/bhaskarm/RedPitaya.git
 cd RedPitaya
 ```
 
@@ -106,6 +108,19 @@ make build/u-boot.scr
 ```
 The build process downloads the Xilinx version of U-Boot sources from Github, applies patches and starts the build process. Patches are available in the `patches/` directory.
 
+If the files in the /boot partition are being modified (boot.bin or devicetree.dtb) there is no need to generate a new image. sftp the new files over and copy them to the /boot directory
+
+```bash
+sftp root@192.168.2.100
+put boot.bin
+quit
+```
+Make the /boot partition RW and copy the new file
+
+```bash
+sudo mount -o remount,rw /dev/mmcblk0p1 /boot
+cp ~/boot.bin /boot
+```
 ### Linux kernel
 
 To build a Linux image:
@@ -124,16 +139,12 @@ Since file `tmp/boot.bin.uboot` is created it should be renamed to simply `tmp/b
 
 ## Linux user space
 
-### Buildroot
-
-Buildroot is the most basic Linux distribution available for Red Pitaya. It is also used to provide some sources which are dependencies for user space applications.
-```bash
-make build/uramdisk.image.gz
-``` 
-
 ### Debian OS
 
+```bash
 sudo OS/debian/image.sh
+```
+
 Sometimes image.sh starts the qemu sshd daemon but it never stop it; this causes the final removal of ./root directory to fail. Kill the qemu sshd daemon, unmount ./root and ./boot. Remove the root 
 
 ### API

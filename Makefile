@@ -35,30 +35,24 @@ DTREE_TAG     = xilinx-v2015.4
 UBOOT_DIR     = $(TMP)/u-boot-xlnx-$(UBOOT_TAG)
 LINUX_DIR     = $(TMP)/linux-xlnx-$(LINUX_TAG)
 DTREE_DIR     = $(TMP)/device-tree-xlnx-$(DTREE_TAG)
-BUILDROOT_DIR = $(TMP)/buildroot-$(BUILDROOT_TAG)
 
 UBOOT_TAR     = $(DL)/u-boot-xlnx-$(UBOOT_TAG).tar.gz
 LINUX_TAR     = $(DL)/linux-xlnx-$(LINUX_TAG).tar.gz
 DTREE_TAR     = $(DL)/device-tree-xlnx-$(DTREE_TAG).tar.gz
-BUILDROOT_TAR = $(DL)/buildroot-$(BUILDROOT_TAG).tar.gz
 
 # it is possible to use an alternative download location (local) by setting environment variables
 UBOOT_URL     ?= https://github.com/Xilinx/u-boot-xlnx/archive/$(UBOOT_TAG).tar.gz
 LINUX_URL     ?= https://github.com/Xilinx/linux-xlnx/archive/$(LINUX_TAG).tar.gz
 DTREE_URL     ?= https://github.com/Xilinx/device-tree-xlnx/archive/$(DTREE_TAG).tar.gz
-BUILDROOT_URL ?= http://buildroot.uclibc.org/downloads/buildroot-$(BUILDROOT_TAG).tar.gz
 
 UBOOT_GIT     ?= https://github.com/Xilinx/u-boot-xlnx.git
 LINUX_GIT     ?= https://github.com/Xilinx/linux-xlnx.git
 DTREE_GIT     ?= https://github.com/Xilinx/device-tree-xlnx.git
-BUILDROOT_GIT ?= http://git.buildroot.net/git/buildroot.git
 
 ifeq ($(CROSS_COMPILE),arm-xilinx-linux-gnueabi-)
-SYSROOT=$(PWD)/OS/buildroot/buildroot-2014.02/output/host/usr/arm-buildroot-linux-gnueabi/sysroot
 LINUX_CFLAGS = "-O2 -mtune=cortex-a9 -mfpu=neon -mfloat-abi=soft"
 UBOOT_CFLAGS = "-O2 -mtune=cortex-a9 -mfpu=neon -mfloat-abi=soft"
 else
-SYSROOT=$(PWD)/OS/buildroot/buildroot-2014.02/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot
 LINUX_CFLAGS = "-O2 -mtune=cortex-a9 -mfpu=neon -mfloat-abi=hard"
 UBOOT_CFLAGS = "-O2 -mtune=cortex-a9 -mfpu=neon -mfloat-abi=hard"
 endif
@@ -74,7 +68,6 @@ NAME=ecosystem
 # directories
 FPGA_DIR        = fpga
 
-NGINX_DIR       = Bazaar/nginx
 IDGEN_DIR       = Bazaar/tools/idgen
 OS_TOOLS_DIR    = OS/tools
 ECOSYSTEM_DIR   = Applications/ecosystem
@@ -92,7 +85,6 @@ UBOOT           = $(TMP)/u-boot.elf
 LINUX           = $(TMP)/uImage
 BOOT_UBOOT      = $(TMP)/boot.bin
 
-NGINX           = $(INSTALL_DIR)/sbin/nginx
 IDGEN           = $(INSTALL_DIR)/sbin/idgen
 DISCOVERY       = $(INSTALL_DIR)/sbin/discovery.sh
 
@@ -171,7 +163,6 @@ fpga: $(DTREE_DIR)
 
 ENVTOOLS_CFG    = $(INSTALL_DIR)/etc/fw_env.config
 
-UBOOT_SCRIPT_BUILDROOT = patches/u-boot.script.buildroot
 UBOOT_SCRIPT_DEBIAN    = patches/u-boot.script.debian
 UBOOT_SCRIPT           = $(INSTALL_DIR)/u-boot.scr
 
@@ -193,8 +184,7 @@ $(UBOOT): $(UBOOT_DIR)
 	make -C $< arch=ARM CFLAGS=$(UBOOT_CFLAGS) all
 	cp $</u-boot $@
 
-$(UBOOT_SCRIPT): $(INSTALL_DIR) $(UBOOT_DIR) $(UBOOT_SCRIPT_BUILDROOT) $(UBOOT_SCRIPT_DEBIAN)
-	$(UBOOT_DIR)/tools/mkimage -A ARM -O linux -T script -C none -a 0 -e 0 -n "boot Buildroot" -d $(UBOOT_SCRIPT_BUILDROOT) $@.buildroot
+$(UBOOT_SCRIPT): $(INSTALL_DIR) $(UBOOT_DIR) $(UBOOT_SCRIPT_DEBIAN)
 	$(UBOOT_DIR)/tools/mkimage -A ARM -O linux -T script -C none -a 0 -e 0 -n "boot Debian"    -d $(UBOOT_SCRIPT_DEBIAN)    $@.debian
 	cp $@.debian $@
 
@@ -230,7 +220,6 @@ $(LINUX): $(LINUX_DIR)
 
 ################################################################################
 # device tree processing
-# TODO: here separate device trees should be provided for Ubuntu and buildroot
 ################################################################################
 
 $(DTREE_TAR): | $(DL)
@@ -252,21 +241,6 @@ $(DEVICETREE): $(DTREE_DIR) $(LINUX) fpga
 $(BOOT_UBOOT): fpga $(UBOOT)
 	@echo img:{[bootloader] $(FSBL) $(FPGA) $(UBOOT) } > boot_uboot.bif
 	bootgen -image boot_uboot.bif -w -o $@
-
-################################################################################
-# root file system
-################################################################################
-
-URAMDISK_DIR    = OS/buildroot
-
-#.PHONY: buildroot
-
-#$(INSTALL_DIR):
-#	mkdir $(INSTALL_DIR)
-
-#buildroot: $(INSTALL_DIR)
-	#$(MAKE) -C $(URAMDISK_DIR)
-	#$(MAKE) -C $(URAMDISK_DIR) install INSTALL_DIR=$(abspath $(INSTALL_DIR))
 
 ################################################################################
 # API libraries
@@ -300,26 +274,18 @@ endif
 ################################################################################
 
 WEBSOCKETPP_TAG = 0.5.0
-LUANGINX_TAG    = v0.8.7
-NGINX_TAG       = 1.5.3
 
 WEBSOCKETPP_URL = https://github.com/zaphoyd/websocketpp/archive/$(WEBSOCKETPP_TAG).tar.gz
 CRYPTOPP_URL    = http://www.cryptopp.com/cryptopp562.zip
 LIBJSON_URL     = http://sourceforge.net/projects/libjson/files/libjson_7.6.1.zip
-LUANGINX_URL    = https://codeload.github.com/openresty/lua-nginx-module/tar.gz/$(LUANGINX_TAG)
-NGINX_URL       = http://nginx.org/download/nginx-$(NGINX_TAG).tar.gz
 
 WEBSOCKETPP_TAR = $(DL)/websocketpp-$(WEBSOCKETPP_TAG).tar.gz
 CRYPTOPP_TAR    = $(DL)/cryptopp562.zip
 LIBJSON_TAR     = $(DL)/libjson_7.6.1.zip
-LUANGINX_TAR    = $(DL)/lua-nginx-module-$(LUANGINX_TAG).tr.gz
-NGINX_TAR       = $(DL)/nginx-$(NGINX_TAG).tar.gz
 
 WEBSOCKETPP_DIR = Bazaar/nginx/ngx_ext_modules/ws_server/websocketpp
 CRYPTOPP_DIR    = Bazaar/tools/cryptopp
 LIBJSON_DIR     = Bazaar/tools/libjson
-LUANGINX_DIR    = Bazaar/nginx/ngx_ext_modules/lua-nginx-module
-NGINX_SRC_DIR   = Bazaar/nginx/nginx-1.5.3
 BOOST_DIR       = Bazaar/nginx/ngx_ext_modules/ws_server/boost
 
 .PHONY: ecosystem 
@@ -346,34 +312,6 @@ $(LIBJSON_DIR): $(LIBJSON_TAR)
 	mkdir -p $@
 	unzip $< -d $(@D)
 	patch -d $@ -p1 < patches/libjson.patch
-
-#$(LUANGINX_TAR): | $(DL)
-#	curl -L $(LUANGINX_URL) -o $@
-
-#$(LUANGINX_DIR): $(LUANGINX_TAR)
-#	mkdir -p $@
-#	tar -xzf $< --strip-components=1 --directory=$@
-#	patch -d $@ -p1 < patches/lua-nginx-module.patch
-
-#$(NGINX_TAR): | $(DL)
-#	curl -L $(NGINX_URL) -o $@
-
-#$(NGINX_SRC_DIR): $(NGINX_TAR)
-#	mkdir -p $@
-#	tar -xzf $< --strip-components=1 --directory=$@
-#	patch -d $@ -p1 < patches/nginx.patch
-#	cp -f patches/nginx.conf $@/conf/
-
-#$(BOOST_DIR): buildroot
-#	ln -sf ../../../../OS/buildroot/buildroot-2014.02/output/build/boost-1.55.0 $@
-
-#$(NGINX): buildroot libredpitaya $(WEBSOCKETPP_DIR) $(CRYPTOPP_DIR) $(LIBJSON_DIR) $(LUANGINX_DIR) $(NGINX_SRC_DIR) $(BOOST_DIR)
-#	$(MAKE) -C $(NGINX_DIR) SYSROOT=$(SYSROOT)
-#	$(MAKE) -C $(NGINX_DIR) install DESTDIR=$(abspath $(INSTALL_DIR))
-
-#$(IDGEN): $(NGINX)
-#	$(MAKE) -C $(IDGEN_DIR)
-#	$(MAKE) -C $(IDGEN_DIR) install DESTDIR=$(abspath $(INSTALL_DIR))
 
 ################################################################################
 # SCPI server
@@ -526,14 +464,12 @@ clean:
 	rm -rf $(TMP)/*
 	rm -rf $(DL)/*
 	rm -rf Bazaar/tools/cryptopp
-	make -C $(NGINX_DIR) clean
 	make -C $(MONITOR_DIR) clean
 	make -C $(GENERATE_DIR) clean
 	make -C $(ACQUIRE_DIR) clean
 	make -C $(CALIB_DIR) clean
 	-make -C $(SCPI_SERVER_DIR) clean
 	make -C $(LIBRP_DIR)    clean
-	#make -C $(LIBRPAPP_DIR) clean
 	make -C $(SDK_DIR) clean
 	make -C $(COMM_DIR) clean
 	make -C $(APPS_FREE_DIR) clean
