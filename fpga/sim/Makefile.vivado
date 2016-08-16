@@ -1,4 +1,5 @@
-MODELSIM_BIN=$(HOME)/altera/16.0/modelsim_ase/bin
+VERILOG_COMPILE=xvlog -sv
+SIM_ELAB=xelab -debug all
 
 PATH_LIB=/opt/Xilinx/Vivado/2015.4/data/verilog/src
 PATH_SIP=/opt/Xilinx/Vivado/2015.4/data/secureip
@@ -32,19 +33,21 @@ RTL+=$(wildcard $(PATH_RTL)/*.v)
 TBN=$(wildcard $(PATH_TBN)/*.sv)
 
 # targets
-TGT=$(RTL:.sv=)
+#TGT=$(RTL:.sv=)
 #TGT=$(RTL:.v=)
+TGT=red_pitaya_asg_double_buf_tb
 
 .PHONY: compile 
 
 all: $(TGT)
 
 compile: $(LIB) $(SIP) $(RTL) $(TBN)
-	$(MODELSIM_BIN)/vlib work
-	$(MODELSIM_BIN)/vlog $(LIB) $(SIP) $(RTL) $(TBN)
+	$(VERILOG_COMPILE) $(LIB) $(SIP) $(RTL) $(TBN)
 
 %_tb: compile
-	$(MODELSIM_BIN)/vsim -c -do 'run -all;quit' $@
+	$(SIM_ELAB) -s tb_sim work.red_pitaya_asg_double_buf_tb
 
+run_sim: $(TGT)
+	xsim tb_sim -gui -wdb asg.wdb
 clean:
-	rm -rf work *.vcd
+	rm -rf work *.log *.jou *.pb xsim* *.wdb *.str
