@@ -451,7 +451,7 @@ red_pitaya_scope i_scope (
 //---------------------------------------------------------------------------------
 //  DAC arbitrary signal generator
 
-red_pitaya_asg i_asg (
+red_pitaya_asg_double_buf i_asg (
    // DAC
   .dac_a_o         (  asg_a                      ),  // CH 1
   .dac_b_o         (  asg_b                      ),  // CH 2

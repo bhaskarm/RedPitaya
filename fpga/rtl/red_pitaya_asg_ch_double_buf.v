@@ -34,7 +34,7 @@
  * 
  */
 
-module red_pitaya_asg_ch #(
+module red_pitaya_asg_ch_double_buf #(
    parameter RSZ = 15
 )(
    // DAC
@@ -54,18 +54,26 @@ module red_pitaya_asg_ch #(
    output reg [ 14-1: 0] buf_rdata_o     ,  //!< buffer read data
    output reg [RSZ-1: 0] buf_rpnt_o      ,  //!< buffer current read pointer
    // configuration
-   input     [RSZ+15: 0] set_size_i      ,  //!< set table data size
-   input     [RSZ+15: 0] set_step_i      ,  //!< set pointer step
-   input     [RSZ+15: 0] set_ofs_i       ,  //!< set reset offset
+   input     [  14-1: 0] set_amp_i_0     ,  //!< set amplitude scale
+   input     [  14-1: 0] set_dc_i_0      ,  //!< set output offset
+   input     [RSZ+15: 0] set_size_i_0    ,  //!< set table data size
+   input     [RSZ+15: 0] set_step_i_0    ,  //!< set pointer step
+   input     [RSZ+15: 0] set_ofs_i_0     ,  //!< set reset offset
+   input     [  16-1: 0] set_ncyc_i_0    ,  //!< set number of cycle
+   input     [  16-1: 0] set_rnum_i_0    ,  //!< set number of repetitions
+   input     [  32-1: 0] set_rdly_i_0    ,  //!< set delay between repetitions
+   input     [  14-1: 0] set_amp_i_1     ,  //!< set amplitude scale
+   input     [  14-1: 0] set_dc_i_1      ,  //!< set output offset
+   input     [RSZ+15: 0] set_size_i_1    ,  //!< set table data size
+   input     [RSZ+15: 0] set_step_i_1    ,  //!< set pointer step
+   input     [RSZ+15: 0] set_ofs_i_1     ,  //!< set reset offset
+   input     [  16-1: 0] set_ncyc_i_1    ,  //!< set number of cycle
+   input     [  16-1: 0] set_rnum_i_1    ,  //!< set number of repetitions
+   input     [  32-1: 0] set_rdly_i_1    ,  //!< set delay between repetitions
    input                 set_rst_i       ,  //!< set FSM to reset
    input                 set_once_i      ,  //!< set only once  -- not used
    input                 set_wrap_i      ,  //!< set wrap enable
-   input     [  14-1: 0] set_amp_i       ,  //!< set amplitude scale
-   input     [  14-1: 0] set_dc_i        ,  //!< set output offset
    input                 set_zero_i      ,  //!< set output to zero
-   input     [  16-1: 0] set_ncyc_i      ,  //!< set number of cycle
-   input     [  16-1: 0] set_rnum_i      ,  //!< set number of repetitions
-   input     [  32-1: 0] set_rdly_i      ,  //!< set delay between repetitions
    input                 set_rgate_i        //!< set external gated repetition
 );
 
@@ -73,6 +81,7 @@ module red_pitaya_asg_ch #(
 //
 //  DAC buffer RAM
 
+reg               current_buf ;
 reg   [  14-1: 0] dac_buf [0:(1<<RSZ)-1] ;
 reg   [  14-1: 0] dac_rd    ;
 reg   [  14-1: 0] dac_rdat  ;
@@ -85,6 +94,24 @@ wire              dac_npnt_sub_neg;
 
 reg   [  28-1: 0] dac_mult  ;
 reg   [  15-1: 0] dac_sum   ;
+
+reg   [  14-1: 0] set_amp_lat     ;
+reg   [  14-1: 0] set_dc_lat      ;
+reg   [RSZ+15: 0] set_size_lat    ;
+reg   [RSZ+15: 0] set_step_lat    ;
+reg   [RSZ+15: 0] set_ofs_lat     ;
+reg   [  16-1: 0] set_ncyc_lat    ;
+reg   [  16-1: 0] set_rnum_lat    ;
+reg   [  32-1: 0] set_rdly_lat    ;
+
+wire     [  14-1: 0] set_amp_i     ;  //!< set amplitude scale
+wire     [  14-1: 0] set_dc_i      ;  //!< set output offset
+wire     [RSZ+15: 0] set_size_i    ;  //!< set table data size
+wire     [RSZ+15: 0] set_step_i    ;  //!< set pointer step
+wire     [RSZ+15: 0] set_ofs_i     ;  //!< set reset offset
+wire     [  16-1: 0] set_ncyc_i    ;  //!< set number of cycle
+wire     [  16-1: 0] set_rnum_i    ;  //!< set number of repetitions
+wire     [  32-1: 0] set_rdly_i    ;  //!< set delay between repetitions
 
 // read
 always @(posedge dac_clk_i)
@@ -132,9 +159,18 @@ reg              dac_rep      ;
 wire             dac_trig     ;
 reg              dac_trigr    ;
 
+assign  set_amp_i      = set_amp_i_0    ;
+assign  set_dc_i       = set_dc_i_0     ;
+assign  set_size_i     = set_size_i_0   ;
+assign  set_step_i     = set_step_i_0   ;
+assign  set_ofs_i      = set_ofs_i_0    ;
+assign  set_ncyc_i     = set_ncyc_i_0   ;
+assign  set_rnum_i     = set_rnum_i_0   ;
+assign  set_rdly_i     = set_rdly_i_0   ;
 // state machine
 always @(posedge dac_clk_i) begin
    if (dac_rstn_i == 1'b0) begin
+      current_buf <= 1'b0;
       cyc_cnt   <= 16'h0 ;
       rep_cnt   <= 16'h0 ;
       dly_cnt   <= 32'h0 ;
@@ -152,6 +188,12 @@ always @(posedge dac_clk_i) begin
       else
          dly_tick <= dly_tick + 8'h1 ;
 
+      // Switch between the 2 wave buffers
+      if (set_rst_i )
+         current_buf <= 1'b0;
+      else if (|dly_cnt && (dly_tick == 8'd124))
+         dly_cnt <= !dly_cnt;
+
       // delay between repetitions 
       if (set_rst_i || dac_do)
          dly_cnt <= set_rdly_i ;
@@ -161,7 +203,7 @@ always @(posedge dac_clk_i) begin
       // repetitions counter
       if (trig_in && !dac_do)
          rep_cnt <= set_rnum_i ;
-      else if (!set_rgate_i && (|rep_cnt && dac_rep && (dac_trig && !dac_do)))
+      else if (!set_rgate_i && (|rep_cnt && dac_rep && (!dac_do)))
          rep_cnt <= rep_cnt - 16'h1 ;
       else if (set_rgate_i && ((!trig_ext_i && trig_src_i==3'd2) || (trig_ext_i && trig_src_i==3'd3)))
          rep_cnt <= 16'h0 ;
@@ -191,13 +233,12 @@ always @(posedge dac_clk_i) begin
       // in repetition mode
       if (dac_trig && !set_rst_i)
          dac_rep <= 1'b1 ;
-      else if (set_rst_i || (rep_cnt==16'h0))
+      else if (set_rst_i || (rep_cnt<=16'h1))
          dac_rep <= 1'b0 ;
    end
 end
 
-//assign dac_trig = (!dac_rep && trig_in) || (dac_rep && |rep_cnt && (dly_cnt == 32'h0)) ;
-assign dac_trig = (!dac_rep && trig_in) || (dac_rep && |rep_cnt ) ;
+assign dac_trig = (!dac_rep && trig_in) || (dac_rep && !dac_do);
 
 assign dac_npnt_sub = dac_npnt - {1'b0,set_size_i} - 1;
 assign dac_npnt_sub_neg = dac_npnt_sub[RSZ+16];

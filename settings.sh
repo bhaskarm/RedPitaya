@@ -4,7 +4,7 @@
 
 . /opt/Xilinx/Vivado/2015.4/settings64.sh
 . /opt/Xilinx/SDK/2015.4/settings64.sh
-
+export LD_LIBRARY_PATH=""
 ################################################################################
 # setup Linaro toolchain
 ################################################################################
@@ -26,3 +26,4 @@ export BR2_DL_DIR=dl
 
 #GIT_COMMIT_SHORT=`git rev-parse --short HEAD`
 #make REVISION=$GIT_COMMIT_SHORT
+export XILINX_VIVADO=/opt/Xilinx/Vivado/2015.4
