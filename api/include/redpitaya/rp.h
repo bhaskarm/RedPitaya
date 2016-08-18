@@ -170,8 +170,10 @@ typedef enum {
 typedef enum {
     RP_GEN_TRIG_EVT_A_START_ONCE = 0,   //!< Generate trigger when channel A starts generating
     RP_GEN_TRIG_EVT_A_START = 1,        //!< Generate trigger when channel A buffer starts/wraps
+    RP_GEN_TRIG_EVT_A_BUF_TOGGLE = 2,        //!< Generate trigger when channel A buffer switches from one to the other
     RP_GEN_TRIG_EVT_B_START_ONCE = 8,   //!< Generate trigger when channel B starts generating
-    RP_GEN_TRIG_EVT_B_START = 9         //!< Generate trigger when channel B buffer starts/wraps
+    RP_GEN_TRIG_EVT_B_START = 9,        //!< Generate trigger when channel B buffer starts/wraps
+    RP_GEN_TRIG_EVT_B_BUF_TOGGLE = 10        //!< Generate trigger when channel B buffer switches from one to the other
 } rp_trig_evt_t;
 
 /**

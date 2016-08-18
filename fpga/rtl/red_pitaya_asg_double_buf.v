@@ -256,7 +256,7 @@ end else begin
       if (sys_addr[19:0]==20'h60)  set_a_step_1 <= sys_wdata[RSZ+15: 0] ;
       if (sys_addr[19:0]==20'h68)  set_a_ncyc_1 <= sys_wdata[  16-1: 0] ;
       if (sys_addr[19:0]==20'h6C)  set_a_rnum_1 <= sys_wdata[  16-1: 0] ;
-      if (sys_addr[19:0]==20'h60)  set_a_rdly_1 <= sys_wdata[  32-1: 0] ;
+      if (sys_addr[19:0]==20'h70)  set_a_rdly_1 <= sys_wdata[  32-1: 0] ;
 
       if (sys_addr[19:0]==20'h74)  set_b_amp_1  <= sys_wdata[  0+13: 0] ;
       if (sys_addr[19:0]==20'h74)  set_b_dc_1   <= sys_wdata[ 16+13:16] ;
@@ -315,6 +315,24 @@ end else begin
      20'h00040 : begin sys_ack <= sys_en;          sys_rdata <= set_b_rdly_0                         ; end
 
      20'h00044 : begin sys_ack <= sys_en;          sys_rdata <= {{32-4{1'b0}},trig_evt_ab,trig_evt}; end
+
+     20'h00054 : begin sys_ack <= sys_en;          sys_rdata <= {2'h0, set_a_dc_1, 2'h0, set_a_amp_1}  ; end
+     20'h00058 : begin sys_ack <= sys_en;          sys_rdata <= {{32-RSZ-16{1'b0}},set_a_size_1}     ; end
+     20'h0005C : begin sys_ack <= sys_en;          sys_rdata <= {{32-RSZ-16{1'b0}},set_a_ofs_1}      ; end
+     20'h00060 : begin sys_ack <= sys_en;          sys_rdata <= {{32-RSZ-16{1'b0}},set_a_step_1}     ; end
+     20'h00064 : begin sys_ack <= sys_en;          sys_rdata <= buf_a_rpnt_rd                      ; end
+     20'h00068 : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_a_ncyc_1}         ; end
+     20'h0006C : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_a_rnum_1}         ; end
+     20'h00070 : begin sys_ack <= sys_en;          sys_rdata <= set_a_rdly_1                         ; end
+
+     20'h00074 : begin sys_ack <= sys_en;          sys_rdata <= {2'h0, set_b_dc_1, 2'h0, set_b_amp_1}  ; end
+     20'h00078 : begin sys_ack <= sys_en;          sys_rdata <= {{32-RSZ-16{1'b0}},set_b_size_1}     ; end
+     20'h0007C : begin sys_ack <= sys_en;          sys_rdata <= {{32-RSZ-16{1'b0}},set_b_ofs_1}      ; end
+     20'h00080 : begin sys_ack <= sys_en;          sys_rdata <= {{32-RSZ-16{1'b0}},set_b_step_1}     ; end
+     20'h00084 : begin sys_ack <= sys_en;          sys_rdata <= buf_b_rpnt_rd                      ; end
+     20'h00088 : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_b_ncyc_1}         ; end
+     20'h0008C : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_b_rnum_1}         ; end
+     20'h00090 : begin sys_ack <= sys_en;          sys_rdata <= set_b_rdly_1                         ; end
 
      20'h1zzzz : begin sys_ack <= ack_dly;         sys_rdata <= {{32-14{1'b0}},buf_a_rdata}        ; end
      20'h2zzzz : begin sys_ack <= ack_dly;         sys_rdata <= {{32-14{1'b0}},buf_b_rdata}        ; end
