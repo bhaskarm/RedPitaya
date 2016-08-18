@@ -104,20 +104,39 @@ initial begin
   bus.write(32'h10018,-32'd2000  );  // write table
   bus.write(32'h1001c, 32'd250   );  // write table
 
+  bus.write(32'h20000, 32'd3     );  // write table
+  bus.write(32'h20004, 32'd30    );  // write table
+  bus.write(32'h20008, 32'd8000  );  // write table
+  bus.write(32'h2000C,-32'd4     );  // write table
+  bus.write(32'h20010,-32'd40    );  // write table
+  bus.write(32'h20014,-32'd8000  );  // write table
+  bus.write(32'h20018,-32'd2000  );  // write table
+  bus.write(32'h2001c, 32'd250   );  // write table
+
   // CH0 DAC settings
   bus.write(32'h00004,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
   bus.write(32'h00008,{2'h0, 14'd7, 16'hffff}          );  // table size
   bus.write(32'h0000C,{2'h0, 14'h1, 16'h0}             );  // reset offset
   bus.write(32'h00010,{2'h0, 14'h2, 16'h0}             );  // table step
   bus.write(32'h00018,{16'h0, 16'd7}                   );  // number of cycles
-  bus.write(32'h0001C,{16'h0, 16'd3}                   );  // number of repetitions
+  bus.write(32'h0001C,{16'h0, 16'd0}                   );  // number of repetitions
   bus.write(32'h00020,{32'd0}                          );  // number of 1us delay between repetitions
 
-  ch0_set = {1'b0 ,1'b0, 1'b0, 1'b0, 1'b1,    1'b0, 3'h2} ;  // set_rgate, set_zero, set_rst, set_once(NA), set_wrap, 1'b0, trig_src
+  bus.write(32'h00054,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
+  bus.write(32'h00058,{2'h0, 14'd9, 16'hffff}          );  // table size
+  bus.write(32'h0005C,{2'h0, 14'h3, 16'h0}             );  // reset offset
+  bus.write(32'h00060,{2'h0, 14'h2, 16'h0}             );  // table step
+  bus.write(32'h00068,{16'h0, 16'd5}                   );  // number of cycles
+  bus.write(32'h0006C,{16'h0, 16'd0}                   );  // number of repetitions
+  bus.write(32'h00070,{32'd0}                          );  // number of 1us delay between repetitions
+
+  bus.write(32'h00044,{32'd1}                          );  // trigger output conditions
+
+  ch0_set = {1'b0 ,1'b0, 1'b0, 1'b0, 1'b1,    1'b0, 3'h1} ;  // set_rgate, set_zero, set_rst, set_once(NA), set_wrap, 1'b0, trig_src
 
   // CH1 DAC data
   for (int k=0; k<8000; k++) begin
-    bus.write(32'h20000 + (k*4), k);  // write table
+    bus.write(32'h30000 + (k*4), k);  // write table
   end
 
   // CH1 DAC settings
@@ -131,6 +150,13 @@ initial begin
 
   ch1_set = {1'b0, 1'b0, 1'b0, 1'b1, 1'b1,    1'b0, 3'h1} ;  // set_rgate, set_zero, set_rst, set_once(NA), set_wrap, 1'b0, trig_src
 
+  bus.write(32'h00000,{8'h0, ch1_set,  8'h0, ch0_set}  ); // write configuration
+
+  repeat(2000) @(posedge clk);
+
+  bus.write(32'h00000,{8'h0, ch1_set,  8'h0, ch0_set}  ); // write configuration
+
+  repeat(2000) @(posedge clk);
   bus.write(32'h00000,{8'h0, ch1_set,  8'h0, ch0_set}  ); // write configuration
 
   repeat(2000) @(posedge clk);

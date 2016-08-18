@@ -159,14 +159,14 @@ reg              dac_rep      ;
 wire             dac_trig     ;
 reg              dac_trigr    ;
 
-assign  set_amp_i      = set_amp_i_0    ;
-assign  set_dc_i       = set_dc_i_0     ;
-assign  set_size_i     = set_size_i_0   ;
-assign  set_step_i     = set_step_i_0   ;
-assign  set_ofs_i      = set_ofs_i_0    ;
-assign  set_ncyc_i     = set_ncyc_i_0   ;
-assign  set_rnum_i     = set_rnum_i_0   ;
-assign  set_rdly_i     = set_rdly_i_0   ;
+assign  set_amp_i      = current_buf ? set_amp_i_0    : set_amp_i_1    ;
+assign  set_dc_i       = current_buf ? set_dc_i_0     : set_dc_i_1     ;
+assign  set_size_i     = current_buf ? set_size_i_0   : set_size_i_1   ;
+assign  set_step_i     = current_buf ? set_step_i_0   : set_step_i_1   ;
+assign  set_ofs_i      = current_buf ? set_ofs_i_0    : set_ofs_i_1    ;
+assign  set_ncyc_i     = current_buf ? set_ncyc_i_0   : set_ncyc_i_1   ;
+assign  set_rnum_i     = current_buf ? set_rnum_i_0   : set_rnum_i_1   ;
+assign  set_rdly_i     = current_buf ? set_rdly_i_0   : set_rdly_i_1   ;
 // state machine
 always @(posedge dac_clk_i) begin
    if (dac_rstn_i == 1'b0) begin
@@ -191,8 +191,8 @@ always @(posedge dac_clk_i) begin
       // Switch between the 2 wave buffers
       if (set_rst_i )
          current_buf <= 1'b0;
-      else if (|dly_cnt && (dly_tick == 8'd124))
-         dly_cnt <= !dly_cnt;
+      else if ((cyc_cnt == 16'h1 & ~dac_do))
+         current_buf = !current_buf;
 
       // delay between repetitions 
       if (set_rst_i || dac_do)
@@ -258,7 +258,8 @@ end
 
 assign dac_npnt = dac_pnt + set_step_i;
 assign trig_done_o = ((trig_evt_i == 3'b000) & (~dac_rep & trig_in)) |
-                     ((trig_evt_i == 3'b001) & ((dac_trig & ~dac_do) | (dac_do & ~dac_npnt_sub_neg))); // start or wrap or go to start
+                     ((trig_evt_i == 3'b001) & ((dac_trig & ~dac_do) | (dac_do & ~dac_npnt_sub_neg))) | // start or wrap or go to start
+                     ((trig_evt_i == 3'b010) & (cyc_cnt == 16'h1 & ~dac_do)); // all repeats done, switch to second buffer
 
 //---------------------------------------------------------------------------------
 //

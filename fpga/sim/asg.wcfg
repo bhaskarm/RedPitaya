@@ -3,18 +3,18 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="asb.wdb" id="1">
+      <db_ref path="asg.wdb" id="1">
          <top_modules>
             <top_module name="red_pitaya_asg_double_buf_tb" />
          </top_modules>
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="800881090589fs"></ZoomStartTime>
-      <ZoomEndTime time="801243148739fs"></ZoomEndTime>
-      <Cursor1Time time="800932000000fs"></Cursor1Time>
+      <ZoomStartTime time="799717925068fs"></ZoomStartTime>
+      <ZoomEndTime time="800509313758fs"></ZoomEndTime>
+      <Cursor1Time time="1705004000000fs"></Cursor1Time>
    </zoom_setting>
-   <WVObjectSize size="48" />
+   <WVObjectSize size="51" />
    <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_o">
       <obj_property name="ElementShortName">dac_o[13:0]</obj_property>
       <obj_property name="ObjectShortName">dac_o[13:0]</obj_property>
@@ -206,5 +206,17 @@
    <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /ext_trig_dn">
       <obj_property name="ElementShortName">ext_trig_dn[1:0]</obj_property>
       <obj_property name="ObjectShortName">ext_trig_dn[1:0]</obj_property>
+   </wvobject>
+   <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /current_buf">
+      <obj_property name="ElementShortName">current_buf</obj_property>
+      <obj_property name="ObjectShortName">current_buf</obj_property>
+   </wvobject>
+   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/sys_addr">
+      <obj_property name="ElementShortName">sys_addr[31:0]</obj_property>
+      <obj_property name="ObjectShortName">sys_addr[31:0]</obj_property>
+   </wvobject>
+   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/sys_wdata">
+      <obj_property name="ElementShortName">sys_wdata[31:0]</obj_property>
+      <obj_property name="ObjectShortName">sys_wdata[31:0]</obj_property>
    </wvobject>
 </wave_config>
