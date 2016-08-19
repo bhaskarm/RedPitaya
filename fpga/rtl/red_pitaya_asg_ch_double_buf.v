@@ -159,14 +159,14 @@ reg              dac_rep      ;
 wire             dac_trig     ;
 reg              dac_trigr    ;
 
-assign  set_amp_i      = current_buf ? set_amp_i_0    : set_amp_i_1    ;
-assign  set_dc_i       = current_buf ? set_dc_i_0     : set_dc_i_1     ;
-assign  set_size_i     = current_buf ? set_size_i_0   : set_size_i_1   ;
-assign  set_step_i     = current_buf ? set_step_i_0   : set_step_i_1   ;
-assign  set_ofs_i      = current_buf ? set_ofs_i_0    : set_ofs_i_1    ;
-assign  set_ncyc_i     = current_buf ? set_ncyc_i_0   : set_ncyc_i_1   ;
-assign  set_rnum_i     = current_buf ? set_rnum_i_0   : set_rnum_i_1   ;
-assign  set_rdly_i     = current_buf ? set_rdly_i_0   : set_rdly_i_1   ;
+assign  set_amp_i      = (current_buf == 1'b1) ? set_amp_i_1    : set_amp_i_0    ;
+assign  set_dc_i       = (current_buf == 1'b1) ? set_dc_i_1     : set_dc_i_0     ;
+assign  set_size_i     = (current_buf == 1'b1) ? set_size_i_1   : set_size_i_0   ;
+assign  set_step_i     = (current_buf == 1'b1) ? set_step_i_1   : set_step_i_0   ;
+assign  set_ofs_i      = (current_buf == 1'b1) ? set_ofs_i_1    : set_ofs_i_0    ;
+assign  set_ncyc_i     = (current_buf == 1'b1) ? set_ncyc_i_1   : set_ncyc_i_0   ;
+assign  set_rnum_i     = (current_buf == 1'b1) ? set_rnum_i_1   : set_rnum_i_0   ;
+assign  set_rdly_i     = (current_buf == 1'b1) ? set_rdly_i_1   : set_rdly_i_0   ;
 // state machine
 always @(posedge dac_clk_i) begin
    if (dac_rstn_i == 1'b0) begin
@@ -191,8 +191,10 @@ always @(posedge dac_clk_i) begin
       // Switch between the 2 wave buffers
       if (set_rst_i )
          current_buf <= 1'b0;
-      else if ((cyc_cnt == 16'h1 & ~dac_do))
+      else if ((cyc_cnt == 16'h1 & ~dac_do) && trig_evt_i == 3'b010) //switch buffers (enable double buffer mode only when trigger is set to 2 which is the buffer toggle trigger)
          current_buf = !current_buf;
+      else
+         current_buf = 0;
 
       // delay between repetitions 
       if (set_rst_i || dac_do)

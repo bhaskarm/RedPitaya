@@ -84,6 +84,8 @@ logic            sys_ack  ;
 logic        [ 32-1: 0] rdata;
 logic signed [ 32-1: 0] rdata_blk [];
 
+reg          [ 32-1: 0] rdata_cha;
+reg          [ 32-1: 0] rdata_chb;
 //---------------------------------------------------------------------------------
 //
 // signal generation
@@ -95,7 +97,15 @@ initial begin
   repeat(10) @(posedge clk);
 
   // CH0 DAC data
-  bus.write(32'h10000, 32'd3     );  // write table
+  bus.write(32'h20000, 32'd3     );  // write table
+  bus.read(32'h20000, rdata_cha );  // write table
+  bus.write(32'h3fffc, 32'd4     );  // write table
+  bus.read(32'h3fffc, rdata_cha );  // write table
+  bus.write(32'h40000, 32'd7     );  // write table
+  bus.read(32'h40000, rdata_chb );  // write table
+  bus.write(32'h5fffc, 32'd8     );  // write table
+  bus.read(32'h5fffc, rdata_cha );  // write table
+/*  bus.write(32'h10000, 32'd3     );  // write table
   bus.write(32'h10004, 32'd30    );  // write table
   bus.write(32'h10008, 32'd8000  );  // write table
   bus.write(32'h1000C,-32'd4     );  // write table
@@ -181,7 +191,7 @@ initial begin
   end
 
   repeat(20000) @(posedge clk);
-
+*/
   $finish();
 end
 
