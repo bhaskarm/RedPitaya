@@ -65,7 +65,9 @@ module red_pitaya_asg_double_buf (
   input                 sys_ren   ,  // bus read enable
   output reg [ 32-1: 0] sys_rdata ,  // bus read data
   output reg            sys_err   ,  // bus error indicator
-  output reg            sys_ack      // bus acknowledge signal
+  output reg            sys_ack   ,  // bus acknowledge signal
+   // Debug signals
+  output         [16-1: 0] debug_bus
 );
 
 //---------------------------------------------------------------------------------
@@ -105,6 +107,9 @@ reg   [   3-1: 0] trig_a_src   , trig_b_src   ;
 wire              trig_a_done  , trig_b_done  ;
 reg               trig_evt_ab                 ;
 reg   [   3-1: 0] trig_evt                    ;
+wire  [  15-1: 0] ch_a_debug   , ch_b_debug   ;
+
+assign debug_bus = {trig_out_o, ch_a_debug };
 
 red_pitaya_asg_ch_double_buf  #(.RSZ (RSZ)) ch [1:0] (
   // DAC
@@ -144,7 +149,8 @@ red_pitaya_asg_ch_double_buf  #(.RSZ (RSZ)) ch [1:0] (
   .set_once_i      ({set_b_once       , set_a_once       }),  // set only once
   .set_wrap_i      ({set_b_wrap       , set_a_wrap       }),  // set wrap pointer
   .set_zero_i      ({set_b_zero       , set_a_zero       }),  // set output to zero
-  .set_rgate_i     ({set_b_rgate      , set_a_rgate      })   // set external gated repetition
+  .set_rgate_i     ({set_b_rgate      , set_a_rgate      }),  // set external gated repetition
+  .debug_bus       ({ch_b_debug       , ch_a_debug       })
 );
 
 always @(posedge dac_clk_i)
@@ -249,10 +255,10 @@ end else begin
 
       if (sys_addr[19:0]==20'h44)  {trig_evt_ab, trig_evt} <= sys_wdata[4-1:0] ;
 
-      if (sys_addr[19:0]==20'h54)   set_a_amp_1  <= sys_wdata[  0+13: 0] ;
-      if (sys_addr[19:0]==20'h54)   set_a_dc_1   <= sys_wdata[ 16+13:16] ;
-      if (sys_addr[19:0]==20'h58)   set_a_size_1 <= sys_wdata[RSZ+15: 0] ;
-      if (sys_addr[19:0]==20'h5C)   set_a_ofs_1  <= sys_wdata[RSZ+15: 0] ;
+      if (sys_addr[19:0]==20'h54)  set_a_amp_1  <= sys_wdata[  0+13: 0] ;
+      if (sys_addr[19:0]==20'h54)  set_a_dc_1   <= sys_wdata[ 16+13:16] ;
+      if (sys_addr[19:0]==20'h58)  set_a_size_1 <= sys_wdata[RSZ+15: 0] ;
+      if (sys_addr[19:0]==20'h5C)  set_a_ofs_1  <= sys_wdata[RSZ+15: 0] ;
       if (sys_addr[19:0]==20'h60)  set_a_step_1 <= sys_wdata[RSZ+15: 0] ;
       if (sys_addr[19:0]==20'h68)  set_a_ncyc_1 <= sys_wdata[  16-1: 0] ;
       if (sys_addr[19:0]==20'h6C)  set_a_rnum_1 <= sys_wdata[  16-1: 0] ;
@@ -333,6 +339,7 @@ end else begin
      20'h00088 : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_b_ncyc_1}         ; end
      20'h0008C : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_b_rnum_1}         ; end
      20'h00090 : begin sys_ack <= sys_en;          sys_rdata <= set_b_rdly_1                         ; end
+     // Debug registers
      // The decode below needs to change every time RSZ changes
      20'h2zzzz : begin sys_ack <= ack_dly;         sys_rdata <= {{32-14{1'b0}},buf_a_rdata}        ; end
      20'h3zzzz : begin sys_ack <= ack_dly;         sys_rdata <= {{32-14{1'b0}},buf_a_rdata}        ; end
