@@ -74,7 +74,7 @@ module red_pitaya_asg_double_buf (
 //
 // generating signal from DAC table 
 
-localparam RSZ = 15 ;  // RAM size 2^RSZ
+localparam RSZ = 16 ;  // RAM size 2^RSZ
 
 reg   [  14-1: 0] set_a_amp_0  , set_b_amp_0  ;
 reg   [  14-1: 0] set_a_dc_0   , set_b_dc_0   ;
@@ -341,10 +341,14 @@ end else begin
      20'h00090 : begin sys_ack <= sys_en;          sys_rdata <= set_b_rdly_1                         ; end
      // Debug registers
      // The decode below needs to change every time RSZ changes
-     20'h2zzzz : begin sys_ack <= ack_dly;         sys_rdata <= {{32-14{1'b0}},buf_a_rdata}        ; end
-     20'h3zzzz : begin sys_ack <= ack_dly;         sys_rdata <= {{32-14{1'b0}},buf_a_rdata}        ; end
-     20'h4zzzz : begin sys_ack <= ack_dly;         sys_rdata <= {{32-14{1'b0}},buf_b_rdata}        ; end
-     20'h5zzzz : begin sys_ack <= ack_dly;         sys_rdata <= {{32-14{1'b0}},buf_b_rdata}        ; end
+     20'h4zzzz : begin sys_ack <= ack_dly;         sys_rdata <= {{32-14{1'b0}},buf_a_rdata}        ; end
+     20'h5zzzz : begin sys_ack <= ack_dly;         sys_rdata <= {{32-14{1'b0}},buf_a_rdata}        ; end
+     20'h6zzzz : begin sys_ack <= ack_dly;         sys_rdata <= {{32-14{1'b0}},buf_a_rdata}        ; end
+     20'h7zzzz : begin sys_ack <= ack_dly;         sys_rdata <= {{32-14{1'b0}},buf_a_rdata}        ; end
+     20'h8zzzz : begin sys_ack <= ack_dly;         sys_rdata <= {{32-14{1'b0}},buf_b_rdata}        ; end
+     20'h9zzzz : begin sys_ack <= ack_dly;         sys_rdata <= {{32-14{1'b0}},buf_b_rdata}        ; end
+     20'hazzzz : begin sys_ack <= ack_dly;         sys_rdata <= {{32-14{1'b0}},buf_b_rdata}        ; end
+     20'hbzzzz : begin sys_ack <= ack_dly;         sys_rdata <= {{32-14{1'b0}},buf_b_rdata}        ; end
 
        default : begin sys_ack <= sys_en;          sys_rdata <=  32'h0                             ; end
    endcase

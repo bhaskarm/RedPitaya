@@ -35,7 +35,7 @@
  */
 
 module red_pitaya_asg_ch_double_buf #(
-   parameter RSZ = 15
+   parameter RSZ = 16
 )(
    // DAC
    output reg [ 14-1: 0] dac_o           ,  //!< dac data output
