@@ -140,6 +140,22 @@ initial begin
   bus.write(32'h0006C,{16'h0, 16'd0}                   );  // number of repetitions
   bus.write(32'h00070,{32'd0}                          );  // number of 1us delay between repetitions
 
+  bus.write(32'h00074,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
+  bus.write(32'h00078,{1'h0, 15'h7fff, 16'h0}          );  // table size
+  bus.write(32'h0007C,{1'h0, 15'h4000, 16'h0}             );  // reset offset
+  bus.write(32'h00080,{1'h0, 15'h22, 16'h0}             );  // table step
+  bus.write(32'h00088,{16'h0, 16'd7}                   );  // number of cycles
+  bus.write(32'h0008C,{16'h0, 16'd0}                   );  // number of repetitions
+  bus.write(32'h00090,{32'd0}                          );  // number of 1us delay between repetitions
+  
+  bus.write(32'h000A4,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
+  bus.write(32'h000A8,{1'h0, 15'h7fff, 16'h0}          );  // table size
+  bus.write(32'h000AC,{1'h0, 15'h4000, 16'h0}             );  // reset offset
+  bus.write(32'h000B0,{1'h0, 15'h22, 16'h0}             );  // table step
+  bus.write(32'h000B8,{16'h0, 16'd7}                   );  // number of cycles
+  bus.write(32'h000BC,{16'h0, 16'd0}                   );  // number of repetitions
+  bus.write(32'h000C0,{32'd0}                          );  // number of 1us delay between repetitions
+  
   bus.write(32'h00044,{32'd2}                          );  // trigger output conditions
 
   ch0_set = {1'b0 ,1'b0, 1'b0, 1'b0, 1'b0,    1'b0, 3'h1} ;  // set_rgate, set_zero, set_rst, set_once(NA), set_wrap, 1'b0, trig_src
