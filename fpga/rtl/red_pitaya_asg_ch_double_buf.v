@@ -57,20 +57,12 @@ module red_pitaya_asg_ch_double_buf #(
    // configuration
    input     [  (14*N_BUF)-1: 0] set_amp_all_i     ,  //!< set amplitude scale
    input     [  (14*N_BUF)-1: 0] set_dc_all_i      ,  //!< set output offset
-   input     [((RSZ+16)*N_BUF)-1: 0] set_size_all_i    ,  //!< set table data size
+   input     [((RSZ+16)*N_BUF)-1: 0] set_end_all_i    ,  //!< set table data end
    input     [((RSZ+16)*N_BUF)-1: 0] set_step_all_i    ,  //!< set pointer step
-   input     [((RSZ+16)*N_BUF)-1: 0] set_ofs_all_i     ,  //!< set reset offset
+   input     [((RSZ+16)*N_BUF)-1: 0] set_start_all_i     ,  //!< set reset offset
    input     [  (16*N_BUF)-1: 0] set_ncyc_all_i    ,  //!< set number of cycle
    input     [  (16*N_BUF)-1: 0] set_rnum_all_i    ,  //!< set number of repetitions
    input     [  (32*N_BUF)-1: 0] set_rdly_all_i    ,  //!< set delay between repetitions
-//   input     [  14-1: 0] set_amp_i_1     ,  //!< set amplitude scale
-//   input     [  14-1: 0] set_dc_i_1      ,  //!< set output offset
-//   input     [RSZ+15: 0] set_size_i_1    ,  //!< set table data size
-//   input     [RSZ+15: 0] set_step_i_1    ,  //!< set pointer step
-//   input     [RSZ+15: 0] set_ofs_i_1     ,  //!< set reset offset
-//   input     [  16-1: 0] set_ncyc_i_1    ,  //!< set number of cycle
-//   input     [  16-1: 0] set_rnum_i_1    ,  //!< set number of repetitions
-//   input     [  32-1: 0] set_rdly_i_1    ,  //!< set delay between repetitions
    input                 set_rst_i       ,  //!< set FSM to reset
    input                 set_once_i      ,  //!< set only once  -- not used
    input                 set_wrap_i      ,  //!< set wrap enable
@@ -88,8 +80,8 @@ reg   [  14-1: 0] dac_buf [0:(1<<RSZ)-1] ;
 reg   [  14-1: 0] dac_rd    ;
 reg   [  14-1: 0] dac_rdat  ;
 reg   [ RSZ-1: 0] dac_rp    ;
-reg   [RSZ+15: 0] dac_pnt   ; // read pointer
-reg   [RSZ+15: 0] dac_pntp  ; // previour read pointer
+reg   [RSZ+15: 0] dac_ptr   ; // read pointer
+reg   [RSZ+15: 0] dac_ptrp  ; // previour read pointer
 wire  [RSZ+16: 0] dac_npnt  ; // next read pointer
 wire  [RSZ+16: 0] dac_npnt_sub ;
 wire              dac_npnt_sub_neg;
@@ -99,9 +91,9 @@ reg   [  15-1: 0] dac_sum   ;
 
 wire     [  14-1: 0] set_amp_i     ;  //!< set amplitude scale
 wire     [  14-1: 0] set_dc_i      ;  //!< set output offset
-wire     [RSZ+15: 0] set_size_i    ;  //!< set table data size
+wire     [RSZ+15: 0] set_end_i    ;  //!< set table data end
 wire     [RSZ+15: 0] set_step_i    ;  //!< set pointer step
-wire     [RSZ+15: 0] set_ofs_i     ;  //!< set reset offset
+wire     [RSZ+15: 0] set_start_i     ;  //!< set reset offset
 wire     [  16-1: 0] set_ncyc_i    ;  //!< set number of cycle
 wire     [  16-1: 0] set_rnum_i    ;  //!< set number of repetitions
 wire     [  32-1: 0] set_rdly_i    ;  //!< set delay between repetitions
@@ -119,8 +111,8 @@ set_ncyc_i[4:0],
 // read
 always @(posedge dac_clk_i)
 begin
-   buf_rpnt_o <= dac_pnt[RSZ+15:16];
-   dac_rp     <= dac_pnt[RSZ+15:16];
+   buf_rpnt_o <= dac_ptr[RSZ+15:16];
+   dac_rp     <= dac_ptr[RSZ+15:16];
    dac_rd     <= dac_buf[dac_rp] ;
    dac_rdat   <= dac_rd ;  // improve timing
 end
@@ -155,30 +147,77 @@ wire             ext_trig_n   ;
 wire             dac_trig     ;
 reg              dac_trigr    ;
 
-//assign  set_amp_i      = (current_buf == 1'b1) ? set_amp_i_1    : set_amp_i_0    ;
-//assign  set_dc_i       = (current_buf == 1'b1) ? set_dc_i_1     : set_dc_i_0     ;
-//assign  set_size_i     = (current_buf == 1'b1) ? set_size_i_1   : set_size_i_0   ;
-//assign  set_step_i     = (current_buf == 1'b1) ? set_step_i_1   : set_step_i_0   ;
-//assign  set_ofs_i      = (current_buf == 1'b1) ? set_ofs_i_1    : set_ofs_i_0    ;
-//assign  set_ncyc_i     = (current_buf == 1'b1) ? set_ncyc_i_1   : set_ncyc_i_0   ;
-//assign  set_rnum_i     = (current_buf == 1'b1) ? set_rnum_i_1   : set_rnum_i_0   ;
-//assign  set_rdly_i     = (current_buf == 1'b1) ? set_rdly_i_1   : set_rdly_i_0   ;
 assign  set_amp_i      = set_amp_all_i   [ (14*(current_buf+1))-1 +: 14];
 assign  set_dc_i       = set_dc_all_i    [ (14*(current_buf+1))-1 +: 14];
-assign  set_size_i     = set_size_all_i  [ ((RSZ+16)*(current_buf+1))-1 +: (RSZ+16)];
+assign  set_end_i     = set_end_all_i  [ ((RSZ+16)*(current_buf+1))-1 +: (RSZ+16)];
 assign  set_step_i     = set_step_all_i  [ ((RSZ+16)*(current_buf+1))-1 +: (RSZ+16)];
-assign  set_ofs_i      = set_ofs_all_i   [ ((RSZ+16)*(current_buf+1))-1 +: (RSZ+16)];
+assign  set_start_i      = set_start_all_i   [ ((RSZ+16)*(current_buf+1))-1 +: (RSZ+16)];
 assign  set_ncyc_i     = set_ncyc_all_i  [ (16*(current_buf+1))-1 +: 16];
 assign  set_rnum_i     = set_rnum_all_i  [ (16*(current_buf+1))-1 +: 16];
 assign  set_rdly_i     = set_rdly_all_i  [ (32*(current_buf+1))-1 +: 32];
 // state machine
+always @(posedge dac_clk_i) begin
+   if (dac_rstn_i == 1'b0 || set_rst_i == 1'b1) begin
+      asg_state <= SM_IDLE;
+   end
+   else begin
+      asg_state <= next_asg_state;
+   end
+   // Latch the dac trigger for as long as the DAC is not reset
+   if (dac_rstn_i == 1'b0 || set_rst_i == 1'b1) begin
+      trig_in_latch <= 1'b0;
+   else if (trig_in)
+      trig_in_latch <= 1'b1;
+end
+
+always @(*) begin
+    next_asg_state <= asg_state;
+    case (asg_state)
+        SM_IDLE : begin
+            if (trig_in_latch) next_asg_state = SM_START_PTR;
+            current_buf <= 2'b00;
+            cyc_cnt <= 16'h0000;
+            dac_ptr <= {RSZ+16{1'b0}};
+        end
+        SM_START_PTR : begin
+            next_asg_state = SM_DRIVE_DAC;
+            current_buf <= current_buf;
+            cyc_cnt <= set_ncyc_i;
+            dac_ptr <= set_start_i;
+        end
+        SM_DRIVE_DAC : begin
+            if (dac_ptr + set_step_i >= set_end_i) begin
+                next_asg_state = SM_START_PTR;
+                if (cyc_cnt == 1) begin
+                    current_buf <= current_buf + 1;
+                    cyc_cnt <= set_ncyc_i;
+                    dac_ptr <= set_start_i;
+                end else begin
+                    current_buf <= current_buf;
+                    cyc_cnt <= cyc_cnt - 1;
+                    dac_ptr <= set_start_i;
+                end
+            end
+        end
+        SM_START_NEXT_BUF: begin
+            next_asg_state = SM_START_PTR;
+            current_buf <= current_buf;
+            cyc_cnt <= set_ncyc_i;
+            dac_ptr <= set_start_i;
+        end
+        default : begin
+            next_asg_state = SM_IDLE;
+        end
+    endcase
+end
+            
 always @(posedge dac_clk_i) begin
    if (dac_rstn_i == 1'b0) begin
       current_buf <= 1'b0;
       cyc_cnt   <= 16'h0 ;
       dac_do    <=  1'b0 ;
       trig_in   <=  1'b0 ;
-      dac_pntp  <= {RSZ+16{1'b0}} ;
+      dac_ptrp  <= {RSZ+16{1'b0}} ;
       dac_trigr <=  1'b0 ;
       trig_in_latch <=  1'b0 ;
    end
@@ -189,14 +228,9 @@ always @(posedge dac_clk_i) begin
       else if (cyc_cnt == 16'h1 && dac_npnt_sub_neg)
          current_buf = !current_buf;
 
-      // Latch the dac trigger for as long as the DAC is not reset
-      if (set_rst_i)
-         trig_in_latch <= 1'b0;
-      else if (trig_in)
-         trig_in_latch <= 1'b1;
 
       // count number of table read cycles
-      dac_pntp  <= dac_pnt;
+      dac_ptrp  <= dac_ptr;
       dac_trigr <= dac_trig; // ignore trigger when count
       if (dac_trig) // First trigger only
          cyc_cnt <= set_ncyc_i ;
@@ -224,23 +258,23 @@ end
 
 assign dac_trig = trig_in || !dac_do;
 
-//assign dac_npnt_sub = dac_npnt - {1'b0,set_size_i} - 1;
-assign dac_npnt_sub_neg = ~({1'b0, dac_npnt} > {1'b0,set_size_i});
+//assign dac_npnt_sub = dac_npnt - {1'b0,set_end_i} - 1;
+assign dac_npnt_sub_neg = ~({1'b0, dac_npnt} > {1'b0,set_end_i});
 
 // read pointer logic
 always @(posedge dac_clk_i)
 if (dac_rstn_i == 1'b0) begin
-   dac_pnt  <= {RSZ+16{1'b0}};
+   dac_ptr  <= {RSZ+16{1'b0}};
 end else begin
    if (set_rst_i || ((dac_trig || trig_in_latch) && !dac_do)) // manual reset or start
-      dac_pnt <= set_ofs_i;
+      dac_ptr <= set_start_i;
    else if (dac_do) begin
-      if (dac_npnt_sub_neg)  dac_pnt <= set_ofs_i; // Always wrap to the offset, not to zero
-      else                    dac_pnt <= dac_npnt[RSZ+15:0]; // normal increase
+      if (dac_npnt_sub_neg)  dac_ptr <= set_start_i; // Always wrap to the offset, not to zero
+      else                    dac_ptr <= dac_npnt[RSZ+15:0]; // normal increase
    end
 end
 
-assign dac_npnt = dac_pnt + set_step_i;
+assign dac_npnt = dac_ptr + set_step_i;
 assign trig_done_o = (cyc_cnt == 16'h1 & ~dac_do); // all repeats done, switch to second buffer
                      
                      
