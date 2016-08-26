@@ -36,7 +36,7 @@
 
 module red_pitaya_asg_ch_double_buf #(
    parameter RSZ = 16,
-   parameter N_BUF = 2
+   parameter N_BUF = 4
 )(
    // DAC
    output reg [ 14-1: 0] dac_o           ,  //!< dac data output
@@ -46,8 +46,9 @@ module red_pitaya_asg_ch_double_buf #(
    input                 trig_sw_i       ,  //!< software trigger
    input                 trig_ext_i      ,  //!< external trigger
    input      [  3-1: 0] trig_src_i      ,  //!< trigger source selector
-   output                trig_done_o     ,  //!< trigger event
    input      [  3-1: 0] trig_evt_i      ,  //!< trigger event condition (0: start of waveform, 1: counter wrap, 2-7: reserved)
+   output                buf_done_o      ,  //!< trigger event
+   output                cyc_done_o      ,  //!< trigger event
    // buffer ctrl
    input                 buf_we_i        ,  //!< buffer write enable
    input      [RSZ-1: 0] buf_addr_i      ,  //!< buffer address
@@ -64,10 +65,7 @@ module red_pitaya_asg_ch_double_buf #(
    input     [  (16*N_BUF)-1: 0] set_rnum_all_i    ,  //!< set number of repetitions
    input     [  (32*N_BUF)-1: 0] set_rdly_all_i    ,  //!< set delay between repetitions
    input                 set_rst_i       ,  //!< set FSM to reset
-   input                 set_once_i      ,  //!< set only once  -- not used
-   input                 set_wrap_i      ,  //!< set wrap enable
    input                 set_zero_i      ,  //!< set output to zero
-   input                 set_rgate_i,       //!< set external gated repetition
    // Debug signals
    output         [15-1: 0] debug_bus
 );
@@ -99,15 +97,20 @@ wire     [  16-1: 0] set_rnum_i    ;  //!< set number of repetitions
 wire     [  32-1: 0] set_rdly_i    ;  //!< set delay between repetitions
 reg      [  16-1: 0] cyc_cnt      ;
 reg                  trig_in_latch;
-reg                  current_buf  ;
-reg              dac_do       ;
-
+reg      [     1:0 ] current_buf  ;
+reg                  cyc_done     ;
+reg                  buf_done     ;
+reg      [     2: 0] asg_state    ;
+reg      [     2: 0] next_asg_state    ;
+parameter SM_IDLE=0, SM_START_PTR=1, SM_DRIVE_DAC=2, SM_START_NEXT_BUF=3;
 assign debug_bus =  { cyc_cnt[6:0], 
 set_ncyc_i[4:0],
  current_buf,
-  trig_in_latch,
- dac_do };
+ cyc_done_o,
+ buf_done_o };
 
+assign buf_done_o = buf_done;
+assign cyc_done_o = cyc_done;
 // read
 always @(posedge dac_clk_i)
 begin
@@ -144,9 +147,6 @@ reg              trig_in      ;
 wire             ext_trig_p   ;
 wire             ext_trig_n   ;
 
-wire             dac_trig     ;
-reg              dac_trigr    ;
-
 assign  set_amp_i      = set_amp_all_i   [ (14*(current_buf+1))-1 +: 14];
 assign  set_dc_i       = set_dc_all_i    [ (14*(current_buf+1))-1 +: 14];
 assign  set_end_i     = set_end_all_i  [ ((RSZ+16)*(current_buf+1))-1 +: (RSZ+16)];
@@ -155,130 +155,127 @@ assign  set_start_i      = set_start_all_i   [ ((RSZ+16)*(current_buf+1))-1 +: (
 assign  set_ncyc_i     = set_ncyc_all_i  [ (16*(current_buf+1))-1 +: 16];
 assign  set_rnum_i     = set_rnum_all_i  [ (16*(current_buf+1))-1 +: 16];
 assign  set_rdly_i     = set_rdly_all_i  [ (32*(current_buf+1))-1 +: 32];
-// state machine
+
 always @(posedge dac_clk_i) begin
-   if (dac_rstn_i == 1'b0 || set_rst_i == 1'b1) begin
-      asg_state <= SM_IDLE;
-   end
-   else begin
-      asg_state <= next_asg_state;
-   end
    // Latch the dac trigger for as long as the DAC is not reset
-   if (dac_rstn_i == 1'b0 || set_rst_i == 1'b1) begin
+   if (dac_rstn_i == 1'b0 || set_rst_i == 1'b1)
       trig_in_latch <= 1'b0;
    else if (trig_in)
       trig_in_latch <= 1'b1;
+      
+    // trigger arrived
+   if (dac_rstn_i == 1'b0 || set_rst_i == 1'b1) begin
+        trig_in <= 1'b0;
+   end else begin
+     case (trig_src_i)
+        3'd1 : trig_in <= trig_sw_i   ; // sw
+        3'd2 : trig_in <= ext_trig_p  ; // external positive edge
+        3'd3 : trig_in <= ext_trig_n  ; // external negative edge
+     default : trig_in <= 1'b0        ;
+    endcase
+  end
 end
 
+// state machine Sequential
+always @(posedge dac_clk_i) begin
+   if (dac_rstn_i == 1'b0 || set_rst_i == 1'b1) begin
+      asg_state <= SM_IDLE;
+   end else begin
+      asg_state <= next_asg_state;
+   end
+
+   if (dac_rstn_i == 1'b0 || set_rst_i == 1'b1) begin
+      current_buf <= 2'b00;
+      cyc_cnt <= 16'h0000;
+      dac_ptr <= {RSZ+16{1'b0}};
+   end else begin
+     case(asg_state)
+       SM_IDLE       : begin
+           current_buf <= 2'b00;
+           cyc_cnt <= 16'h0000;
+           dac_ptr <= {RSZ+16{1'b0}};
+       end
+       SM_START_PTR  : begin
+           current_buf <= current_buf;
+           cyc_cnt <= set_ncyc_i;
+           dac_ptr <= set_start_i;
+       end
+       SM_DRIVE_DAC  : begin
+           if (dac_ptr + set_step_i >= set_end_i) begin
+             dac_ptr = set_start_i;
+             if (cyc_cnt == 16'h0001) begin
+               current_buf <= current_buf + 1;
+               cyc_cnt <= set_ncyc_i;
+             end else begin
+               current_buf <= current_buf;
+               cyc_cnt <= cyc_cnt - 1;
+             end
+           end else begin
+             dac_ptr = dac_ptr + set_step_i;
+             current_buf = current_buf;
+             cyc_cnt = cyc_cnt;
+           end
+       end
+       SM_START_NEXT_BUF: begin
+           current_buf = current_buf;
+           cyc_cnt = set_ncyc_i;
+           dac_ptr = set_start_i;
+       end
+       default : begin
+           current_buf = 2'b00;
+           cyc_cnt = 16'h0000;
+           dac_ptr = {RSZ+16{1'b0}};
+       end
+     endcase
+   end
+end
+
+// state machine comb
 always @(*) begin
-    next_asg_state <= asg_state;
+    next_asg_state = SM_IDLE;
+    cyc_done = 1'b0;
+    buf_done = 1'b0;
     case (asg_state)
         SM_IDLE : begin
-            if (trig_in_latch) next_asg_state = SM_START_PTR;
-            current_buf <= 2'b00;
-            cyc_cnt <= 16'h0000;
-            dac_ptr <= {RSZ+16{1'b0}};
+            if (trig_in_latch == 1'b1) 
+              next_asg_state = SM_START_PTR;
+            cyc_done = 1'b0;
+            buf_done = 1'b0;
         end
         SM_START_PTR : begin
             next_asg_state = SM_DRIVE_DAC;
-            current_buf <= current_buf;
-            cyc_cnt <= set_ncyc_i;
-            dac_ptr <= set_start_i;
+            cyc_done = 1'b0;
+            buf_done = 1'b0;
         end
         SM_DRIVE_DAC : begin
             if (dac_ptr + set_step_i >= set_end_i) begin
-                next_asg_state = SM_START_PTR;
-                if (cyc_cnt == 1) begin
-                    current_buf <= current_buf + 1;
-                    cyc_cnt <= set_ncyc_i;
-                    dac_ptr <= set_start_i;
-                end else begin
-                    current_buf <= current_buf;
-                    cyc_cnt <= cyc_cnt - 1;
-                    dac_ptr <= set_start_i;
-                end
+              if (cyc_cnt == 16'h0001) begin
+                next_asg_state = SM_START_NEXT_BUF;
+              end else begin
+                next_asg_state = SM_DRIVE_DAC;
+              end
+                cyc_done = 1'b1;
+                buf_done = 1'b0;
+            end else begin
+              next_asg_state = SM_DRIVE_DAC;
+              cyc_done = 1'b0;
+              buf_done = 1'b0;
             end
+
         end
         SM_START_NEXT_BUF: begin
             next_asg_state = SM_START_PTR;
-            current_buf <= current_buf;
-            cyc_cnt <= set_ncyc_i;
-            dac_ptr <= set_start_i;
+            cyc_done = 1'b0;
+            buf_done = 1'b1;
         end
         default : begin
             next_asg_state = SM_IDLE;
+            cyc_done = 1'b0;
+            buf_done = 1'b0;
         end
     endcase
 end
             
-always @(posedge dac_clk_i) begin
-   if (dac_rstn_i == 1'b0) begin
-      current_buf <= 1'b0;
-      cyc_cnt   <= 16'h0 ;
-      dac_do    <=  1'b0 ;
-      trig_in   <=  1'b0 ;
-      dac_ptrp  <= {RSZ+16{1'b0}} ;
-      dac_trigr <=  1'b0 ;
-      trig_in_latch <=  1'b0 ;
-   end
-   else begin
-      // Switch between the 2 wave buffers
-      if (set_rst_i )
-         current_buf <= 1'b0;
-      else if (cyc_cnt == 16'h1 && dac_npnt_sub_neg)
-         current_buf = !current_buf;
-
-
-      // count number of table read cycles
-      dac_ptrp  <= dac_ptr;
-      dac_trigr <= dac_trig; // ignore trigger when count
-      if (dac_trig) // First trigger only
-         cyc_cnt <= set_ncyc_i ;
-      else if (trig_in_latch && |cyc_cnt && dac_npnt_sub_neg)
-         cyc_cnt <= cyc_cnt - 16'h1 ;
-      else if (trig_in_latch && cyc_cnt==16'h0000)
-         cyc_cnt <= set_ncyc_i;
-
-      // trigger arrived
-      case (trig_src_i)
-          3'd1 : trig_in <= trig_sw_i   ; // sw
-          3'd2 : trig_in <= ext_trig_p  ; // external positive edge
-          3'd3 : trig_in <= ext_trig_n  ; // external negative edge
-       default : trig_in <= 1'b0        ;
-      endcase
-
-      // in cycle mode
-      if (set_rst_i || ((cyc_cnt==16'h1) && dac_npnt_sub_neg) )
-         dac_do <= 1'b0 ;
-      else if ((dac_trig || (trig_in_latch && !dac_do)) && !set_rst_i)
-         dac_do <= 1'b1 ;
-
-   end
-end
-
-assign dac_trig = trig_in || !dac_do;
-
-//assign dac_npnt_sub = dac_npnt - {1'b0,set_end_i} - 1;
-assign dac_npnt_sub_neg = ~({1'b0, dac_npnt} > {1'b0,set_end_i});
-
-// read pointer logic
-always @(posedge dac_clk_i)
-if (dac_rstn_i == 1'b0) begin
-   dac_ptr  <= {RSZ+16{1'b0}};
-end else begin
-   if (set_rst_i || ((dac_trig || trig_in_latch) && !dac_do)) // manual reset or start
-      dac_ptr <= set_start_i;
-   else if (dac_do) begin
-      if (dac_npnt_sub_neg)  dac_ptr <= set_start_i; // Always wrap to the offset, not to zero
-      else                    dac_ptr <= dac_npnt[RSZ+15:0]; // normal increase
-   end
-end
-
-assign dac_npnt = dac_ptr + set_step_i;
-assign trig_done_o = (cyc_cnt == 16'h1 & ~dac_do); // all repeats done, switch to second buffer
-                     
-                     
-
 //---------------------------------------------------------------------------------
 //
 //  External trigger

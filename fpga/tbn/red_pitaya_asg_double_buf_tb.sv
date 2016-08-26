@@ -116,42 +116,48 @@ initial begin
   bus.write(32'h2001c, 32'd250   );  // write table
 
   // CH1 DAC data
-  /*for (int k=0; k<16384; k++) begin
-    bus.write(32'h20000 + (k*4), k);  // write table
+  for (int k=0; k<400; k++) begin
+    bus.write(32'h40000 + (k*4), k+3);  // write table
   end
-  for (int k=0; k<16384; k++) begin
-    bus.write(32'h40000 + (k*4), k);  // write table
+  for (int k=0; k<400; k++) begin
+    bus.write(32'h50000 + (k*4), k+3);  // write table
   end
-*/
+  for (int k=0; k<400; k++) begin
+    bus.write(32'h60000 + (k*4), k+3);  // write table
+  end
+  for (int k=0; k<400; k++) begin
+    bus.write(32'h70000 + (k*4), k+3);  // write table
+  end
+
   // CH0 DAC settings
   bus.write(32'h00004,{1'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
-  bus.write(32'h00008,{1'h0, 15'h3fff, 16'h0}          );  // table size
+  bus.write(32'h00008,{1'h0, 15'h1f, 16'h0}          );  // table size
   bus.write(32'h0000C,{1'h0, 15'h0, 16'h0}             );  // reset offset
-  bus.write(32'h00010,{1'h0, 15'h22, 16'h0}             );  // table step
+  bus.write(32'h00010,{1'h0, 15'h1, 16'h0}             );  // table step
   bus.write(32'h00018,{16'h0, 16'd3}                   );  // number of cycles
   bus.write(32'h0001C,{16'h0, 16'd0}                   );  // number of repetitions
   bus.write(32'h00020,{32'd0}                          );  // number of 1us delay between repetitions
 
   bus.write(32'h00054,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
-  bus.write(32'h00058,{1'h0, 15'h7fff, 16'h0}          );  // table size
+  bus.write(32'h00058,{1'h0, 15'h21, 16'h0}          );  // table size
   bus.write(32'h0005C,{1'h0, 15'h4000, 16'h0}             );  // reset offset
-  bus.write(32'h00060,{1'h0, 15'h22, 16'h0}             );  // table step
+  bus.write(32'h00060,{1'h0, 15'h1, 16'h0}             );  // table step
   bus.write(32'h00068,{16'h0, 16'd7}                   );  // number of cycles
   bus.write(32'h0006C,{16'h0, 16'd0}                   );  // number of repetitions
   bus.write(32'h00070,{32'd0}                          );  // number of 1us delay between repetitions
 
   bus.write(32'h00074,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
-  bus.write(32'h00078,{1'h0, 15'h7fff, 16'h0}          );  // table size
-  bus.write(32'h0007C,{1'h0, 15'h4000, 16'h0}             );  // reset offset
+  bus.write(32'h00078,{1'h0, 15'h17, 16'h0}          );  // table size
+  bus.write(32'h0007C,{1'h0, 15'h8000, 16'h0}             );  // reset offset
   bus.write(32'h00080,{1'h0, 15'h22, 16'h0}             );  // table step
   bus.write(32'h00088,{16'h0, 16'd7}                   );  // number of cycles
   bus.write(32'h0008C,{16'h0, 16'd0}                   );  // number of repetitions
   bus.write(32'h00090,{32'd0}                          );  // number of 1us delay between repetitions
   
   bus.write(32'h000A4,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
-  bus.write(32'h000A8,{1'h0, 15'h7fff, 16'h0}          );  // table size
-  bus.write(32'h000AC,{1'h0, 15'h4000, 16'h0}             );  // reset offset
-  bus.write(32'h000B0,{1'h0, 15'h22, 16'h0}             );  // table step
+  bus.write(32'h000A8,{1'h0, 15'h13, 16'h0}          );  // table size
+  bus.write(32'h000AC,{1'h0, 15'hC000, 16'h0}             );  // reset offset
+  bus.write(32'h000B0,{1'h0, 15'h1, 16'h0}             );  // table step
   bus.write(32'h000B8,{16'h0, 16'd7}                   );  // number of cycles
   bus.write(32'h000BC,{16'h0, 16'd0}                   );  // number of repetitions
   bus.write(32'h000C0,{32'd0}                          );  // number of 1us delay between repetitions
@@ -161,9 +167,9 @@ initial begin
   ch0_set = {1'b0 ,1'b0, 1'b0, 1'b0, 1'b0,    1'b0, 3'h1} ;  // set_rgate, set_zero, set_rst, set_once(NA), set_wrap, 1'b0, trig_src
 
   // CH1 DAC data
-//  for (int k=0; k<8000; k++) begin
-//    bus.write(32'h30000 + (k*4), k);  // write table
-//  end
+  for (int k=0; k<8000; k++) begin
+    bus.write(32'h60000 + (k*4), k);  // write table
+  end
 
   // CH1 DAC settings
   bus.write(32'h00024,{2'h0, 14'd0, 2'h0, 14'h2000}    );  // DC offset, amplitude

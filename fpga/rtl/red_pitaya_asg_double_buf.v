@@ -75,7 +75,7 @@ module red_pitaya_asg_double_buf (
 // generating signal from DAC table 
 
 localparam RSZ = 16 ;  // RAM size 2^RSZ
-localparam N_BUF = 2;  // Number of repeatable buffers
+localparam N_BUF = 4;  // Number of repeatable buffers
 
 
 reg   [  14-1: 0] set_a_amp_0  , set_b_amp_0  ;
@@ -111,11 +111,9 @@ reg   [  16-1: 0] set_a_ncyc_3 , set_b_ncyc_3 ;
 reg   [  16-1: 0] set_a_rnum_3 , set_b_rnum_3 ;
 reg   [  32-1: 0] set_a_rdly_3 , set_b_rdly_3 ;
 reg               set_a_rst    , set_b_rst    ;
-reg               set_a_once   , set_b_once   ;
-reg               set_a_wrap   , set_b_wrap   ;
 reg               set_a_zero   , set_b_zero   ;
-reg               set_a_rgate  , set_b_rgate  ;
 reg               buf_a_we     , buf_b_we     ;
+reg               buf_a_resvd  , buf_b_resvd  ;
 reg   [ RSZ-1: 0] buf_a_addr   , buf_b_addr   ;
 wire  [  14-1: 0] buf_a_rdata  , buf_b_rdata  ;
 wire  [ RSZ-1: 0] buf_a_rpnt   , buf_b_rpnt   ;
@@ -135,6 +133,8 @@ wire   [((RSZ+16)*N_BUF)-1: 0] set_a_start    , set_b_start    ;
 wire   [  (16*N_BUF)-1: 0] set_a_ncyc   , set_b_ncyc   ;
 wire   [  (16*N_BUF)-1: 0] set_a_rnum   , set_b_rnum   ;
 wire   [  (32*N_BUF)-1: 0] set_a_rdly   , set_b_rdly   ;
+wire   cyc_b_done       , cyc_a_done       ;
+wire   buf_b_done       , buf_a_done       ;
 
 assign debug_bus = {trig_out_o, ch_a_debug };
 
@@ -169,7 +169,8 @@ red_pitaya_asg_ch_double_buf  #(.RSZ (RSZ), .N_BUF(N_BUF)) ch [1:0] (
   .trig_sw_i       ({trig_b_sw        , trig_a_sw        }),  // software trigger
   .trig_ext_i      ({trig_b_i         , trig_a_i         }),  // external trigger
   .trig_src_i      ({trig_b_src       , trig_a_src       }),  // trigger source selector
-  .trig_done_o     ({trig_b_done      , trig_a_done      }),  // trigger event
+  .cyc_done_o      ({cyc_b_done       , cyc_a_done       }),  // trigger event
+  .buf_done_o      ({buf_b_done       , buf_a_done       }),  // trigger event
   .trig_evt_i      ({trig_evt         , trig_evt         }),  // trigger event condition (0: start of waveform, 1: counter wrap, 2-7: reserved)
   // buffer ctrl
   .buf_we_i        ({buf_b_we         , buf_a_we         }),  // buffer buffer write
@@ -180,25 +181,15 @@ red_pitaya_asg_ch_double_buf  #(.RSZ (RSZ), .N_BUF(N_BUF)) ch [1:0] (
   // configuration
   .set_amp_all_i   ({set_b_amp        , set_a_amp        }),  // set amplitude scale
   .set_dc_all_i    ({set_b_dc         , set_a_dc         }),  // set output offset
-  .set_end_all_i  ({set_b_end       , set_a_end       }),  // set table data size
+  .set_end_all_i   ({set_b_end        , set_a_end        }),  // set table data size
   .set_step_all_i  ({set_b_step       , set_a_step       }),  // set pointer step
   .set_start_all_i   ({set_b_start        , set_a_start        }),  // set reset offset
   .set_ncyc_all_i  ({set_b_ncyc       , set_a_ncyc       }),  // set number of cycle
   .set_rnum_all_i  ({set_b_rnum       , set_a_rnum       }),  // set number of repetitions
   .set_rdly_all_i  ({set_b_rdly       , set_a_rdly       }),  // set delay between repetitions
-//  .set_amp_i_1     ({set_b_amp_1      , set_a_amp_1      }),  // set amplitude scale
-//  .set_dc_i_1      ({set_b_dc_1       , set_a_dc_1       }),  // set output offset
-//  .set_end_i_1    ({set_b_end_1     , set_a_end_1     }),  // set table data size
-//  .set_step_i_1    ({set_b_step_1     , set_a_step_1     }),  // set pointer step
-//  .set_start_i_1     ({set_b_start_1      , set_a_start_1      }),  // set reset offset
-//  .set_ncyc_i_1    ({set_b_ncyc_1     , set_a_ncyc_1     }),  // set number of cycle
-//  .set_rnum_i_1    ({set_b_rnum_1     , set_a_rnum_1     }),  // set number of repetitions
-//  .set_rdly_i_1    ({set_b_rdly_1     , set_a_rdly_1     }),  // set delay between repetitions
+   // Controls for the whole generator
   .set_rst_i       ({set_b_rst        , set_a_rst        }),  // set FMS to reset
-  .set_once_i      ({set_b_once       , set_a_once       }),  // set only once
-  .set_wrap_i      ({set_b_wrap       , set_a_wrap       }),  // set wrap pointer
   .set_zero_i      ({set_b_zero       , set_a_zero       }),  // set output to zero
-  .set_rgate_i     ({set_b_rgate      , set_a_rgate      }),  // set external gated repetition
   .debug_bus       ({ch_b_debug       , ch_a_debug       })
 );
 
@@ -225,8 +216,6 @@ if (dac_rstn_i == 1'b0) begin
    trig_a_src  <=  3'h0    ;
    set_a_zero  <=  1'b0    ;
    set_a_rst   <=  1'b0    ;
-   set_a_once  <=  1'b0    ;
-   set_a_wrap  <=  1'b0    ;
    set_a_amp_0  <= 14'h2000 ;
    set_a_dc_0   <= 14'h0    ;
    set_a_end_0 <= {RSZ+16{1'b1}} ;
@@ -259,13 +248,10 @@ if (dac_rstn_i == 1'b0) begin
    set_a_ncyc_3 <= 16'h0    ;
    set_a_rnum_3 <= 16'h0    ;
    set_a_rdly_3 <= 32'h0    ;
-   set_a_rgate <=  1'b0    ;
    trig_b_sw   <=  1'b0    ;
    trig_b_src  <=  3'h0    ;
    set_b_zero  <=  1'b0    ;
    set_b_rst   <=  1'b0    ;
-   set_b_once  <=  1'b0    ;
-   set_b_wrap  <=  1'b0    ;
    set_b_amp_0  <= 14'h2000 ;
    set_b_dc_0   <= 14'h0    ;
    set_b_end_0 <= {RSZ+16{1'b1}} ;
@@ -282,7 +268,6 @@ if (dac_rstn_i == 1'b0) begin
    set_b_ncyc_1 <= 16'h0    ;
    set_b_rnum_1 <= 16'h0    ;
    set_b_rdly_1 <= 32'h0    ;
-   set_b_rgate <=  1'b0    ;
    ren_dly     <=  3'h0    ;
    ack_dly     <=  1'b0    ;
    trig_evt_ab <=  1'b0    ;
@@ -297,8 +282,8 @@ end else begin
       trig_b_src <= sys_wdata[19:16] ;
 
    if (sys_wen) begin
-      if (sys_addr[19:0]==20'h0)   {set_a_rgate, set_a_zero, set_a_rst, set_a_once, set_a_wrap} <= sys_wdata[ 8: 4] ;
-      if (sys_addr[19:0]==20'h0)   {set_b_rgate, set_b_zero, set_b_rst, set_b_once, set_b_wrap} <= sys_wdata[24:20] ;
+      if (sys_addr[19:0]==20'h0)   { set_a_zero, set_a_rst, buf_a_resvd} <= sys_wdata[ 7: 5] ;
+      if (sys_addr[19:0]==20'h0)   { set_b_zero, set_b_rst, buf_b_resvd} <= sys_wdata[23:21] ;
 
       if (sys_addr[19:0]==20'h4)   set_a_amp_0  <= sys_wdata[  0+13: 0] ;
       if (sys_addr[19:0]==20'h4)   set_a_dc_0   <= sys_wdata[ 16+13:16] ;
@@ -359,8 +344,8 @@ end else begin
    ack_dly <=  ren_dly[3-1] || sys_wen ;
 end
 
-wire [32-1: 0] r0_rd = {7'h0,set_b_rgate, set_b_zero,set_b_rst,set_b_once,set_b_wrap, 1'b0,trig_b_src,
-                        7'h0,set_a_rgate, set_a_zero,set_a_rst,set_a_once,set_a_wrap, 1'b0,trig_a_src };
+wire [32-1: 0] r0_rd = {8'h0, set_b_zero,set_b_rst, 3'h0,trig_b_src,
+                        8'h0, set_a_zero,set_a_rst, 3'h0,trig_a_src };
 
 wire sys_en;
 assign sys_en = sys_wen | sys_ren;
