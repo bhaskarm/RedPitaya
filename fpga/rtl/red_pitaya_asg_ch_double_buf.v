@@ -147,14 +147,14 @@ reg              trig_in      ;
 wire             ext_trig_p   ;
 wire             ext_trig_n   ;
 
-assign  set_amp_i      = set_amp_all_i   [ (14*(current_buf+1))-1 +: 14];
-assign  set_dc_i       = set_dc_all_i    [ (14*(current_buf+1))-1 +: 14];
-assign  set_end_i     = set_end_all_i  [ ((RSZ+16)*(current_buf+1))-1 +: (RSZ+16)];
-assign  set_step_i     = set_step_all_i  [ ((RSZ+16)*(current_buf+1))-1 +: (RSZ+16)];
-assign  set_start_i      = set_start_all_i   [ ((RSZ+16)*(current_buf+1))-1 +: (RSZ+16)];
-assign  set_ncyc_i     = set_ncyc_all_i  [ (16*(current_buf+1))-1 +: 16];
-assign  set_rnum_i     = set_rnum_all_i  [ (16*(current_buf+1))-1 +: 16];
-assign  set_rdly_i     = set_rdly_all_i  [ (32*(current_buf+1))-1 +: 32];
+assign  set_amp_i      = set_amp_all_i   [ (14*(current_buf)) +: 14];
+assign  set_dc_i       = set_dc_all_i    [ (14*(current_buf)) +: 14];
+assign  set_end_i     = set_end_all_i  [ ((RSZ+16)*(current_buf)) +: (RSZ+16)];
+assign  set_step_i     = set_step_all_i  [ ((RSZ+16)*(current_buf)) +: (RSZ+16)];
+assign  set_start_i      = set_start_all_i   [ ((RSZ+16)*(current_buf)) +: (RSZ+16)];
+assign  set_ncyc_i     = set_ncyc_all_i  [ (16*(current_buf)) +: 16];
+assign  set_rnum_i     = set_rnum_all_i  [ (16*(current_buf)) +: 16];
+assign  set_rdly_i     = set_rdly_all_i  [ (32*(current_buf)) +: 32];
 
 always @(posedge dac_clk_i) begin
    // Latch the dac trigger for as long as the DAC is not reset
@@ -251,11 +251,13 @@ always @(*) begin
             if (dac_ptr + set_step_i >= set_end_i) begin
               if (cyc_cnt == 16'h0001) begin
                 next_asg_state = SM_START_NEXT_BUF;
+                cyc_done = 1'b1;
+                buf_done = 1'b0; // Next state activated the signal
               end else begin
                 next_asg_state = SM_DRIVE_DAC;
-              end
                 cyc_done = 1'b1;
                 buf_done = 1'b0;
+              end
             end else begin
               next_asg_state = SM_DRIVE_DAC;
               cyc_done = 1'b0;

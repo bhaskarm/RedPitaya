@@ -140,23 +140,39 @@ assign debug_bus = {trig_out_o, ch_a_debug };
 
 generate
   if (N_BUF <= 2) begin
-    assign set_a_amp   = {set_a_amp_0,set_a_amp_1};
-    assign set_a_dc    = {set_a_dc_0, set_a_dc_1};
-    assign set_a_end  = {set_a_end_0, set_a_end_1};
-    assign set_a_step  = {set_a_step_0, set_a_step_1};
-    assign set_a_start   = {set_a_start_0, set_a_start_1};
-    assign set_a_ncyc  = {set_a_ncyc_0, set_a_ncyc_1};
-    assign set_a_rnum  = {set_a_rnum_0, set_a_rnum_1};
-    assign set_a_rdly  = {set_a_rdly_0, set_a_rdly_1};
+    assign set_a_amp   = {set_a_amp_1,set_a_amp_0};
+    assign set_a_dc    = {set_a_dc_1, set_a_dc_0};
+    assign set_a_end  = {set_a_end_1, set_a_end_0};
+    assign set_a_step  = {set_a_step_1, set_a_step_0};
+    assign set_a_start   = {set_a_start_1, set_a_start_0};
+    assign set_a_ncyc  = {set_a_ncyc_1, set_a_ncyc_0};
+    assign set_a_rnum  = {set_a_rnum_1, set_a_rnum_0};
+    assign set_a_rdly  = {set_a_rdly_1, set_a_rdly_0};
+    assign set_b_amp   = {set_b_amp_1,set_b_amp_0};
+    assign set_b_dc    = {set_b_dc_1, set_b_dc_0};
+    assign set_b_end  = {set_b_end_1, set_b_end_0};
+    assign set_b_step  = {set_b_step_1, set_b_step_0};
+    assign set_b_start   = {set_b_start_1, set_b_start_0};
+    assign set_b_ncyc  = {set_b_ncyc_1, set_b_ncyc_0};
+    assign set_b_rnum  = {set_b_rnum_1, set_b_rnum_0};
+    assign set_b_rdly  = {set_b_rdly_1, set_b_rdly_0};
   end else begin
-    assign set_a_amp   = {set_a_amp_0, set_a_amp_1, set_a_amp_2, set_a_amp_3};
-    assign set_a_dc    = {set_a_dc_0, set_a_dc_1, set_a_dc_2, set_a_dc_3};
-    assign set_a_end  = {set_a_end_0, set_a_end_1, set_a_end_2, set_a_end_3};
-    assign set_a_step  = {set_a_step_0, set_a_step_1, set_a_step_2, set_a_step_3};
-    assign set_a_start   = {set_a_start_0, set_a_start_1, set_a_start_2, set_a_start_3};
-    assign set_a_ncyc  = {set_a_ncyc_0, set_a_ncyc_1, set_a_ncyc_2, set_a_ncyc_3};
-    assign set_a_rnum  = {set_a_rnum_0, set_a_rnum_1, set_a_rnum_2, set_a_rnum_3};
-    assign set_a_rdly  = {set_a_rdly_0, set_a_rdly_1, set_a_rdly_2, set_a_rdly_3};
+    assign set_a_amp   = {set_a_amp_3, set_a_amp_2, set_a_amp_1, set_a_amp_0};
+    assign set_a_dc    = {set_a_dc_3, set_a_dc_2, set_a_dc_1, set_a_dc_0};
+    assign set_a_end  = {set_a_end_3, set_a_end_2, set_a_end_1, set_a_end_0};
+    assign set_a_step  = {set_a_step_3, set_a_step_2, set_a_step_1, set_a_step_0};
+    assign set_a_start   = {set_a_start_3, set_a_start_2, set_a_start_1, set_a_start_0};
+    assign set_a_ncyc  = {set_a_ncyc_3, set_a_ncyc_2, set_a_ncyc_1, set_a_ncyc_0};
+    assign set_a_rnum  = {set_a_rnum_3, set_a_rnum_2, set_a_rnum_1, set_a_rnum_0};
+    assign set_a_rdly  = {set_a_rdly_3, set_a_rdly_2, set_a_rdly_1, set_a_rdly_0};
+    assign set_b_amp   = {set_b_amp_3, set_b_amp_2, set_b_amp_1, set_b_amp_0};
+    assign set_b_dc    = {set_b_dc_3, set_b_dc_2, set_b_dc_1, set_b_dc_0};
+    assign set_b_end  = {set_b_end_3, set_b_end_2, set_b_end_1, set_b_end_0};
+    assign set_b_step  = {set_b_step_3, set_b_step_2, set_b_step_1, set_b_step_0};
+    assign set_b_start   = {set_b_start_3, set_b_start_2, set_b_start_1, set_b_start_0};
+    assign set_b_ncyc  = {set_b_ncyc_3, set_b_ncyc_2, set_b_ncyc_1, set_b_ncyc_0};
+    assign set_b_rnum  = {set_b_rnum_3, set_b_rnum_2, set_b_rnum_1, set_b_rnum_0};
+    assign set_b_rdly  = {set_b_rdly_3, set_b_rdly_2, set_b_rdly_1, set_b_rdly_0};
   end
 endgenerate
 
@@ -248,8 +264,6 @@ if (dac_rstn_i == 1'b0) begin
    set_a_ncyc_3 <= 16'h0    ;
    set_a_rnum_3 <= 16'h0    ;
    set_a_rdly_3 <= 32'h0    ;
-   trig_b_sw   <=  1'b0    ;
-   trig_b_src  <=  3'h0    ;
    set_b_zero  <=  1'b0    ;
    set_b_rst   <=  1'b0    ;
    set_b_amp_0  <= 14'h2000 ;
@@ -268,10 +282,28 @@ if (dac_rstn_i == 1'b0) begin
    set_b_ncyc_1 <= 16'h0    ;
    set_b_rnum_1 <= 16'h0    ;
    set_b_rdly_1 <= 32'h0    ;
+   set_b_amp_2  <= 14'h2000 ;
+   set_b_dc_2   <= 14'h0    ;
+   set_b_end_2 <= {RSZ+16{1'b1}} ;
+   set_b_start_2  <= {RSZ+16{1'b0}} ;
+   set_b_step_2 <={{RSZ+15{1'b0}},1'b0} ;
+   set_b_ncyc_2 <= 16'h0    ;
+   set_b_rnum_2 <= 16'h0    ;
+   set_b_rdly_2 <= 32'h0    ;
+   set_b_amp_3  <= 14'h2000 ;
+   set_b_dc_3   <= 14'h0    ;
+   set_b_end_3 <= {RSZ+16{1'b1}} ;
+   set_b_start_3  <= {RSZ+16{1'b0}} ;
+   set_b_step_3 <={{RSZ+15{1'b0}},1'b0} ;
+   set_b_ncyc_3 <= 16'h0    ;
+   set_b_rnum_3 <= 16'h0    ;
+   set_b_rdly_3 <= 32'h0    ;
    ren_dly     <=  3'h0    ;
    ack_dly     <=  1'b0    ;
    trig_evt_ab <=  1'b0    ;
    trig_evt    <=  3'h0    ;
+   trig_b_sw   <=  1'b0    ;
+   trig_b_src  <=  3'h0    ;
 end else begin
    trig_a_sw  <= sys_wen && (sys_addr[19:0]==20'h0) && sys_wdata[0]  ;
    if (sys_wen && (sys_addr[19:0]==20'h0))
@@ -314,23 +346,23 @@ end else begin
       if (sys_addr[19:0]==20'h6C)  set_a_rnum_1 <= sys_wdata[  16-1: 0] ;
       if (sys_addr[19:0]==20'h70)  set_a_rdly_1 <= sys_wdata[  32-1: 0] ;
 
-      if (sys_addr[19:0]==20'h74)  set_b_amp_2  <= sys_wdata[  0+13: 0] ;
-      if (sys_addr[19:0]==20'h74)  set_b_dc_2   <= sys_wdata[ 16+13:16] ;
-      if (sys_addr[19:0]==20'h78)  set_b_end_2 <= sys_wdata[RSZ+15: 0] ;
-      if (sys_addr[19:0]==20'h7C)  set_b_start_2  <= sys_wdata[RSZ+15: 0] ;
-      if (sys_addr[19:0]==20'h80)  set_b_step_2 <= sys_wdata[RSZ+15: 0] ;
-      if (sys_addr[19:0]==20'h88)  set_b_ncyc_2 <= sys_wdata[  16-1: 0] ;
-      if (sys_addr[19:0]==20'h8C)  set_b_rnum_2 <= sys_wdata[  16-1: 0] ;
-      if (sys_addr[19:0]==20'h90)  set_b_rdly_2 <= sys_wdata[  32-1: 0] ;
+      if (sys_addr[19:0]==20'h74)  set_a_amp_2  <= sys_wdata[  0+13: 0] ;
+      if (sys_addr[19:0]==20'h74)  set_a_dc_2   <= sys_wdata[ 16+13:16] ;
+      if (sys_addr[19:0]==20'h78)  set_a_end_2 <= sys_wdata[RSZ+15: 0] ;
+      if (sys_addr[19:0]==20'h7C)  set_a_start_2  <= sys_wdata[RSZ+15: 0] ;
+      if (sys_addr[19:0]==20'h80)  set_a_step_2 <= sys_wdata[RSZ+15: 0] ;
+      if (sys_addr[19:0]==20'h88)  set_a_ncyc_2 <= sys_wdata[  16-1: 0] ;
+      if (sys_addr[19:0]==20'h8C)  set_a_rnum_2 <= sys_wdata[  16-1: 0] ;
+      if (sys_addr[19:0]==20'h90)  set_a_rdly_2 <= sys_wdata[  32-1: 0] ;
 
-      if (sys_addr[19:0]==20'h94)  set_b_amp_3  <= sys_wdata[  0+13: 0] ;
-      if (sys_addr[19:0]==20'h94)  set_b_dc_3   <= sys_wdata[ 16+13:16] ;
-      if (sys_addr[19:0]==20'h98)  set_b_end_3 <= sys_wdata[RSZ+15: 0] ;
-      if (sys_addr[19:0]==20'h9C)  set_b_start_3  <= sys_wdata[RSZ+15: 0] ;
-      if (sys_addr[19:0]==20'hA0)  set_b_step_3 <= sys_wdata[RSZ+15: 0] ;
-      if (sys_addr[19:0]==20'hA8)  set_b_ncyc_3 <= sys_wdata[  16-1: 0] ;
-      if (sys_addr[19:0]==20'hAC)  set_b_rnum_3 <= sys_wdata[  16-1: 0] ;
-      if (sys_addr[19:0]==20'hB0)  set_b_rdly_3 <= sys_wdata[  32-1: 0] ;
+      if (sys_addr[19:0]==20'h94)  set_a_amp_3  <= sys_wdata[  0+13: 0] ;
+      if (sys_addr[19:0]==20'h94)  set_a_dc_3   <= sys_wdata[ 16+13:16] ;
+      if (sys_addr[19:0]==20'h98)  set_a_end_3 <= sys_wdata[RSZ+15: 0] ;
+      if (sys_addr[19:0]==20'h9C)  set_a_start_3  <= sys_wdata[RSZ+15: 0] ;
+      if (sys_addr[19:0]==20'hA0)  set_a_step_3 <= sys_wdata[RSZ+15: 0] ;
+      if (sys_addr[19:0]==20'hA8)  set_a_ncyc_3 <= sys_wdata[  16-1: 0] ;
+      if (sys_addr[19:0]==20'hAC)  set_a_rnum_3 <= sys_wdata[  16-1: 0] ;
+      if (sys_addr[19:0]==20'hB0)  set_a_rdly_3 <= sys_wdata[  32-1: 0] ;
 
       // Extra registers to run double buffered waveform
    end

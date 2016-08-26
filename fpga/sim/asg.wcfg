@@ -10,249 +10,502 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="385953306084fs"></ZoomStartTime>
-      <ZoomEndTime time="386298637765fs"></ZoomEndTime>
-      <Cursor1Time time="386028000000fs"></Cursor1Time>
+      <ZoomStartTime time="399561060273fs"></ZoomStartTime>
+      <ZoomEndTime time="403576663696fs"></ZoomEndTime>
+      <Cursor1Time time="401180000000fs"></Cursor1Time>
    </zoom_setting>
-   <WVObjectSize size="60" />
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_o">
-      <obj_property name="ElementShortName">dac_o[13:0]</obj_property>
-      <obj_property name="ObjectShortName">dac_o[13:0]</obj_property>
+   <WVObjectSize size="2" />
+   <wvobject type="group" fp_name="group194">
+      <obj_property name="label">Top level</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/dac_a_o">
+         <obj_property name="ElementShortName">dac_a_o[13:0]</obj_property>
+         <obj_property name="ObjectShortName">dac_a_o[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/dac_b_o">
+         <obj_property name="ElementShortName">dac_b_o[13:0]</obj_property>
+         <obj_property name="ObjectShortName">dac_b_o[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/dac_clk_i">
+         <obj_property name="ElementShortName">dac_clk_i</obj_property>
+         <obj_property name="ObjectShortName">dac_clk_i</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/dac_rstn_i">
+         <obj_property name="ElementShortName">dac_rstn_i</obj_property>
+         <obj_property name="ObjectShortName">dac_rstn_i</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/trig_a_i">
+         <obj_property name="ElementShortName">trig_a_i</obj_property>
+         <obj_property name="ObjectShortName">trig_a_i</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/trig_b_i">
+         <obj_property name="ElementShortName">trig_b_i</obj_property>
+         <obj_property name="ObjectShortName">trig_b_i</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/trig_out_o">
+         <obj_property name="ElementShortName">trig_out_o</obj_property>
+         <obj_property name="ObjectShortName">trig_out_o</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/sys_addr">
+         <obj_property name="ElementShortName">sys_addr[31:0]</obj_property>
+         <obj_property name="ObjectShortName">sys_addr[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/sys_wdata">
+         <obj_property name="ElementShortName">sys_wdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">sys_wdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/sys_sel">
+         <obj_property name="ElementShortName">sys_sel[3:0]</obj_property>
+         <obj_property name="ObjectShortName">sys_sel[3:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/sys_wen">
+         <obj_property name="ElementShortName">sys_wen</obj_property>
+         <obj_property name="ObjectShortName">sys_wen</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/sys_ren">
+         <obj_property name="ElementShortName">sys_ren</obj_property>
+         <obj_property name="ObjectShortName">sys_ren</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/sys_rdata">
+         <obj_property name="ElementShortName">sys_rdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">sys_rdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/sys_err">
+         <obj_property name="ElementShortName">sys_err</obj_property>
+         <obj_property name="ObjectShortName">sys_err</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/sys_ack">
+         <obj_property name="ElementShortName">sys_ack</obj_property>
+         <obj_property name="ObjectShortName">sys_ack</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/debug_bus">
+         <obj_property name="ElementShortName">debug_bus[15:0]</obj_property>
+         <obj_property name="ObjectShortName">debug_bus[15:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_amp_0">
+         <obj_property name="ElementShortName">set_a_amp_0[13:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_amp_0[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_dc_0">
+         <obj_property name="ElementShortName">set_a_dc_0[13:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_dc_0[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_end_0">
+         <obj_property name="ElementShortName">set_a_end_0[31:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_end_0[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_step_0">
+         <obj_property name="ElementShortName">set_a_step_0[31:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_step_0[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_start_0">
+         <obj_property name="ElementShortName">set_a_start_0[31:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_start_0[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_ncyc_0">
+         <obj_property name="ElementShortName">set_a_ncyc_0[15:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_ncyc_0[15:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_amp_1">
+         <obj_property name="ElementShortName">set_a_amp_1[13:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_amp_1[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_dc_1">
+         <obj_property name="ElementShortName">set_a_dc_1[13:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_dc_1[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_end_1">
+         <obj_property name="ElementShortName">set_a_end_1[31:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_end_1[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_step_1">
+         <obj_property name="ElementShortName">set_a_step_1[31:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_step_1[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_start_1">
+         <obj_property name="ElementShortName">set_a_start_1[31:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_start_1[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_ncyc_1">
+         <obj_property name="ElementShortName">set_a_ncyc_1[15:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_ncyc_1[15:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_amp_2">
+         <obj_property name="ElementShortName">set_a_amp_2[13:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_amp_2[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_dc_2">
+         <obj_property name="ElementShortName">set_a_dc_2[13:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_dc_2[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_end_2">
+         <obj_property name="ElementShortName">set_a_end_2[31:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_end_2[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_step_2">
+         <obj_property name="ElementShortName">set_a_step_2[31:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_step_2[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_start_2">
+         <obj_property name="ElementShortName">set_a_start_2[31:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_start_2[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_ncyc_2">
+         <obj_property name="ElementShortName">set_a_ncyc_2[15:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_ncyc_2[15:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_amp_3">
+         <obj_property name="ElementShortName">set_a_amp_3[13:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_amp_3[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_dc_3">
+         <obj_property name="ElementShortName">set_a_dc_3[13:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_dc_3[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_end_3">
+         <obj_property name="ElementShortName">set_a_end_3[31:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_end_3[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_step_3">
+         <obj_property name="ElementShortName">set_a_step_3[31:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_step_3[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_start_3">
+         <obj_property name="ElementShortName">set_a_start_3[31:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_start_3[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_ncyc_3">
+         <obj_property name="ElementShortName">set_a_ncyc_3[15:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_ncyc_3[15:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_rst">
+         <obj_property name="ElementShortName">set_a_rst</obj_property>
+         <obj_property name="ObjectShortName">set_a_rst</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_b_rst">
+         <obj_property name="ElementShortName">set_b_rst</obj_property>
+         <obj_property name="ObjectShortName">set_b_rst</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_zero">
+         <obj_property name="ElementShortName">set_a_zero</obj_property>
+         <obj_property name="ObjectShortName">set_a_zero</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_b_zero">
+         <obj_property name="ElementShortName">set_b_zero</obj_property>
+         <obj_property name="ObjectShortName">set_b_zero</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/buf_a_we">
+         <obj_property name="ElementShortName">buf_a_we</obj_property>
+         <obj_property name="ObjectShortName">buf_a_we</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/buf_b_we">
+         <obj_property name="ElementShortName">buf_b_we</obj_property>
+         <obj_property name="ObjectShortName">buf_b_we</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/buf_a_resvd">
+         <obj_property name="ElementShortName">buf_a_resvd</obj_property>
+         <obj_property name="ObjectShortName">buf_a_resvd</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/buf_b_resvd">
+         <obj_property name="ElementShortName">buf_b_resvd</obj_property>
+         <obj_property name="ObjectShortName">buf_b_resvd</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/buf_a_addr">
+         <obj_property name="ElementShortName">buf_a_addr[15:0]</obj_property>
+         <obj_property name="ObjectShortName">buf_a_addr[15:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/buf_b_addr">
+         <obj_property name="ElementShortName">buf_b_addr[15:0]</obj_property>
+         <obj_property name="ObjectShortName">buf_b_addr[15:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/buf_a_rdata">
+         <obj_property name="ElementShortName">buf_a_rdata[13:0]</obj_property>
+         <obj_property name="ObjectShortName">buf_a_rdata[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/buf_b_rdata">
+         <obj_property name="ElementShortName">buf_b_rdata[13:0]</obj_property>
+         <obj_property name="ObjectShortName">buf_b_rdata[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/buf_a_rpnt">
+         <obj_property name="ElementShortName">buf_a_rpnt[15:0]</obj_property>
+         <obj_property name="ObjectShortName">buf_a_rpnt[15:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/buf_b_rpnt">
+         <obj_property name="ElementShortName">buf_b_rpnt[15:0]</obj_property>
+         <obj_property name="ObjectShortName">buf_b_rpnt[15:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/buf_a_rpnt_rd">
+         <obj_property name="ElementShortName">buf_a_rpnt_rd[31:0]</obj_property>
+         <obj_property name="ObjectShortName">buf_a_rpnt_rd[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/buf_b_rpnt_rd">
+         <obj_property name="ElementShortName">buf_b_rpnt_rd[31:0]</obj_property>
+         <obj_property name="ObjectShortName">buf_b_rpnt_rd[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/trig_a_sw">
+         <obj_property name="ElementShortName">trig_a_sw</obj_property>
+         <obj_property name="ObjectShortName">trig_a_sw</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/trig_b_sw">
+         <obj_property name="ElementShortName">trig_b_sw</obj_property>
+         <obj_property name="ObjectShortName">trig_b_sw</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/trig_a_src">
+         <obj_property name="ElementShortName">trig_a_src[2:0]</obj_property>
+         <obj_property name="ObjectShortName">trig_a_src[2:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/trig_b_src">
+         <obj_property name="ElementShortName">trig_b_src[2:0]</obj_property>
+         <obj_property name="ObjectShortName">trig_b_src[2:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/trig_a_done">
+         <obj_property name="ElementShortName">trig_a_done</obj_property>
+         <obj_property name="ObjectShortName">trig_a_done</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/trig_b_done">
+         <obj_property name="ElementShortName">trig_b_done</obj_property>
+         <obj_property name="ObjectShortName">trig_b_done</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/trig_evt_ab">
+         <obj_property name="ElementShortName">trig_evt_ab</obj_property>
+         <obj_property name="ObjectShortName">trig_evt_ab</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/trig_evt">
+         <obj_property name="ElementShortName">trig_evt[2:0]</obj_property>
+         <obj_property name="ObjectShortName">trig_evt[2:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/ch_a_debug">
+         <obj_property name="ElementShortName">ch_a_debug[14:0]</obj_property>
+         <obj_property name="ObjectShortName">ch_a_debug[14:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/ch_b_debug">
+         <obj_property name="ElementShortName">ch_b_debug[14:0]</obj_property>
+         <obj_property name="ObjectShortName">ch_b_debug[14:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_amp">
+         <obj_property name="ElementShortName">set_a_amp[55:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_amp[55:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_b_amp">
+         <obj_property name="ElementShortName">set_b_amp[55:0]</obj_property>
+         <obj_property name="ObjectShortName">set_b_amp[55:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_dc">
+         <obj_property name="ElementShortName">set_a_dc[55:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_dc[55:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_b_dc">
+         <obj_property name="ElementShortName">set_b_dc[55:0]</obj_property>
+         <obj_property name="ObjectShortName">set_b_dc[55:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_end">
+         <obj_property name="ElementShortName">set_a_end[127:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_end[127:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_b_end">
+         <obj_property name="ElementShortName">set_b_end[127:0]</obj_property>
+         <obj_property name="ObjectShortName">set_b_end[127:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_step">
+         <obj_property name="ElementShortName">set_a_step[127:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_step[127:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_b_step">
+         <obj_property name="ElementShortName">set_b_step[127:0]</obj_property>
+         <obj_property name="ObjectShortName">set_b_step[127:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_start">
+         <obj_property name="ElementShortName">set_a_start[127:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_start[127:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_b_start">
+         <obj_property name="ElementShortName">set_b_start[127:0]</obj_property>
+         <obj_property name="ObjectShortName">set_b_start[127:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_ncyc">
+         <obj_property name="ElementShortName">set_a_ncyc[63:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_ncyc[63:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_b_ncyc">
+         <obj_property name="ElementShortName">set_b_ncyc[63:0]</obj_property>
+         <obj_property name="ObjectShortName">set_b_ncyc[63:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_rnum">
+         <obj_property name="ElementShortName">set_a_rnum[63:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_rnum[63:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_b_rnum">
+         <obj_property name="ElementShortName">set_b_rnum[63:0]</obj_property>
+         <obj_property name="ObjectShortName">set_b_rnum[63:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_a_rdly">
+         <obj_property name="ElementShortName">set_a_rdly[127:0]</obj_property>
+         <obj_property name="ObjectShortName">set_a_rdly[127:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/set_b_rdly">
+         <obj_property name="ElementShortName">set_b_rdly[127:0]</obj_property>
+         <obj_property name="ObjectShortName">set_b_rdly[127:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/cyc_b_done">
+         <obj_property name="ElementShortName">cyc_b_done</obj_property>
+         <obj_property name="ObjectShortName">cyc_b_done</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/cyc_a_done">
+         <obj_property name="ElementShortName">cyc_a_done</obj_property>
+         <obj_property name="ObjectShortName">cyc_a_done</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/buf_b_done">
+         <obj_property name="ElementShortName">buf_b_done</obj_property>
+         <obj_property name="ObjectShortName">buf_b_done</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/buf_a_done">
+         <obj_property name="ElementShortName">buf_a_done</obj_property>
+         <obj_property name="ObjectShortName">buf_a_done</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/ren_dly">
+         <obj_property name="ElementShortName">ren_dly[2:0]</obj_property>
+         <obj_property name="ObjectShortName">ren_dly[2:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/ack_dly">
+         <obj_property name="ElementShortName">ack_dly</obj_property>
+         <obj_property name="ObjectShortName">ack_dly</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/r0_rd">
+         <obj_property name="ElementShortName">r0_rd[31:0]</obj_property>
+         <obj_property name="ObjectShortName">r0_rd[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/sys_en">
+         <obj_property name="ElementShortName">sys_en</obj_property>
+         <obj_property name="ObjectShortName">sys_en</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/RSZ">
+         <obj_property name="ElementShortName">RSZ[31:0]</obj_property>
+         <obj_property name="ObjectShortName">RSZ[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/N_BUF">
+         <obj_property name="ElementShortName">N_BUF[31:0]</obj_property>
+         <obj_property name="ObjectShortName">N_BUF[31:0]</obj_property>
+      </wvobject>
    </wvobject>
-   <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_clk_i">
-      <obj_property name="ElementShortName">dac_clk_i</obj_property>
-      <obj_property name="ObjectShortName">dac_clk_i</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_rstn_i">
-      <obj_property name="ElementShortName">dac_rstn_i</obj_property>
-      <obj_property name="ObjectShortName">dac_rstn_i</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /trig_sw_i">
-      <obj_property name="ElementShortName">trig_sw_i</obj_property>
-      <obj_property name="ObjectShortName">trig_sw_i</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /trig_ext_i">
-      <obj_property name="ElementShortName">trig_ext_i</obj_property>
-      <obj_property name="ObjectShortName">trig_ext_i</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /trig_src_i">
-      <obj_property name="ElementShortName">trig_src_i[2:0]</obj_property>
-      <obj_property name="ObjectShortName">trig_src_i[2:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /trig_evt_i">
-      <obj_property name="ElementShortName">trig_evt_i[2:0]</obj_property>
-      <obj_property name="ObjectShortName">trig_evt_i[2:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /buf_done_o">
-      <obj_property name="ElementShortName">buf_done_o</obj_property>
-      <obj_property name="ObjectShortName">buf_done_o</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /cyc_done_o">
-      <obj_property name="ElementShortName">cyc_done_o</obj_property>
-      <obj_property name="ObjectShortName">cyc_done_o</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /buf_we_i">
-      <obj_property name="ElementShortName">buf_we_i</obj_property>
-      <obj_property name="ObjectShortName">buf_we_i</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /buf_addr_i">
-      <obj_property name="ElementShortName">buf_addr_i[15:0]</obj_property>
-      <obj_property name="ObjectShortName">buf_addr_i[15:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /buf_wdata_i">
-      <obj_property name="ElementShortName">buf_wdata_i[13:0]</obj_property>
-      <obj_property name="ObjectShortName">buf_wdata_i[13:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /buf_rdata_o">
-      <obj_property name="ElementShortName">buf_rdata_o[13:0]</obj_property>
-      <obj_property name="ObjectShortName">buf_rdata_o[13:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /buf_rpnt_o">
-      <obj_property name="ElementShortName">buf_rpnt_o[15:0]</obj_property>
-      <obj_property name="ObjectShortName">buf_rpnt_o[15:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_amp_all_i">
-      <obj_property name="ElementShortName">set_amp_all_i[27:0]</obj_property>
-      <obj_property name="ObjectShortName">set_amp_all_i[27:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_dc_all_i">
-      <obj_property name="ElementShortName">set_dc_all_i[27:0]</obj_property>
-      <obj_property name="ObjectShortName">set_dc_all_i[27:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_end_all_i">
-      <obj_property name="ElementShortName">set_end_all_i[63:0]</obj_property>
-      <obj_property name="ObjectShortName">set_end_all_i[63:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_step_all_i">
-      <obj_property name="ElementShortName">set_step_all_i[63:0]</obj_property>
-      <obj_property name="ObjectShortName">set_step_all_i[63:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_start_all_i">
-      <obj_property name="ElementShortName">set_start_all_i[63:0]</obj_property>
-      <obj_property name="ObjectShortName">set_start_all_i[63:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_ncyc_all_i">
-      <obj_property name="ElementShortName">set_ncyc_all_i[31:0]</obj_property>
-      <obj_property name="ObjectShortName">set_ncyc_all_i[31:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_rnum_all_i">
-      <obj_property name="ElementShortName">set_rnum_all_i[31:0]</obj_property>
-      <obj_property name="ObjectShortName">set_rnum_all_i[31:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_rdly_all_i">
-      <obj_property name="ElementShortName">set_rdly_all_i[63:0]</obj_property>
-      <obj_property name="ObjectShortName">set_rdly_all_i[63:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_rst_i">
-      <obj_property name="ElementShortName">set_rst_i</obj_property>
-      <obj_property name="ObjectShortName">set_rst_i</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_zero_i">
-      <obj_property name="ElementShortName">set_zero_i</obj_property>
-      <obj_property name="ObjectShortName">set_zero_i</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /debug_bus">
-      <obj_property name="ElementShortName">debug_bus[14:0]</obj_property>
-      <obj_property name="ObjectShortName">debug_bus[14:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_rd">
-      <obj_property name="ElementShortName">dac_rd[13:0]</obj_property>
-      <obj_property name="ObjectShortName">dac_rd[13:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_rdat">
-      <obj_property name="ElementShortName">dac_rdat[13:0]</obj_property>
-      <obj_property name="ObjectShortName">dac_rdat[13:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_rp">
-      <obj_property name="ElementShortName">dac_rp[15:0]</obj_property>
-      <obj_property name="ObjectShortName">dac_rp[15:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_ptr">
-      <obj_property name="ElementShortName">dac_ptr[31:0]</obj_property>
-      <obj_property name="ObjectShortName">dac_ptr[31:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_mult">
-      <obj_property name="ElementShortName">dac_mult[27:0]</obj_property>
-      <obj_property name="ObjectShortName">dac_mult[27:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_sum">
-      <obj_property name="ElementShortName">dac_sum[14:0]</obj_property>
-      <obj_property name="ObjectShortName">dac_sum[14:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_amp_i">
-      <obj_property name="ElementShortName">set_amp_i[13:0]</obj_property>
-      <obj_property name="ObjectShortName">set_amp_i[13:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_dc_i">
-      <obj_property name="ElementShortName">set_dc_i[13:0]</obj_property>
-      <obj_property name="ObjectShortName">set_dc_i[13:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_end_i">
-      <obj_property name="ElementShortName">set_end_i[31:0]</obj_property>
-      <obj_property name="ObjectShortName">set_end_i[31:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_step_i">
-      <obj_property name="ElementShortName">set_step_i[31:0]</obj_property>
-      <obj_property name="ObjectShortName">set_step_i[31:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_start_i">
-      <obj_property name="ElementShortName">set_start_i[31:0]</obj_property>
-      <obj_property name="ObjectShortName">set_start_i[31:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_ncyc_i">
-      <obj_property name="ElementShortName">set_ncyc_i[15:0]</obj_property>
-      <obj_property name="ObjectShortName">set_ncyc_i[15:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_rnum_i">
-      <obj_property name="ElementShortName">set_rnum_i[15:0]</obj_property>
-      <obj_property name="ObjectShortName">set_rnum_i[15:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_rdly_i">
-      <obj_property name="ElementShortName">set_rdly_i[31:0]</obj_property>
-      <obj_property name="ObjectShortName">set_rdly_i[31:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /cyc_cnt">
-      <obj_property name="ElementShortName">cyc_cnt[15:0]</obj_property>
-      <obj_property name="ObjectShortName">cyc_cnt[15:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /trig_in_latch">
-      <obj_property name="ElementShortName">trig_in_latch</obj_property>
-      <obj_property name="ObjectShortName">trig_in_latch</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /current_buf">
-      <obj_property name="ElementShortName">current_buf</obj_property>
-      <obj_property name="ObjectShortName">current_buf</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /cyc_done">
-      <obj_property name="ElementShortName">cyc_done</obj_property>
-      <obj_property name="ObjectShortName">cyc_done</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /buf_done">
-      <obj_property name="ElementShortName">buf_done</obj_property>
-      <obj_property name="ObjectShortName">buf_done</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /asg_state">
-      <obj_property name="ElementShortName">asg_state[2:0]</obj_property>
-      <obj_property name="ObjectShortName">asg_state[2:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /next_asg_state">
-      <obj_property name="ElementShortName">next_asg_state[2:0]</obj_property>
-      <obj_property name="ObjectShortName">next_asg_state[2:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /trig_in">
-      <obj_property name="ElementShortName">trig_in</obj_property>
-      <obj_property name="ObjectShortName">trig_in</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /ext_trig_p">
-      <obj_property name="ElementShortName">ext_trig_p</obj_property>
-      <obj_property name="ObjectShortName">ext_trig_p</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /ext_trig_n">
-      <obj_property name="ElementShortName">ext_trig_n</obj_property>
-      <obj_property name="ObjectShortName">ext_trig_n</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /ext_trig_in">
-      <obj_property name="ElementShortName">ext_trig_in[2:0]</obj_property>
-      <obj_property name="ObjectShortName">ext_trig_in[2:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /ext_trig_dp">
-      <obj_property name="ElementShortName">ext_trig_dp[1:0]</obj_property>
-      <obj_property name="ObjectShortName">ext_trig_dp[1:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /ext_trig_dn">
-      <obj_property name="ElementShortName">ext_trig_dn[1:0]</obj_property>
-      <obj_property name="ObjectShortName">ext_trig_dn[1:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /ext_trig_debp">
-      <obj_property name="ElementShortName">ext_trig_debp[19:0]</obj_property>
-      <obj_property name="ObjectShortName">ext_trig_debp[19:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /ext_trig_debn">
-      <obj_property name="ElementShortName">ext_trig_debn[19:0]</obj_property>
-      <obj_property name="ObjectShortName">ext_trig_debn[19:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /RSZ">
-      <obj_property name="ElementShortName">RSZ[31:0]</obj_property>
-      <obj_property name="ObjectShortName">RSZ[31:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /N_BUF">
-      <obj_property name="ElementShortName">N_BUF[31:0]</obj_property>
-      <obj_property name="ObjectShortName">N_BUF[31:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /SM_IDLE">
-      <obj_property name="ElementShortName">SM_IDLE[31:0]</obj_property>
-      <obj_property name="ObjectShortName">SM_IDLE[31:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /SM_START_PTR">
-      <obj_property name="ElementShortName">SM_START_PTR[31:0]</obj_property>
-      <obj_property name="ObjectShortName">SM_START_PTR[31:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /SM_DRIVE_DAC">
-      <obj_property name="ElementShortName">SM_DRIVE_DAC[31:0]</obj_property>
-      <obj_property name="ObjectShortName">SM_DRIVE_DAC[31:0]</obj_property>
-   </wvobject>
-   <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /SM_START_NEXT_BUF">
-      <obj_property name="ElementShortName">SM_START_NEXT_BUF[31:0]</obj_property>
-      <obj_property name="ObjectShortName">SM_START_NEXT_BUF[31:0]</obj_property>
+   <wvobject type="group" fp_name="group259">
+      <obj_property name="label">Channel A</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_o">
+         <obj_property name="ElementShortName">dac_o[13:0]</obj_property>
+         <obj_property name="ObjectShortName">dac_o[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /trig_sw_i">
+         <obj_property name="ElementShortName">trig_sw_i</obj_property>
+         <obj_property name="ObjectShortName">trig_sw_i</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /buf_done_o">
+         <obj_property name="ElementShortName">buf_done_o</obj_property>
+         <obj_property name="ObjectShortName">buf_done_o</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /cyc_done_o">
+         <obj_property name="ElementShortName">cyc_done_o</obj_property>
+         <obj_property name="ObjectShortName">cyc_done_o</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /buf_we_i">
+         <obj_property name="ElementShortName">buf_we_i</obj_property>
+         <obj_property name="ObjectShortName">buf_we_i</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /buf_addr_i">
+         <obj_property name="ElementShortName">buf_addr_i[15:0]</obj_property>
+         <obj_property name="ObjectShortName">buf_addr_i[15:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /buf_wdata_i">
+         <obj_property name="ElementShortName">buf_wdata_i[13:0]</obj_property>
+         <obj_property name="ObjectShortName">buf_wdata_i[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /buf_rdata_o">
+         <obj_property name="ElementShortName">buf_rdata_o[13:0]</obj_property>
+         <obj_property name="ObjectShortName">buf_rdata_o[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /buf_rpnt_o">
+         <obj_property name="ElementShortName">buf_rpnt_o[15:0]</obj_property>
+         <obj_property name="ObjectShortName">buf_rpnt_o[15:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_rd">
+         <obj_property name="ElementShortName">dac_rd[13:0]</obj_property>
+         <obj_property name="ObjectShortName">dac_rd[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_rdat">
+         <obj_property name="ElementShortName">dac_rdat[13:0]</obj_property>
+         <obj_property name="ObjectShortName">dac_rdat[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_rp">
+         <obj_property name="ElementShortName">dac_rp[15:0]</obj_property>
+         <obj_property name="ObjectShortName">dac_rp[15:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_ptr">
+         <obj_property name="ElementShortName">dac_ptr[31:0]</obj_property>
+         <obj_property name="ObjectShortName">dac_ptr[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_mult">
+         <obj_property name="ElementShortName">dac_mult[27:0]</obj_property>
+         <obj_property name="ObjectShortName">dac_mult[27:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_sum">
+         <obj_property name="ElementShortName">dac_sum[14:0]</obj_property>
+         <obj_property name="ObjectShortName">dac_sum[14:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_amp_i">
+         <obj_property name="ElementShortName">set_amp_i[13:0]</obj_property>
+         <obj_property name="ObjectShortName">set_amp_i[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_dc_i">
+         <obj_property name="ElementShortName">set_dc_i[13:0]</obj_property>
+         <obj_property name="ObjectShortName">set_dc_i[13:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_end_i">
+         <obj_property name="ElementShortName">set_end_i[31:0]</obj_property>
+         <obj_property name="ObjectShortName">set_end_i[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_step_i">
+         <obj_property name="ElementShortName">set_step_i[31:0]</obj_property>
+         <obj_property name="ObjectShortName">set_step_i[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_start_i">
+         <obj_property name="ElementShortName">set_start_i[31:0]</obj_property>
+         <obj_property name="ObjectShortName">set_start_i[31:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /set_ncyc_i">
+         <obj_property name="ElementShortName">set_ncyc_i[15:0]</obj_property>
+         <obj_property name="ObjectShortName">set_ncyc_i[15:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /cyc_cnt">
+         <obj_property name="ElementShortName">cyc_cnt[15:0]</obj_property>
+         <obj_property name="ObjectShortName">cyc_cnt[15:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /trig_in_latch">
+         <obj_property name="ElementShortName">trig_in_latch</obj_property>
+         <obj_property name="ObjectShortName">trig_in_latch</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /current_buf">
+         <obj_property name="ElementShortName">current_buf[1:0]</obj_property>
+         <obj_property name="ObjectShortName">current_buf[1:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /cyc_done">
+         <obj_property name="ElementShortName">cyc_done</obj_property>
+         <obj_property name="ObjectShortName">cyc_done</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /buf_done">
+         <obj_property name="ElementShortName">buf_done</obj_property>
+         <obj_property name="ObjectShortName">buf_done</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /asg_state">
+         <obj_property name="ElementShortName">asg_state[2:0]</obj_property>
+         <obj_property name="ObjectShortName">asg_state[2:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /next_asg_state">
+         <obj_property name="ElementShortName">next_asg_state[2:0]</obj_property>
+         <obj_property name="ObjectShortName">next_asg_state[2:0]</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /trig_in">
+         <obj_property name="ElementShortName">trig_in</obj_property>
+         <obj_property name="ObjectShortName">trig_in</obj_property>
+      </wvobject>
    </wvobject>
 </wave_config>

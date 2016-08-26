@@ -115,20 +115,6 @@ initial begin
   bus.write(32'h20018,-32'd2000  );  // write table
   bus.write(32'h2001c, 32'd250   );  // write table
 
-  // CH1 DAC data
-  for (int k=0; k<400; k++) begin
-    bus.write(32'h40000 + (k*4), k+3);  // write table
-  end
-  for (int k=0; k<400; k++) begin
-    bus.write(32'h50000 + (k*4), k+3);  // write table
-  end
-  for (int k=0; k<400; k++) begin
-    bus.write(32'h60000 + (k*4), k+3);  // write table
-  end
-  for (int k=0; k<400; k++) begin
-    bus.write(32'h70000 + (k*4), k+3);  // write table
-  end
-
   // CH0 DAC settings
   bus.write(32'h00004,{1'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
   bus.write(32'h00008,{1'h0, 15'h1f, 16'h0}          );  // table size
@@ -139,30 +125,44 @@ initial begin
   bus.write(32'h00020,{32'd0}                          );  // number of 1us delay between repetitions
 
   bus.write(32'h00054,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
-  bus.write(32'h00058,{1'h0, 15'h21, 16'h0}          );  // table size
-  bus.write(32'h0005C,{1'h0, 15'h4000, 16'h0}             );  // reset offset
+  bus.write(32'h00058,{1'h0, 15'h131, 16'h0}          );  // table size
+  bus.write(32'h0005C,{1'h0, 15'h100, 16'h0}             );  // reset offset
   bus.write(32'h00060,{1'h0, 15'h1, 16'h0}             );  // table step
   bus.write(32'h00068,{16'h0, 16'd7}                   );  // number of cycles
   bus.write(32'h0006C,{16'h0, 16'd0}                   );  // number of repetitions
   bus.write(32'h00070,{32'd0}                          );  // number of 1us delay between repetitions
 
   bus.write(32'h00074,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
-  bus.write(32'h00078,{1'h0, 15'h17, 16'h0}          );  // table size
-  bus.write(32'h0007C,{1'h0, 15'h8000, 16'h0}             );  // reset offset
-  bus.write(32'h00080,{1'h0, 15'h22, 16'h0}             );  // table step
-  bus.write(32'h00088,{16'h0, 16'd7}                   );  // number of cycles
+  bus.write(32'h00078,{1'h0, 15'h20f, 16'h0}          );  // table size
+  bus.write(32'h0007C,{1'h0, 15'h200, 16'h0}             );  // reset offset
+  bus.write(32'h00080,{1'h0, 15'h2, 16'h0}             );  // table step
+  bus.write(32'h00088,{16'h0, 16'd4}                   );  // number of cycles
   bus.write(32'h0008C,{16'h0, 16'd0}                   );  // number of repetitions
   bus.write(32'h00090,{32'd0}                          );  // number of 1us delay between repetitions
   
-  bus.write(32'h000A4,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
-  bus.write(32'h000A8,{1'h0, 15'h13, 16'h0}          );  // table size
-  bus.write(32'h000AC,{1'h0, 15'hC000, 16'h0}             );  // reset offset
-  bus.write(32'h000B0,{1'h0, 15'h1, 16'h0}             );  // table step
-  bus.write(32'h000B8,{16'h0, 16'd7}                   );  // number of cycles
-  bus.write(32'h000BC,{16'h0, 16'd0}                   );  // number of repetitions
-  bus.write(32'h000C0,{32'd0}                          );  // number of 1us delay between repetitions
+  bus.write(32'h00094,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
+  bus.write(32'h00098,{1'h0, 15'h323, 16'h0}          );  // table size
+  bus.write(32'h0009C,{1'h0, 15'h300, 16'h0}             );  // reset offset
+  bus.write(32'h000A0,{1'h0, 15'h1, 16'h0}             );  // table step
+  bus.write(32'h000A8,{16'h0, 16'd8}                   );  // number of cycles
+  bus.write(32'h000AC,{16'h0, 16'd0}                   );  // number of repetitions
+  bus.write(32'h000B0,{32'd0}                          );  // number of 1us delay between repetitions
   
   bus.write(32'h00044,{32'd2}                          );  // trigger output conditions
+
+  // CH1 DAC data
+  for (int k=0; k<1025; k++) begin
+    bus.write(32'h40000 + (k*4), k+3);  // write table
+  end
+  for (int k=0; k<40; k++) begin
+    bus.write(32'h50000 + (k*4), k+3);  // write table
+  end
+  for (int k=0; k<40; k++) begin
+    bus.write(32'h60000 + (k*4), k+3);  // write table
+  end
+  for (int k=0; k<40; k++) begin
+    bus.write(32'h70000 + (k*4), k+3);  // write table
+  end
 
   ch0_set = {1'b0 ,1'b0, 1'b0, 1'b0, 1'b0,    1'b0, 3'h1} ;  // set_rgate, set_zero, set_rst, set_once(NA), set_wrap, 1'b0, trig_src
 
