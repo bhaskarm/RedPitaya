@@ -50,4 +50,4 @@ compile: $(LIB) $(SIP) $(RTL) $(TBN)
 run_sim: $(TGT)
 	xsim tb_sim -gui -wdb asg.wdb
 clean:
-	rm -rf work *.log *.jou *.pb xsim* *.wdb *.str
+	rm -rf work *.log *.jou *.pb xsim* *.wdb *.str *.vcd

@@ -10,8 +10,8 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="399561060273fs"></ZoomStartTime>
-      <ZoomEndTime time="403576663696fs"></ZoomEndTime>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="4015603424fs"></ZoomEndTime>
       <Cursor1Time time="401180000000fs"></Cursor1Time>
    </zoom_setting>
    <WVObjectSize size="2" />
