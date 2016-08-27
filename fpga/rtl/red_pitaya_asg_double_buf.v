@@ -364,6 +364,33 @@ end else begin
       if (sys_addr[19:0]==20'hAC)  set_a_rnum_3 <= sys_wdata[  16-1: 0] ;
       if (sys_addr[19:0]==20'hB0)  set_a_rdly_3 <= sys_wdata[  32-1: 0] ;
 
+      if (sys_addr[19:0]==20'hB4)  set_b_amp_1  <= sys_wdata[  0+13: 0] ;
+      if (sys_addr[19:0]==20'hB4)  set_b_dc_1   <= sys_wdata[ 16+13:16] ;
+      if (sys_addr[19:0]==20'hB8)  set_b_end_1 <= sys_wdata[RSZ+15: 0] ;
+      if (sys_addr[19:0]==20'hBC)  set_b_start_1  <= sys_wdata[RSZ+15: 0] ;
+      if (sys_addr[19:0]==20'hC0)  set_b_step_1 <= sys_wdata[RSZ+15: 0] ;
+      if (sys_addr[19:0]==20'hC8)  set_b_ncyc_1 <= sys_wdata[  16-1: 0] ;
+      if (sys_addr[19:0]==20'hCC)  set_b_rnum_1 <= sys_wdata[  16-1: 0] ;
+      if (sys_addr[19:0]==20'hD0)  set_b_rdly_1 <= sys_wdata[  32-1: 0] ;
+
+      if (sys_addr[19:0]==20'hD4)  set_b_amp_2  <= sys_wdata[  0+13: 0] ;
+      if (sys_addr[19:0]==20'hD4)  set_b_dc_2   <= sys_wdata[ 16+13:16] ;
+      if (sys_addr[19:0]==20'hD8)  set_b_end_2 <= sys_wdata[RSZ+15: 0] ;
+      if (sys_addr[19:0]==20'hDC)  set_b_start_2  <= sys_wdata[RSZ+15: 0] ;
+      if (sys_addr[19:0]==20'hE0)  set_b_step_2 <= sys_wdata[RSZ+15: 0] ;
+      if (sys_addr[19:0]==20'hE8)  set_b_ncyc_2 <= sys_wdata[  16-1: 0] ;
+      if (sys_addr[19:0]==20'hEC)  set_b_rnum_2 <= sys_wdata[  16-1: 0] ;
+      if (sys_addr[19:0]==20'hF0)  set_b_rdly_2 <= sys_wdata[  32-1: 0] ;
+
+      if (sys_addr[19:0]==20'hF4)  set_b_amp_3  <= sys_wdata[  0+13: 0] ;
+      if (sys_addr[19:0]==20'hF4)  set_b_dc_3   <= sys_wdata[ 16+13:16] ;
+      if (sys_addr[19:0]==20'hF8)  set_b_end_3 <= sys_wdata[RSZ+15: 0] ;
+      if (sys_addr[19:0]==20'hFC)  set_b_start_3  <= sys_wdata[RSZ+15: 0] ;
+      if (sys_addr[19:0]==20'h100)  set_b_step_3 <= sys_wdata[RSZ+15: 0] ;
+      if (sys_addr[19:0]==20'h108)  set_b_ncyc_3 <= sys_wdata[  16-1: 0] ;
+      if (sys_addr[19:0]==20'h10C)  set_b_rnum_3 <= sys_wdata[  16-1: 0] ;
+      if (sys_addr[19:0]==20'h110)  set_b_rdly_3 <= sys_wdata[  32-1: 0] ;
+
       // Extra registers to run double buffered waveform
    end
 
@@ -439,6 +466,34 @@ end else begin
      20'h000A8 : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_a_ncyc_3}         ; end
      20'h000AC : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_a_rnum_3}         ; end
      20'h000B0 : begin sys_ack <= sys_en;          sys_rdata <= set_a_rdly_3                         ; end
+
+     20'h000B4 : begin sys_ack <= sys_en;          sys_rdata <= {2'h0, set_b_dc_1, 2'h0, set_b_amp_1}  ; end
+     20'h000B8 : begin sys_ack <= sys_en;          sys_rdata <= {{32-RSZ-16{1'b0}},set_b_end_1}     ; end
+     20'h000BC : begin sys_ack <= sys_en;          sys_rdata <= {{32-RSZ-16{1'b0}},set_b_start_1}      ; end
+     20'h000C0 : begin sys_ack <= sys_en;          sys_rdata <= {{32-RSZ-16{1'b0}},set_b_step_1}     ; end
+     20'h000C4 : begin sys_ack <= sys_en;          sys_rdata <= buf_b_rpnt_rd                      ; end
+     20'h000C8 : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_b_ncyc_1}         ; end
+     20'h000CC : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_b_rnum_1}         ; end
+     20'h000D0 : begin sys_ack <= sys_en;          sys_rdata <= set_b_rdly_1                         ; end
+
+     20'h000D4 : begin sys_ack <= sys_en;          sys_rdata <= {2'h0, set_b_dc_2, 2'h0, set_b_amp_2}  ; end
+     20'h000D8 : begin sys_ack <= sys_en;          sys_rdata <= {{32-RSZ-16{1'b0}},set_b_end_2}     ; end
+     20'h000DC : begin sys_ack <= sys_en;          sys_rdata <= {{32-RSZ-16{1'b0}},set_b_start_2}      ; end
+     20'h000E0 : begin sys_ack <= sys_en;          sys_rdata <= {{32-RSZ-16{1'b0}},set_b_step_2}     ; end
+     20'h000E4 : begin sys_ack <= sys_en;          sys_rdata <= buf_b_rpnt_rd                      ; end
+     20'h000E8 : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_b_ncyc_2}         ; end
+     20'h000EC : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_b_rnum_2}         ; end
+     20'h000F0 : begin sys_ack <= sys_en;          sys_rdata <= set_b_rdly_2                         ; end
+
+     20'h000F4 : begin sys_ack <= sys_en;          sys_rdata <= {2'h0, set_b_dc_3, 2'h0, set_b_amp_3}  ; end
+     20'h000F8 : begin sys_ack <= sys_en;          sys_rdata <= {{32-RSZ-16{1'b0}},set_b_end_3}     ; end
+     20'h000FC : begin sys_ack <= sys_en;          sys_rdata <= {{32-RSZ-16{1'b0}},set_b_start_3}      ; end
+     20'h00100 : begin sys_ack <= sys_en;          sys_rdata <= {{32-RSZ-16{1'b0}},set_b_step_3}     ; end
+     20'h00104 : begin sys_ack <= sys_en;          sys_rdata <= buf_b_rpnt_rd                      ; end
+     20'h00108 : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_b_ncyc_3}         ; end
+     20'h0010C : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_b_rnum_3}         ; end
+     20'h00110 : begin sys_ack <= sys_en;          sys_rdata <= set_b_rdly_3                         ; end
+
      // Debug registers
      // The decode below needs to change every time RSZ changes
      20'h4zzzz : begin sys_ack <= ack_dly;         sys_rdata <= {{32-14{1'b0}},buf_a_rdata}        ; end

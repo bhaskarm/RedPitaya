@@ -23,6 +23,9 @@
 
 `timescale 1ns / 1ps
 
+`define CH_OFFSET_FIRST 32
+`define CH_OFFSET 96
+`define BUF_OFFSET 262144
 module red_pitaya_asg_double_buf_tb #(
   // time period
   realtime  TP = 8.0ns,  // 125MHz
@@ -97,87 +100,65 @@ initial begin
   repeat(10) @(posedge clk);
 
   // CH0 DAC settings
-  bus.write(32'h00004,{1'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
-  bus.write(32'h00008,{16'h3ffc, 16'h0}          );  // table size
-  bus.write(32'h0000C,{16'h0, 16'h0}             );  // reset offset
-  bus.write(32'h00010,{16'h34, 16'h0}             );  // table step
-  bus.write(32'h00018,{16'h0, 16'd1}                   );  // number of cycles
-  bus.write(32'h0001C,{16'h0, 16'd0}                   );  // number of repetitions
-  bus.write(32'h00020,{32'd0}                          );  // number of 1us delay between repetitions
+  bus.write(`CH_OFFSET_FIRST+32'h00004,{1'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
+  bus.write(`CH_OFFSET_FIRST+32'h00008,{16'h3ffc, 16'h0}          );  // table size
+  bus.write(`CH_OFFSET_FIRST+32'h0000C,{16'h0, 16'h0}             );  // reset offset
+  bus.write(`CH_OFFSET_FIRST+32'h00010,{16'h34, 16'h0}             );  // table step
+  bus.write(`CH_OFFSET_FIRST+32'h00018,{16'h0, 16'd1}                   );  // number of cycles
+  bus.write(`CH_OFFSET_FIRST+32'h0001C,{16'h0, 16'd0}                   );  // number of repetitions
+  bus.write(`CH_OFFSET_FIRST+32'h00020,{32'd0}                          );  // number of 1us delay between repetitions
 
-  bus.write(32'h00054,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
-  bus.write(32'h00058,{16'h7ffc, 16'h0}          );  // table size
-  bus.write(32'h0005C,{16'h4000, 16'h0}             );  // reset offset
-  bus.write(32'h00060,{16'h34, 16'h0}             );  // table step
-  bus.write(32'h00068,{16'h0, 16'd2}                   );  // number of cycles
-  bus.write(32'h0006C,{16'h0, 16'd0}                   );  // number of repetitions
-  bus.write(32'h00070,{32'd0}                          );  // number of 1us delay between repetitions
+  bus.write(`CH_OFFSET+32'h00054,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
+  bus.write(`CH_OFFSET+32'h00058,{16'h7ffc, 16'h0}          );  // table size
+  bus.write(`CH_OFFSET+32'h0005C,{16'h4000, 16'h0}             );  // reset offset
+  bus.write(`CH_OFFSET+32'h00060,{16'h34, 16'h0}             );  // table step
+  bus.write(`CH_OFFSET+32'h00068,{16'h0, 16'd2}                   );  // number of cycles
+  bus.write(`CH_OFFSET+32'h0006C,{16'h0, 16'd0}                   );  // number of repetitions
+  bus.write(`CH_OFFSET+32'h00070,{32'd0}                          );  // number of 1us delay between repetitions
 
-  bus.write(32'h00074,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
-  bus.write(32'h00078,{16'hbffc, 16'h0}          );  // table size
-  bus.write(32'h0007C,{16'h8000, 16'h0}             );  // reset offset
-  bus.write(32'h00080,{16'h34, 16'h0}             );  // table step
-  bus.write(32'h00088,{16'h0, 16'd3}                   );  // number of cycles
-  bus.write(32'h0008C,{16'h0, 16'd0}                   );  // number of repetitions
-  bus.write(32'h00090,{32'd0}                          );  // number of 1us delay between repetitions
+  bus.write(`CH_OFFSET+32'h00074,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
+  bus.write(`CH_OFFSET+32'h00078,{16'hbffc, 16'h0}          );  // table size
+  bus.write(`CH_OFFSET+32'h0007C,{16'h8000, 16'h0}             );  // reset offset
+  bus.write(`CH_OFFSET+32'h00080,{16'h34, 16'h0}             );  // table step
+  bus.write(`CH_OFFSET+32'h00088,{16'h0, 16'd3}                   );  // number of cycles
+  bus.write(`CH_OFFSET+32'h0008C,{16'h0, 16'd0}                   );  // number of repetitions
+  bus.write(`CH_OFFSET+32'h00090,{32'd0}                          );  // number of 1us delay between repetitions
   
-  bus.write(32'h00094,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
-  bus.write(32'h00098,{16'hfffc, 16'h0}          );  // table size
-  bus.write(32'h0009C,{16'hc000, 16'h0}             );  // reset offset
-  bus.write(32'h000A0,{16'h34, 16'h0}             );  // table step
-  bus.write(32'h000A8,{16'h0, 16'd4}                   );  // number of cycles
-  bus.write(32'h000AC,{16'h0, 16'd0}                   );  // number of repetitions
-  bus.write(32'h000B0,{32'd0}                          );  // number of 1us delay between repetitions
+  bus.write(`CH_OFFSET+32'h00094,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
+  bus.write(`CH_OFFSET+32'h00098,{16'hfffc, 16'h0}          );  // table size
+  bus.write(`CH_OFFSET+32'h0009C,{16'hc000, 16'h0}             );  // reset offset
+  bus.write(`CH_OFFSET+32'h000A0,{16'h34, 16'h0}             );  // table step
+  bus.write(`CH_OFFSET+32'h000A8,{16'h0, 16'd4}                   );  // number of cycles
+  bus.write(`CH_OFFSET+32'h000AC,{16'h0, 16'd0}                   );  // number of repetitions
+  bus.write(`CH_OFFSET+32'h000B0,{32'd0}                          );  // number of 1us delay between repetitions
   
   bus.write(32'h00044,{32'd2}                          );  // trigger output conditions
 
   // CH1 DAC data
   for (int k=0; k<65536/16; k++) begin
-    bus.write(32'h40000 + (k*4), k+3);  // write table
+    bus.write(`BUF_OFFSET+32'h40000 + (k*4), k+3);  // write table
   end
   for (int k=0; k<40; k++) begin
-    bus.write(32'h50000 + (k*4), k+3);  // write table
+    bus.write(`BUF_OFFSET+32'h50000 + (k*4), k+3);  // write table
   end
   for (int k=0; k<40; k++) begin
-    bus.write(32'h60000 + (k*4), k+3);  // write table
+    bus.write(`BUF_OFFSET+32'h60000 + (k*4), k+3);  // write table
   end
   for (int k=0; k<40; k++) begin
-    bus.write(32'h70000 + (k*4), k+3);  // write table
+    bus.write(`BUF_OFFSET+32'h70000 + (k*4), k+3);  // write table
   end
 
   ch0_set = {1'b0 ,1'b0, 1'b0, 1'b0, 1'b0,    1'b0, 3'h1} ;  // set_rgate, set_zero, set_rst, set_once(NA), set_wrap, 1'b0, trig_src
 
-  // CH1 DAC data
-  for (int k=0; k<8000; k++) begin
-    bus.write(32'h60000 + (k*4), k);  // write table
-  end
+  ch1_set = {1'b0, 1'b0, 1'b0, 1'b0, 1'b0,    1'b0, 3'h1} ;  // set_rgate, set_zero, set_rst, set_once(NA), set_wrap, 1'b0, trig_src
 
-  // CH1 DAC settings
-  bus.write(32'h00024,{2'h0, 14'd0, 2'h0, 14'h2000}    );  // DC offset, amplitude
-  bus.write(32'h00028,{2'h0, 14'd7999, 16'hffff}       );  // table size
-  bus.write(32'h0002C,{2'h0, 14'h5, 16'h0}             );  // reset offset
-  bus.write(32'h00030,{2'h0, 14'h9, 16'h0}             );  // table step
-  bus.write(32'h00038,{16'h0, 16'd0}                   );  // number of cycles
-  bus.write(32'h0003C,{16'h0, 16'd5}                   );  // number of repetitions
-  bus.write(32'h00040,{32'd10}                         );  // number of 1us delay between repetitions
 
-  ch1_set = {1'b0, 1'b0, 1'b0, 1'b1, 1'b0,    1'b0, 3'h1} ;  // set_rgate, set_zero, set_rst, set_once(NA), set_wrap, 1'b0, trig_src
-
-  for (int k=0; k<200; k++) begin
-    //bus.write(32'h00000,{8'h0, ch1_set,  8'h0, ch0_set}  ); // write configuration
-    //repeat(50) @(posedge clk);
-  end
-
+  bus.write(32'h00000,{8'h0, ch1_set,  8'h0, ch0_set}  ); // write configuration
   bus.write(32'h00000,{8'h0, ch1_set,  8'h0, ch0_set}  ); // write configuration
 
   repeat(2000) @(posedge clk);
-  //bus.write(32'h00000,{8'h0, ch1_set,  8'h0, ch0_set}  ); // write configuration
 
   repeat(2000) @(posedge clk);
-
-  ch1_set = {1'b0, 1'b0, 1'b1, 1'b1,    1'b0, 3'h1} ;  // set_a_zero, set_a_rst, set_a_once, set_a_wrap, 1'b0, trig_src
-
-  //bus.write(32'h00000,{7'h0, ch1_set,  7'h0, ch0_set}  ); // write configuration
 
   repeat(200) @(posedge clk);
 
