@@ -50,22 +50,21 @@ sudo ln -s /usr/bin/make /usr/bin/gmake
 2. Xilinx [Vivado 2015.4](http://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vivado-design-tools/2015-4.html) FPGA development tools. The SDK (bare metal toolchain) must also be installed, be careful during the install process to select it. Preferably use the default install location.
 Download the Xilinx.lic file and load it using the license manager
 ```bash
-sudo chown -R <username >~/.Xilinx
-Chmod 755 -R ~/.Xilinx
-Chgrp -R <username> ~/.Xilinx
+sudo chown -R <username> ~/.Xilinx
+chmod 755 -R ~/.Xilinx
+chgrp -R <username> ~/.Xilinx
 Copy Xilinx.lic to ~/.Xilinx/
 ```
 # Build process
 
 Go to your preferred development directory and clone the Red Pitaya repository from GitHub.
 ```bash
-git clone --branch adc_devel https://github.com/bhaskarm/RedPitaya.git
+git clone --branch analog_devel https://github.com/bhaskarm/RedPitaya.git
 cd RedPitaya
 ```
 
 An example script `settings.sh` is provided for setting all necessary environment variables. The script assumes some default tool install paths, so it might need editing if install paths other than the ones described above were used.
 ```bash
-source ~/xilinx.bashrc
 . settings.sh
 ```
 

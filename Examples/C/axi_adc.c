@@ -60,23 +60,19 @@
 
 
 /* configuration constants */
-#define SERVER_IP_ADDR          "192.168.1.1"
+#define SERVER_IP_ADDR          "192.168.2.101"
 #define SERVER_IP_PORT_A        5001
-#define SERVER_IP_PORT_B        5002
 #define ACQUISITION_LENGTH      200000          /* samples */
 #define PRE_TRIGGER_LENGTH      40000           /* samples */
-#define DECIMATION              DE_8            /* one of enum decimation */
-#define TRIGGER_MODE            TR_CH_A_RISING  /* one of enum trigger */
-#define TRIGGER_THRESHOLD       2048            /* ADC counts, 2048 ≃ +0.25V */
+#define DECIMATION              DE_1            /* one of enum decimation */
+#define TRIGGER_MODE            TR_MANUAL       /* one of enum trigger */
+#define TRIGGER_THRESHOLD       0               /* ADC counts, 2048 ≃ +0.25V */
 
 /* internal constants */
 #define READ_BLOCK_SIZE         16384
 #define SEND_BLOCK_SIZE         17752
-#define RAM_A_ADDRESS           0x1e000000UL
-#define RAM_A_SIZE              0x01000000UL
-#define RAM_B_ADDRESS           0x1f000000UL
-#define RAM_B_SIZE              0x01000000UL
-
+#define RAM_A_ADDRESS           0x08000000UL
+#define RAM_A_SIZE              0x0C000000UL
 
 /* data types */
 enum equalizer {
@@ -549,6 +545,7 @@ static void *send_worker(void *data)
 	} while (1);
 
 send_worker_exit:
+	printf("Send worker exiting...\n");
 	return NULL;
 }
 
