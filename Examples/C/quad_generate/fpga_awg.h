@@ -167,6 +167,34 @@ typedef struct awg_reg_t {
     uint32_t cha_num_rpt_3;
     uint32_t cha_rpt_dly_3;
     
+    /** @brief Description missing, second buffer for chan B */
+    uint32_t chb_scale_off_1;
+    uint32_t chb_count_wrap_1;
+    uint32_t chb_start_off_1;
+    uint32_t chb_count_step_1;
+    uint32_t chb_rd_ptr_ro_1;
+    uint32_t chb_num_cyc_1;
+    uint32_t chb_num_rpt_1;
+    uint32_t chb_rpt_dly_1;
+    /** @brief Description missing, third buffer for chan B */
+    uint32_t chb_scale_off_2;
+    uint32_t chb_count_wrap_2;
+    uint32_t chb_start_off_2;
+    uint32_t chb_count_step_2;
+    uint32_t chb_rd_ptr_ro_2;
+    uint32_t chb_num_cyc_2;
+    uint32_t chb_num_rpt_2;
+    uint32_t chb_rpt_dly_2;
+    /** @brief Description missing, fourth buffer for chan B */
+    uint32_t chb_scale_off_3;
+    uint32_t chb_count_wrap_3;
+    uint32_t chb_start_off_3;
+    uint32_t chb_count_step_3;
+    uint32_t chb_rd_ptr_ro_3;
+    uint32_t chb_num_cyc_3;
+    uint32_t chb_num_rpt_3;
+    uint32_t chb_rpt_dly_3;
+    
 
 } awg_reg_t;
 

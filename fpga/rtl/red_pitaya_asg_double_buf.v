@@ -136,7 +136,7 @@ wire   [  (32*N_BUF)-1: 0] set_a_rdly   , set_b_rdly   ;
 wire   cyc_b_done       , cyc_a_done       ;
 wire   buf_b_done       , buf_a_done       ;
 
-assign debug_bus = {trig_out_o, ch_a_debug };
+assign debug_bus = {ch_b_debug[7:0], ch_a_debug[7:0] };
 
 generate
   if (N_BUF <= 2) begin

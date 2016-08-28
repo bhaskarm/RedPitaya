@@ -1,17 +1,3 @@
-/**
- * $Id: generate.c 1246 2014-06-02 09:07am pdorazio $
- *
- * @brief Red Pitaya simple signal/function generator with pre-defined
- *        signal types.
- *
- * @Author Ales Bardorfer <ales.bardorfer@redpitaya.com>
- *
- * (c) Red Pitaya  http://www.redpitaya.com
- *
- * This part of code is written in C programming language.
- * Please visit http://en.wikipedia.org/wiki/C_(programming_language)
- * for more details on the language used herein.
- */
 
 #include <stdio.h>
 #include <time.h>
@@ -116,9 +102,6 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    /* Channel argument parsing */
-    uint32_t ch = 0; // Channel A
-
     /* Signal amplitude argument parsing */
     double ampl = strtod(argv[1], NULL);
     if ( (ampl < 0.0) || (ampl > c_max_amplitude) ) {
@@ -141,17 +124,19 @@ int main(int argc, char *argv[])
     printf("Waveform => Sine, %f Hz, %f V\n", freq, ampl);
     fpga_awg_init();
 
-    synthesize_signal(ampl, freq, 0, data, &params); // Build the wave first
-    write_data_fpga(ch, data, &params, 0); // Load it into the buffer along with the config
-
-    synthesize_signal(ampl, freq, 1, data, &params); 
-    write_data_fpga(ch, data, &params, 1);
-
-    synthesize_signal(ampl, freq, 2, data, &params); 
-    write_data_fpga(ch, data, &params, 2);
-
-    synthesize_signal(ampl, freq, 3, data, &params); 
-    write_data_fpga(ch, data, &params, 3);
+    for (uint32_t ch=0; ch<2; ch++) {
+      synthesize_signal(ampl, freq, 0, data, &params); // Build the wave first
+      write_data_fpga(ch, data, &params, 0); // Load it into the buffer along with the config
+     
+      synthesize_signal(ampl, freq, 1, data, &params); 
+      write_data_fpga(ch, data, &params, 1);
+     
+      synthesize_signal(ampl, freq, 2, data, &params); 
+      write_data_fpga(ch, data, &params, 2);
+     
+      synthesize_signal(ampl, freq, 3, data, &params); 
+      write_data_fpga(ch, data, &params, 3);
+    }
 #if ENABLE_SCOPE_TRIGGER
     // Enable the acquire module to check for cycles done trigger
     rp_AcqReset();
@@ -165,11 +150,9 @@ int main(int argc, char *argv[])
     rp_acq_trig_state_t state = RP_TRIG_STATE_TRIGGERED;
 #endif
 
-    for(int i = 0; i < MAX_NUM_SAMPLES; i++) {
-        //printf(" %d ", g_awg_cha_mem[MAX_NUM_SAMPLES+i]);
-    }
     printf(" \n\n");
-    g_awg_reg->state_machine_conf = 0x000011;
+    //g_awg_reg->state_machine_conf = 0x110011; // trigger both channels
+    g_awg_reg->state_machine_conf = 0x110011;
     uint32_t trigger_counter = 0;
     while (1) {
 #if ENABLE_SCOPE_TRIGGER
@@ -291,10 +274,10 @@ void write_data_fpga(uint32_t ch,
     //#### DO NOT CHANGE THIS VALUE
     g_awg_reg->all_ch_trig_out_cond = 0x000002; // Important setting to keep at 2 for ping pong buffer
     if(ch == 0) {
+        printf(" Channel A\n ");
         if (buf_index == 0) {
           /* Channel A */
           printf(" Buffer 0 \n ");
-          printf(" Single buffer size =%d \n ", g_awg_reg->cha_count_wrap);
           g_awg_reg->cha_scale_off      = awg->offsgain;
           addr_calc_temp                = (MAX_NUM_SAMPLES - 4)<<16;
           g_awg_reg->cha_count_wrap     = addr_calc_temp;
@@ -305,7 +288,7 @@ void write_data_fpga(uint32_t ch,
               g_awg_cha_mem[i] = data[i];
               //printf(" %d ", data[i]);
           }
-          printf(" Buffer 0 \n\n");
+          printf(" Buffer 0 size =%d \n ", g_awg_reg->cha_count_wrap);
         } else if (buf_index == 1) {
           printf(" Buffer 1 \n ");
           g_awg_reg->cha_scale_off_1    = awg->offsgain;
@@ -319,7 +302,7 @@ void write_data_fpga(uint32_t ch,
               g_awg_cha_mem[MAX_NUM_SAMPLES+i] = data[i];
               //printf(" %d ", data[i]);
           }
-          printf(" Buffer 1 \n\n");
+          printf(" Buffer 1 size =%d \n ", g_awg_reg->cha_count_wrap_1);
         } else if (buf_index == 2) {
           printf(" Buffer 2 \n ");
           g_awg_reg->cha_scale_off_2    = awg->offsgain;
@@ -333,7 +316,7 @@ void write_data_fpga(uint32_t ch,
               g_awg_cha_mem[2*MAX_NUM_SAMPLES+i] = data[i];
               //printf(" %d ", data[i]);
           }
-          printf(" Buffer 2 \n ");
+          printf(" Buffer 2 size =%d \n ", g_awg_reg->cha_count_wrap_2);
         } else if (buf_index == 3) {
           printf(" Buffer 3 \n ");
           g_awg_reg->cha_scale_off_3    = awg->offsgain;
@@ -347,18 +330,66 @@ void write_data_fpga(uint32_t ch,
               g_awg_cha_mem[3*MAX_NUM_SAMPLES+i] = data[i];
               //printf(" %d ", data[i]);
           }
-          printf(" Buffer 3 \n ");
+          printf(" Buffer 3 size =%d \n ", g_awg_reg->cha_count_wrap_3);
         }
     } else {
-        /* Channel B */
-        g_awg_reg->state_machine_conf = 0x410000;
-        g_awg_reg->chb_scale_off      = awg->offsgain;
-        g_awg_reg->chb_count_wrap     = awg->wrap;
-        g_awg_reg->chb_count_step     = awg->step;
-        g_awg_reg->chb_start_off      = 0;
-
-        for(i = 0; i < MAX_NUM_SAMPLES; i++) {
-            g_awg_chb_mem[i] = data[i];
+        printf(" Channel B\n ");
+        if (buf_index == 0) {
+          /* Channel B */
+          printf(" Buffer 0 \n ");
+          g_awg_reg->chb_scale_off      = awg->offsgain;
+          addr_calc_temp                = (MAX_NUM_SAMPLES - 4)<<16;
+          g_awg_reg->chb_count_wrap     = addr_calc_temp;
+          g_awg_reg->chb_count_step     = awg->step;
+          g_awg_reg->chb_start_off      = 0;
+          g_awg_reg->chb_num_cyc        = 2;
+          for(i = 0; i < MAX_NUM_SAMPLES; i++) {
+              g_awg_chb_mem[i] = data[i];
+              //printf(" %d ", data[i]);
+          }
+          printf(" Buffer 3 size =%d \n ", g_awg_reg->chb_count_wrap);
+        } else if (buf_index == 1) {
+          printf(" Buffer 1 \n ");
+          g_awg_reg->chb_scale_off_1    = awg->offsgain;
+          addr_calc_temp                = (2*MAX_NUM_SAMPLES - 4)<<16;
+          g_awg_reg->chb_count_wrap_1   = addr_calc_temp;
+          g_awg_reg->chb_count_step_1   = awg->step;
+          addr_calc_temp                = (MAX_NUM_SAMPLES)<<16;
+          g_awg_reg->chb_start_off_1    = addr_calc_temp;
+          g_awg_reg->chb_num_cyc_1      = 3;
+          for(i = 0; i < MAX_NUM_SAMPLES; i++) {
+              g_awg_chb_mem[MAX_NUM_SAMPLES+i] = data[i];
+              //printf(" %d ", data[i]);
+          }
+          printf(" Buffer 3 size =%d \n ", g_awg_reg->chb_count_wrap_3);
+        } else if (buf_index == 2) {
+          printf(" Buffer 2 \n ");
+          g_awg_reg->chb_scale_off_2    = awg->offsgain;
+          addr_calc_temp                = (3*MAX_NUM_SAMPLES - 4)<<16;
+          g_awg_reg->chb_count_wrap_2   = addr_calc_temp;
+          g_awg_reg->chb_count_step_2   = awg->step;
+          addr_calc_temp                = (2*MAX_NUM_SAMPLES)<<16;
+          g_awg_reg->chb_start_off_2    = addr_calc_temp;
+          g_awg_reg->chb_num_cyc_2      = 4;
+          for(i = 0; i < MAX_NUM_SAMPLES; i++) {
+              g_awg_chb_mem[2*MAX_NUM_SAMPLES+i] = data[i];
+              //printf(" %d ", data[i]);
+          }
+          printf(" Buffer 3 size =%d \n ", g_awg_reg->chb_count_wrap_3);
+        } else if (buf_index == 3) {
+          printf(" Buffer 3 \n ");
+          g_awg_reg->chb_scale_off_3    = awg->offsgain;
+          addr_calc_temp                = (4*MAX_NUM_SAMPLES - 4)<<16;
+          g_awg_reg->chb_count_wrap_3   = addr_calc_temp;
+          g_awg_reg->chb_count_step_3   = awg->step;
+          addr_calc_temp                = (3*MAX_NUM_SAMPLES)<<16;
+          g_awg_reg->chb_start_off_3    = addr_calc_temp;
+          g_awg_reg->chb_num_cyc_3      = 5;
+          for(i = 0; i < MAX_NUM_SAMPLES; i++) {
+              g_awg_chb_mem[3*MAX_NUM_SAMPLES+i] = data[i];
+              //printf(" %d ", data[i]);
+          }
+          printf(" Buffer 3 size =%d \n ", g_awg_reg->chb_count_wrap_3);
         }
     }
 
