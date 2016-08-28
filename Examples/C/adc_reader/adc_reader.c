@@ -92,18 +92,17 @@ struct queue {
 
 static void scope_reset(void);
 static void scope_set_filters(enum equalizer eq, int shaping, volatile uint32_t *base);
-static void scope_setup_input_parameters(enum decimation dec, enum equalizer ch_a_eq, enum equalizer ch_b_eq, int ch_a_shaping, int ch_b_shaping);
-static void scope_setup_trigger_parameters(int thresh_a, int thresh_b, int hyst_a, int hyst_b, int deadtime);
+static void scope_setup_input_parameters(enum decimation dec, enum equalizer ch_a_eq, int ch_a_shaping);
+static void scope_setup_trigger_parameters(int thresh_a, int hyst_a, int deadtime);
 static void scope_setup_axi_recording(void);
 static void scope_activate_trigger(enum trigger trigger);
-static void read_worker(struct queue *a, struct queue *b);
+static void read_worker(struct queue *a);
 static void *send_worker(void *data);
 
 
 /* module global variables */
 static volatile void *scope;    /* access to fpga registers must not be optimized */
 static void *buf_a = MAP_FAILED;
-static void *buf_b = MAP_FAILED;
 static struct queue queue_a = {
 	.mutex = PTHREAD_MUTEX_INITIALIZER,
 	.started = 0,
@@ -111,14 +110,6 @@ static struct queue queue_a = {
 	.buf = NULL,
 	.sock_fd = -1,
 };
-static struct queue queue_b = {
-	.mutex = PTHREAD_MUTEX_INITIALIZER,
-	.started = 0,
-	.read_end = 0,
-	.buf = NULL,
-	.sock_fd = -1,
-};
-
 
 /* functions */
 /*
@@ -142,10 +133,9 @@ int main(int argc, char **argv)
 
 	smap = mmap(NULL, 0x00100000UL, PROT_WRITE | PROT_READ, MAP_SHARED, mem_fd, 0x40100000UL);
 	buf_a = mmap(NULL, RAM_A_SIZE, PROT_READ, MAP_SHARED, mem_fd, RAM_A_ADDRESS);
-	buf_b = mmap(NULL, RAM_B_SIZE, PROT_READ, MAP_SHARED, mem_fd, RAM_B_ADDRESS);
-	if (smap == MAP_FAILED || buf_a == MAP_FAILED || buf_b == MAP_FAILED) {
-		fprintf(stderr, "mmap failed, %s - scope %p buf_a %p buf_b %p\n",
-		        strerror(errno), smap, buf_a, buf_b);
+	if (smap == MAP_FAILED || buf_a == MAP_FAILED) {
+		fprintf(stderr, "mmap failed, %s - scope %p buf_a %p \n",
+		        strerror(errno), smap, buf_a);
 		rc = -2;
 		goto main_exit;
 	}
@@ -153,20 +143,18 @@ int main(int argc, char **argv)
 
 	/* allocate cacheable buffers */
 	queue_a.buf = malloc(ACQUISITION_LENGTH * 2);
-	queue_b.buf = malloc(ACQUISITION_LENGTH * 2);
-	if (queue_a.buf == NULL || queue_b.buf == NULL) {
-		fprintf(stderr, "malloc failed, %s - buf a %p buf b %p\n",
-		        strerror(errno), queue_a.buf, queue_b.buf);
+	if (queue_a.buf == NULL ) {
+		fprintf(stderr, "malloc failed, %s - buf a %p\n",
+		        strerror(errno), queue_a.buf);
 		rc = -3;
 		goto main_exit;
 	}
 
 	/* setup udp sockets */
 	queue_a.sock_fd = socket(PF_INET, SOCK_DGRAM, 0);
-	queue_b.sock_fd = socket(PF_INET, SOCK_DGRAM, 0);
-	if (queue_a.sock_fd < 0 || queue_b.sock_fd < 0) {
-		fprintf(stderr, "create socket failed, %s - sock_fd a %d sock_fd b %d\n",
-		        strerror(errno), queue_a.sock_fd, queue_b.sock_fd);
+	if (queue_a.sock_fd < 0 ) {
+		fprintf(stderr, "create socket failed, %s - sock_fd a %d \n",
+		        strerror(errno), queue_a.sock_fd);
 		rc = -4;
 		goto main_exit;
 	}
@@ -182,18 +170,10 @@ int main(int argc, char **argv)
 		goto main_exit;
 	}
 
-	srv_addr.sin_port = htons(SERVER_IP_PORT_B);
-
-	if (connect(queue_b.sock_fd, (struct sockaddr *)&srv_addr, sizeof(srv_addr)) < 0) {
-		fprintf(stderr, "connect B failed, %s\n", strerror(errno));
-		rc = -5;
-		goto main_exit;
-	}
-
 	/* initialize scope */
 	scope_reset();
-	scope_setup_input_parameters(DECIMATION, EQ_LV, EQ_LV, 1, 1);
-	scope_setup_trigger_parameters(TRIGGER_THRESHOLD, TRIGGER_THRESHOLD, 50, 50, 1250);
+	scope_setup_input_parameters(DECIMATION, EQ_LV, 1);
+	scope_setup_trigger_parameters(TRIGGER_THRESHOLD, 50, 1250);
 	scope_setup_axi_recording();
 
 	/* start socket senders */
@@ -205,16 +185,8 @@ int main(int argc, char **argv)
 	}
 	queue_a.started = 1;
 
-	rc = pthread_create(&queue_b.sender, NULL, send_worker, &queue_b);
-	if (rc != 0) {
-		fprintf(stderr, "start sender B failed, %s\n", strerror(rc));
-		rc = -6;
-		goto main_exit;
-	}
-	queue_b.started = 1;
-
 	/* start reader in main-thread */
-	read_worker(&queue_a, &queue_b);
+	read_worker(&queue_a);
 
 main_exit:
 	/* cleanup */
@@ -222,26 +194,16 @@ main_exit:
 		pthread_cancel(queue_a.sender);
 		pthread_join(queue_a.sender, NULL);
 	}
-	if (queue_b.started) {
-		pthread_cancel(queue_b.sender);
-		pthread_join(queue_b.sender, NULL);
-	}
 	if (smap != MAP_FAILED)
 		munmap(smap, 0x00100000UL);
 	if (buf_a != MAP_FAILED)
 		munmap(buf_a, RAM_A_SIZE);
-	if (buf_b != MAP_FAILED)
-		munmap(buf_b, RAM_B_SIZE);
 	if (queue_a.buf)
 		free(queue_a.buf);
-	if (queue_b.buf)
-		free(queue_b.buf);
 	if (mem_fd >= 0)
 		close(mem_fd);
 	if (queue_a.sock_fd >= 0)
 		close(queue_a.sock_fd);
-	if (queue_b.sock_fd >= 0)
-		close(queue_b.sock_fd);
 
 	return rc;
 }
@@ -283,32 +245,26 @@ static void scope_set_filters(enum equalizer eq,
 
 static void scope_setup_input_parameters(enum decimation dec,
                                          enum equalizer ch_a_eq,
-                                         enum equalizer ch_b_eq,
-                                         int ch_a_shaping,
-                                         int ch_b_shaping)
+                                         int ch_a_shaping
+                                         )
 {
 	*(uint32_t *)(scope + 0x00014) = dec;                           /* decimation */
 	*(uint32_t *)(scope + 0x00028) = (dec != DE_OFF) ? 1 : 0;       /* enable averaging */
 
 	scope_set_filters(ch_a_eq, ch_a_shaping, (uint32_t *)(scope + 0x00030)); /* filter coeff base channel a */
-	scope_set_filters(ch_b_eq, ch_b_shaping, (uint32_t *)(scope + 0x00040)); /* filter coeff base channel b */
 }
 
 static void scope_setup_trigger_parameters(int thresh_a,
-                                           int thresh_b,
                                            int hyst_a,
-                                           int hyst_b,
                                            int deadtime)
 {
 	*(uint32_t *)(scope + 0x00008) = thresh_a;      /* channel a trigger threshold */
-	*(uint32_t *)(scope + 0x0000c) = thresh_b;      /* channel b trigger threshold */
 	/* the legacy recording logic controls when the trigger mode will be reset. we want
 	 * that to happen as soon as possible (because that's the signal that a trigger event
 	 * occured, and the pre-trigger samples are already waiting for transmission), so set
 	 * some small value > 0 here */
 	*(uint32_t *)(scope + 0x00010) = 10;            /* legacy post trigger samples */
 	*(uint32_t *)(scope + 0x00020) = hyst_a;        /* channel a trigger hysteresis */
-	*(uint32_t *)(scope + 0x00024) = hyst_b;        /* channel b trigger hysteresis */
 	*(uint32_t *)(scope + 0x00090) = deadtime;      /* trigger deadtime */
 }
 
@@ -317,12 +273,8 @@ static void scope_setup_axi_recording(void)
 	*(uint32_t *)(scope + 0x00050) = RAM_A_ADDRESS;                 /* buffer a start */
 	*(uint32_t *)(scope + 0x00054) = RAM_A_ADDRESS + RAM_A_SIZE;    /* buffer a stop */
 	*(uint32_t *)(scope + 0x00058) = ACQUISITION_LENGTH - PRE_TRIGGER_LENGTH + 64; /* channel a post trigger samples */
-	*(uint32_t *)(scope + 0x00070) = RAM_B_ADDRESS;                 /* buffer b start */
-	*(uint32_t *)(scope + 0x00074) = RAM_B_ADDRESS + RAM_B_SIZE;    /* buffer b stop */
-	*(uint32_t *)(scope + 0x00078) = ACQUISITION_LENGTH - PRE_TRIGGER_LENGTH + 64; /* channel b post trigger samples */
 
 	*(uint32_t *)(scope + 0x0005c) = 1;     /* enable channel a axi */
-	*(uint32_t *)(scope + 0x0007c) = 1;     /* enable channel b axi */
 }
 
 static void scope_activate_trigger(enum trigger trigger)
@@ -339,18 +291,18 @@ static void scope_activate_trigger(enum trigger trigger)
  * queue->read_end for each block that was copied. rinse and repeat. access to
  * read_end is protected by queue->mutex.
  */
-static void read_worker(struct queue *a, struct queue *b)
+static void read_worker(struct queue *a)
 {
-	unsigned int start_pos_a, start_pos_b;
-	unsigned int curr_pos_a, curr_pos_b;
-	unsigned int read_pos_a, read_pos_b;
-	size_t length_a, length_b;
-	int a_first, a_ready, b_first, b_ready;
+	unsigned int start_pos_a;
+	unsigned int curr_pos_a;
+	unsigned int read_pos_a;
+	size_t length_a;
+	int a_first, a_ready;
 	int did_something;
 
 	do {
-		a_first = b_first = 1;
-		a_ready = b_ready = 0;
+		a_first =  1;
+		a_ready =  0;
 
 		scope_activate_trigger(TRIGGER_MODE);
 
@@ -359,10 +311,8 @@ static void read_worker(struct queue *a, struct queue *b)
 			usleep(5);
 
 		start_pos_a = *(uint32_t *)(scope + 0x00060);   /* channel a trigger pointer */
-		start_pos_b = *(uint32_t *)(scope + 0x00080);   /* channel b trigger pointer */
 
 		start_pos_a = CIRCULAR_SUB(start_pos_a - RAM_A_ADDRESS, PRE_TRIGGER_LENGTH * 2, RAM_A_SIZE);
-		start_pos_b = CIRCULAR_SUB(start_pos_b - RAM_B_ADDRESS, PRE_TRIGGER_LENGTH * 2, RAM_B_SIZE);
 
 		did_something = 1;
 
@@ -378,37 +328,21 @@ static void read_worker(struct queue *a, struct queue *b)
 			if (pthread_mutex_unlock(&a->mutex) != 0)
 				goto read_worker_exit;
 
-			if (pthread_mutex_lock(&b->mutex) != 0)
-				goto read_worker_exit;
-			read_pos_b = b->read_end;
-			if (pthread_mutex_unlock(&b->mutex) != 0)
-				goto read_worker_exit;
-
 			/* before starting, test if senders are ready */
 			if (a_first && read_pos_a == 0) {
 				a_first = 0;
 				a_ready = 1;
 			}
-			if (b_first && read_pos_b == 0) {
-				b_first = 0;
-				b_ready = 1;
-			}
 
 			/* get current recording positions */
 			curr_pos_a = *(uint32_t *)(scope + 0x00064);    /* channel a current write pointer */
-			curr_pos_b = *(uint32_t *)(scope + 0x00084);    /* channel b current write pointer */
 			curr_pos_a -= RAM_A_ADDRESS;
-			curr_pos_b -= RAM_B_ADDRESS;
 
 			/* calculate block sizes */
 			if (read_pos_a + READ_BLOCK_SIZE <= ACQUISITION_LENGTH * 2)
 				length_a = READ_BLOCK_SIZE;
 			else
 				length_a = ACQUISITION_LENGTH * 2 - read_pos_a;
-			if (read_pos_b + READ_BLOCK_SIZE <= ACQUISITION_LENGTH * 2)
-				length_b = READ_BLOCK_SIZE;
-			else
-				length_b = ACQUISITION_LENGTH * 2 - read_pos_b;
 
 			/* copy if sender is ready and a full block is available in the dma ram */
 			if (a_ready && CIRCULAR_DIST(start_pos_a, curr_pos_a, RAM_A_SIZE) >= length_a) {
@@ -429,25 +363,7 @@ static void read_worker(struct queue *a, struct queue *b)
 
 				did_something = 1;
 			}
-			if (b_ready && CIRCULAR_DIST(start_pos_b, curr_pos_b, RAM_B_SIZE) > length_b) {
-				CIRCULARSRC_MEMCPY(b->buf + read_pos_b, buf_b, start_pos_b, RAM_B_SIZE, length_b);
-				start_pos_b = CIRCULAR_ADD(start_pos_b, length_b, RAM_B_SIZE);
-
-				if (read_pos_b + length_b >= ACQUISITION_LENGTH * 2)
-					b_ready = 0; /* stop if all samples were copied */
-
-				if (pthread_mutex_lock(&b->mutex) != 0)
-					goto read_worker_exit;
-				if (b->read_end == read_pos_b)
-					b->read_end += length_b;
-				else
-					b_ready = 0; /* stop if sender resetted read_end */
-				if (pthread_mutex_unlock(&b->mutex) != 0)
-					goto read_worker_exit;
-
-				did_something = 1;
-			}
-		} while (a_first || a_ready || b_first || b_ready);
+		} while (a_first || a_ready);
 	} while (1);
 
 read_worker_exit:
