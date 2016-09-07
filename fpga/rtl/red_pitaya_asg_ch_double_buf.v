@@ -103,9 +103,10 @@ reg                  buf_done     ;
 reg      [     2: 0] asg_state    ;
 reg      [     2: 0] next_asg_state    ;
 parameter SM_IDLE=0, SM_START_PTR=1, SM_DRIVE_DAC=2, SM_START_NEXT_BUF=3;
-assign debug_bus =  { cyc_cnt[6:0], 
-set_ncyc_i[4:0],
+assign debug_bus =  { cyc_cnt[5:0], 
+ set_ncyc_i[4:0],
  current_buf,
+ trig_in,    
  cyc_done_o,
  buf_done_o };
 
