@@ -1306,6 +1306,32 @@ int rp_GenGetTriggerEventCondition(rp_trig_evt_t *evt);
 int rp_GenTrigger(uint32_t channel);
 
 float rp_CmnCnvCntToV(uint32_t field_len, uint32_t cnts, float adc_max_v, uint32_t calibScale, int calib_dc_off, float user_dc_off);
+/**
+* Precidyne Quad Generate functions
+*/
+
+int prec_GenReset();
+int prec_GenOutDisable(prec_channel_t channel);
+int prec_GenOutEnable(prec_channel_t channel);
+int prec_GenOutIsEnabled(prec_channel_t channel, bool *value);
+int prec_GenAmp(prec_channel_t channel, int buf_idx, float amplitude);
+int prec_GenGetAmp(prec_channel_t channel, int buf_idx, float *amplitude);
+int prec_GenOffset(prec_channel_t channel, int buf_idx, float offset);
+int prec_GenGetOffset(prec_channel_t channel, int buf_idx, float *offset);
+int prec_GenFreq(prec_channel_t channel, int buf_idx, float frequency);
+int prec_GenGetFreq(prec_channel_t channel, int buf_idx, float *frequency);
+int prec_GenPhase(prec_channel_t channel, int buf_idx, float phase);
+int prec_GenGetPhase(prec_channel_t channel, int buf_idx, float *phase);
+int prec_GenWaveform(prec_channel_t channel, int buf_idx, prec_waveform_t type);
+int prec_GenGetWaveform(prec_channel_t channel, int buf_idx, prec_waveform_t *type);
+int prec_GenArbWaveform(prec_channel_t channel, int buf_idx, float *waveform, uint32_t length);
+int prec_GenGetArbWaveform(prec_channel_t channel, int buf_idx, float *waveform, uint32_t *length);
+int prec_GenBurstCount(prec_channel_t channel, int buf_idx, int num);
+int prec_GenGetBurstCount(prec_channel_t channel, int buf_idx, int *num);
+int prec_GenTriggerSource(prec_channel_t channel, prec_trig_src_t src);
+int prec_GenGetTriggerSource(prec_channel_t channel, prec_trig_src_t *src);
+int prec_GenTrigger(uint32_t channel);
+float prec_CmnCnvCntToV(uint32_t field_len, uint32_t cnts, float adc_max_v, uint32_t calibScale, int calib_dc_off, float user_dc_off)
 
 #ifdef __cplusplus
 }

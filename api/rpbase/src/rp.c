@@ -836,3 +836,96 @@ float rp_CmnCnvCntToV(uint32_t field_len, uint32_t cnts, float adc_max_v, uint32
 	return cmn_CnvCntToV(field_len, cnts, adc_max_v, calibScale, calib_dc_off, user_dc_off);
 }
 
+/**
+* Precidyne Quad Generate functions
+*/
+
+int prec_GenReset() {
+    return prec_gen_SetDefaultValues();
+}
+
+int prec_GenOutDisable(prec_channel_t channel) {
+    return prec_gen_Disable(channel);
+}
+
+int prec_GenOutEnable(prec_channel_t channel) {
+    return prec_gen_Enable(channel);
+}
+
+int prec_GenOutIsEnabled(prec_channel_t channel, bool *value) {
+    return prec_gen_IsEnable(channel, value);
+}
+
+int prec_GenAmp(prec_channel_t channel, int buf_idx, float amplitude) {
+    return prec_gen_setAmplitude(channel, buf_idx, amplitude);
+}
+
+int prec_GenGetAmp(prec_channel_t channel, int buf_idx, float *amplitude) {
+    return prec_gen_getAmplitude(channel, buf_idx, amplitude);
+}
+
+int prec_GenOffset(prec_channel_t channel, int buf_idx, float offset) {
+    return prec_gen_setOffset(channel, buf_idx, offset);
+}
+
+int prec_GenGetOffset(prec_channel_t channel, int buf_idx, float *offset) {
+    return prec_gen_getOffset(channel, buf_idx, offset);
+}
+
+int prec_GenFreq(prec_channel_t channel, int buf_idx, float frequency) {
+    return prec_gen_setFrequency(channel, buf_idx, frequency);
+}
+
+int prec_GenGetFreq(prec_channel_t channel, int buf_idx, float *frequency) {
+    return prec_gen_getFrequency(channel, buf_idx, frequency);
+}
+
+int prec_GenPhase(prec_channel_t channel, int buf_idx, float phase) {
+    return prec_gen_setPhase(channel, buf_idx, phase);
+}
+
+int prec_GenGetPhase(prec_channel_t channel, int buf_idx, float *phase) {
+    return prec_gen_getPhase(channel, buf_idx, phase);
+}
+
+int prec_GenWaveform(prec_channel_t channel, int buf_idx, prec_waveform_t type) {
+    return prec_gen_setWaveform(channel, buf_idx, type);
+}
+
+int prec_GenGetWaveform(prec_channel_t channel, int buf_idx, prec_waveform_t *type) {
+    return prec_gen_getWaveform(channel, buf_idx, type);
+}
+
+int prec_GenArbWaveform(prec_channel_t channel, int buf_idx, float *waveform, uint32_t length) {
+    return prec_gen_setArbWaveform(channel, buf_idx, waveform, length);
+}
+
+int prec_GenGetArbWaveform(prec_channel_t channel, int buf_idx, float *waveform, uint32_t *length) {
+    return prec_gen_getArbWaveform(channel, buf_idx, waveform, length);
+}
+
+int prec_GenBurstCount(prec_channel_t channel, int buf_idx, int num) {
+    return prec_gen_setBurstCount(channel, buf_idx, num);
+}
+
+int prec_GenGetBurstCount(prec_channel_t channel, int buf_idx, int *num) {
+    return prec_gen_getBurstCount(channel, buf_idx, num);
+}
+
+int prec_GenTriggerSource(prec_channel_t channel, prec_trig_src_t src) {
+    return prec_gen_setTriggerSource(channel, src);
+}
+
+int prec_GenGetTriggerSource(prec_channel_t channel, prec_trig_src_t *src) {
+    return prec_gen_getTriggerSource(channel, src);
+}
+
+int prec_GenTrigger(uint32_t channel) {
+    return prec_gen_Trigger(channel);
+}
+
+float prec_CmnCnvCntToV(uint32_t field_len, uint32_t cnts, float adc_max_v, uint32_t calibScale, int calib_dc_off, float user_dc_off)
+{
+    return cmn_CnvCntToV(field_len, cnts, adc_max_v, calibScale, calib_dc_off, user_dc_off);
+}
+
