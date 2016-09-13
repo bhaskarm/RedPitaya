@@ -352,6 +352,8 @@ ACQUIRE_DIR     = Test/acquire
 CALIB_DIR       = Test/calib
 CALIBRATE_DIR   = Test/calibrate
 COMM_DIR        = Examples/Communication/C
+PRECIDYNE_QGEN  = Examples/C/quad_generate
+PRECIDYNE_UTILS = Examples/utils/precidyne
 XADC_DIR        = Test/xadc
 
 .PHONY: examples rp_communication
