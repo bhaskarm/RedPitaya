@@ -18,12 +18,12 @@ VERSION ?= 0.00-0000
 REVISION ?= devbuild
 
 # List of compiled object files (not yet linked to executable)
-OBJS = fpga_awg.o generate.o
+OBJS = fpga_awg.o quad_generate.o
 # List of raw source files (all object files, renamed from .o to .c)
 SRCS = $(subst .o,.c, $(OBJS)))
 
 # Executable name
-TARGET=generate
+TARGET=quad_generate
 
 # GCC compiling & linking flags
 CFLAGS=-g -std=gnu99 -Wall -Werror -I/opt/redpitaya/include

@@ -352,14 +352,14 @@ ACQUIRE_DIR     = Test/acquire
 CALIB_DIR       = Test/calib
 CALIBRATE_DIR   = Test/calibrate
 COMM_DIR        = Examples/Communication/C
-PRECIDYNE_QGEN  = Examples/C/quad_generate
-PRECIDYNE_UTILS = Examples/utils/precidyne
+PRECIDYNE_QUAD_GEN_DIR  = Examples/C/quad_generate
+PRECIDYNE_UTILS_DIR = Examples/utils/precidyne
 XADC_DIR        = Test/xadc
 
 .PHONY: examples rp_communication
-.PHONY: lcr bode monitor generate acquire calib calibrate
+.PHONY: lcr bode monitor generate acquire calib calibrate precidyne_quad_generate precidyne_utils
 
-examples: lcr bode monitor generate acquire calib
+examples: lcr bode monitor generate acquire calib precidyne_quad_generate precidyne_utils
 # calibrate
 
 lcr:
@@ -377,6 +377,13 @@ monitor:
 generate:
 	$(MAKE) -C $(GENERATE_DIR)
 	$(MAKE) -C $(GENERATE_DIR) install INSTALL_DIR=$(abspath $(INSTALL_DIR))
+
+precidyne_quad_generate:
+	$(MAKE) -C $(PRECIDYNE_QUAD_GEN_DIR)
+	$(MAKE) -C $(PRECIDYNE_QUAD_GEN_DIR) install INSTALL_DIR=$(abspath $(INSTALL_DIR))
+
+precidyne_utils:
+	$(MAKE) -C $(PRECIDYNE_UTILS_DIR) install INSTALL_DIR=$(abspath $(INSTALL_DIR))
 
 acquire:
 	$(MAKE) -C $(ACQUIRE_DIR)

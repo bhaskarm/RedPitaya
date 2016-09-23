@@ -9,5 +9,6 @@ sd_dev=${sd_dev:-/dev/mmcblk0}
 echo "Unmounting $sd_dev";
 sudo umount $sd_dev?*
 echo "Writing $img_file to $sd_dev"
-sudo dd if=$img_file of=$sd_dev bs=4M status=progress
+# Too dangerous, use the image writer linux util 
+#sudo dd if=$img_file of=$sd_dev bs=4M status=progress
 echo "Script finished"
