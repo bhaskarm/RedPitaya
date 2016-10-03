@@ -8,7 +8,13 @@
 
 #include "fpga_awg.h"
 #include "version.h"
+
+/** ENABLE or DISABLE the AWG trigger check **/
+#define ENABLE_SCOPE_TRIGGER 0
+
+#if ENABLE_SCOPE_TRIGGER
 #include "redpitaya/rp.h"
+#endif
 
 /**
  * GENERAL DESCRIPTION:
@@ -51,9 +57,6 @@ const double c_max_amplitude = 2.0;
 
 /** AWG buffer length [samples]*/
 #define MAX_NUM_SAMPLES AWG_SIG_LEN 
-
-/** ENABLE or DISABLE the AWG trigger check **/
-#define ENABLE_SCOPE_TRIGGER 0
 
 /** AWG data buffer */
 int32_t data[MAX_NUM_SAMPLES];

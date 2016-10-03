@@ -299,11 +299,12 @@ int calib_SetBackEndOffset(rp_channel_t channel) {
     calib = params;
 
     /* Generate zero signal */
-    ECHECK(rp_GenReset());
-    ECHECK(rp_GenWaveform(channel, RP_WAVEFORM_SINE));
-    ECHECK(rp_GenAmp(channel, 0));
-    ECHECK(rp_GenOffset(channel, 0));
-    ECHECK(rp_GenOutEnable(channel));
+   // bhaskarm - Disabling generator code till the quad_generate is stable
+   // ECHECK(rp_GenReset());
+   // ECHECK(rp_GenWaveform(channel, RP_WAVEFORM_SINE));
+   // ECHECK(rp_GenAmp(channel, 0));
+   // ECHECK(rp_GenOffset(channel, 0));
+   // ECHECK(rp_GenOutEnable(channel));
 
     CHANNEL_ACTION(channel,
             params.be_ch1_dc_offs = -calib_GetDataMedian(channel, RP_LOW),
@@ -327,12 +328,13 @@ int calib_SetBackEndScale(rp_channel_t channel) {
     calib = params;
 
     /* Generate constant signal signal */
-    ECHECK(rp_GenReset());
-    ECHECK(rp_GenWaveform(channel, RP_WAVEFORM_PWM));
-    ECHECK(rp_GenDutyCycle(channel, 1));
-    ECHECK(rp_GenAmp(channel, CONSTANT_SIGNAL_AMPLITUDE));
-    ECHECK(rp_GenOffset(channel, 0));
-    ECHECK(rp_GenOutEnable(channel));
+   // bhaskarm - Disabling generator code till the quad_generate is stable
+    //ECHECK(rp_GenReset());
+    //ECHECK(rp_GenWaveform(channel, RP_WAVEFORM_PWM));
+    //ECHECK(rp_GenDutyCycle(channel, 1));
+    //ECHECK(rp_GenAmp(channel, CONSTANT_SIGNAL_AMPLITUDE));
+    //ECHECK(rp_GenOffset(channel, 0));
+    //ECHECK(rp_GenOutEnable(channel));
 
     /* Calculate real max adc voltage */
     float value = calib_GetDataMedianFloat(channel, RP_LOW);
@@ -348,21 +350,23 @@ int calib_SetBackEndScale(rp_channel_t channel) {
 }
 
 static int getGenAmp(rp_channel_t channel, float amp, float* min, float* max) {
-    ECHECK(rp_GenReset());
-    ECHECK(rp_GenWaveform(channel, RP_WAVEFORM_SINE));
-    ECHECK(rp_GenAmp(channel, amp));
-    ECHECK(rp_GenOffset(channel, 0));
-    ECHECK(rp_GenOutEnable(channel));
+   // bhaskarm - Disabling generator code till the quad_generate is stable
+    //ECHECK(rp_GenReset());
+    //ECHECK(rp_GenWaveform(channel, RP_WAVEFORM_SINE));
+    //ECHECK(rp_GenAmp(channel, amp));
+    //ECHECK(rp_GenOffset(channel, 0));
+    //ECHECK(rp_GenOutEnable(channel));
 
     return calib_GetDataMinMaxFloat(channel, RP_LOW, min, max);
 }
 
 static int getGenDC_int(rp_channel_t channel, float dc) {
-    ECHECK(rp_GenReset());
-    ECHECK(rp_GenWaveform(channel, RP_WAVEFORM_DC));
-    ECHECK(rp_GenAmp(channel, 0));
-    ECHECK(rp_GenOffset(channel, dc));
-    ECHECK(rp_GenOutEnable(channel));
+   // bhaskarm - Disabling generator code till the quad_generate is stable
+    //ECHECK(rp_GenReset());
+    //ECHECK(rp_GenWaveform(channel, RP_WAVEFORM_DC));
+    //ECHECK(rp_GenAmp(channel, 0));
+    //ECHECK(rp_GenOffset(channel, dc));
+    //ECHECK(rp_GenOutEnable(channel));
 
     return calib_GetDataMedian(channel, RP_LOW);
 }

@@ -22,8 +22,10 @@
 #include "acq_handler.h"
 #include "analog_mixed_signals.h"
 #include "calib.h"
-#include "generate.h"
-#include "gen_handler.h"
+//#include "generate.h"
+//#include "gen_handler.h"
+#include "prec_generate.h"
+#include "prec_gen_handler.h"
 
 static char version[50];
 
@@ -35,10 +37,11 @@ int rp_Init()
 {
     ECHECK(cmn_Init());
 	
-    ECHECK(calib_Init());
+    //ECHECK(calib_Init());
     ECHECK(hk_Init());
     ECHECK(ams_Init());
-    ECHECK(generate_Init());
+    //ECHECK(generate_Init());
+    ECHECK(prec_generate_Init());
     ECHECK(osc_Init());
     // TODO: Place other module initializations here
 
@@ -50,7 +53,7 @@ int rp_Init()
 
 int rp_CalibInit()
 {
-    ECHECK(calib_Init());
+    //ECHECK(calib_Init());
 
     return RP_OK;
 }
@@ -58,10 +61,11 @@ int rp_CalibInit()
 int rp_Release()
 {
     ECHECK(osc_Release())
-    ECHECK(generate_Release());
+    //ECHECK(generate_Release());
+    ECHECK(prec_generate_Release());
     ECHECK(ams_Release());
     ECHECK(hk_Release());
-    ECHECK(calib_Release());
+    //ECHECK(calib_Release());
     ECHECK(cmn_Release());
     // TODO: Place other module releasing here (in reverse order)
     return RP_OK;
@@ -71,7 +75,8 @@ int rp_Reset()
 {
     ECHECK(rp_DpinReset());
     ECHECK(rp_AOpinReset());
-    ECHECK(rp_GenReset());
+    //ECHECK(rp_GenReset());
+    ECHECK(prec_GenReset());
     ECHECK(rp_AcqReset());
     // TODO: Place other module resetting here (in reverse order)
     return 0;
@@ -706,6 +711,7 @@ int rp_AcqGetBufSize(uint32_t *size) {
 /**
 * Generate methods
 */
+/*
 int rp_GenReset() {
     return gen_SetDefaultValues();
 }
@@ -834,7 +840,7 @@ float rp_CmnCnvCntToV(uint32_t field_len, uint32_t cnts, float adc_max_v, uint32
 {
 	return cmn_CnvCntToV(field_len, cnts, adc_max_v, calibScale, calib_dc_off, user_dc_off);
 }
-
+*/
 /**
 * Precidyne Multi buf Generate functions
 */
@@ -843,79 +849,79 @@ int prec_GenReset() {
     return prec_gen_SetDefaultValues();
 }
 
-int prec_GenOutDisable(prec_channel_t channel) {
+int prec_GenOutDisable(rp_channel_t channel) {
     return prec_gen_Disable(channel);
 }
 
-int prec_GenOutEnable(prec_channel_t channel) {
+int prec_GenOutEnable(rp_channel_t channel) {
     return prec_gen_Enable(channel);
 }
 
-int prec_GenOutIsEnabled(prec_channel_t channel, bool *value) {
+int prec_GenOutIsEnabled(rp_channel_t channel, bool *value) {
     return prec_gen_IsEnable(channel, value);
 }
 
-int prec_GenAmp(prec_channel_t channel, int buf_idx, float amplitude) {
+int prec_GenAmp(rp_channel_t channel, int buf_idx, float amplitude) {
     return prec_gen_setAmplitude(channel, buf_idx, amplitude);
 }
 
-int prec_GenGetAmp(prec_channel_t channel, int buf_idx, float *amplitude) {
+int prec_GenGetAmp(rp_channel_t channel, int buf_idx, float *amplitude) {
     return prec_gen_getAmplitude(channel, buf_idx, amplitude);
 }
 
-int prec_GenOffset(prec_channel_t channel, int buf_idx, float offset) {
+int prec_GenOffset(rp_channel_t channel, int buf_idx, float offset) {
     return prec_gen_setOffset(channel, buf_idx, offset);
 }
 
-int prec_GenGetOffset(prec_channel_t channel, int buf_idx, float *offset) {
+int prec_GenGetOffset(rp_channel_t channel, int buf_idx, float *offset) {
     return prec_gen_getOffset(channel, buf_idx, offset);
 }
 
-int prec_GenFreq(prec_channel_t channel, int buf_idx, float frequency) {
+int prec_GenFreq(rp_channel_t channel, int buf_idx, float frequency) {
     return prec_gen_setFrequency(channel, buf_idx, frequency);
 }
 
-int prec_GenGetFreq(prec_channel_t channel, int buf_idx, float *frequency) {
+int prec_GenGetFreq(rp_channel_t channel, int buf_idx, float *frequency) {
     return prec_gen_getFrequency(channel, buf_idx, frequency);
 }
 
-int prec_GenPhase(prec_channel_t channel, int buf_idx, float phase) {
+int prec_GenPhase(rp_channel_t channel, int buf_idx, float phase) {
     return prec_gen_setPhase(channel, buf_idx, phase);
 }
 
-int prec_GenGetPhase(prec_channel_t channel, int buf_idx, float *phase) {
+int prec_GenGetPhase(rp_channel_t channel, int buf_idx, float *phase) {
     return prec_gen_getPhase(channel, buf_idx, phase);
 }
 
-int prec_GenWaveform(prec_channel_t channel, int buf_idx, prec_waveform_t type) {
+int prec_GenWaveform(rp_channel_t channel, int buf_idx, prec_waveform_t type) {
     return prec_gen_setWaveform(channel, buf_idx, type);
 }
 
-int prec_GenGetWaveform(prec_channel_t channel, int buf_idx, prec_waveform_t *type) {
+int prec_GenGetWaveform(rp_channel_t channel, int buf_idx, prec_waveform_t *type) {
     return prec_gen_getWaveform(channel, buf_idx, type);
 }
 
-int prec_GenArbWaveform(prec_channel_t channel, int buf_idx, float *waveform, uint32_t length) {
+int prec_GenArbWaveform(rp_channel_t channel, int buf_idx, float *waveform, uint32_t length) {
     return prec_gen_setArbWaveform(channel, buf_idx, waveform, length);
 }
 
-int prec_GenGetArbWaveform(prec_channel_t channel, int buf_idx, float *waveform, uint32_t *length) {
+int prec_GenGetArbWaveform(rp_channel_t channel, int buf_idx, float *waveform, uint32_t *length) {
     return prec_gen_getArbWaveform(channel, buf_idx, waveform, length);
 }
 
-int prec_GenBurstCount(prec_channel_t channel, int buf_idx, int num) {
+int prec_GenBurstCount(rp_channel_t channel, int buf_idx, int num) {
     return prec_gen_setBurstCount(channel, buf_idx, num);
 }
 
-int prec_GenGetBurstCount(prec_channel_t channel, int buf_idx, int *num) {
+int prec_GenGetBurstCount(rp_channel_t channel, int buf_idx, int *num) {
     return prec_gen_getBurstCount(channel, buf_idx, num);
 }
 
-int prec_GenTriggerSource(prec_channel_t channel, prec_trig_src_t src) {
+int prec_GenTriggerSource(rp_channel_t channel, rp_trig_src_t src) {
     return prec_gen_setTriggerSource(channel, src);
 }
 
-int prec_GenGetTriggerSource(prec_channel_t channel, prec_trig_src_t *src) {
+int prec_GenGetTriggerSource(rp_channel_t channel, rp_trig_src_t *src) {
     return prec_gen_getTriggerSource(channel, src);
 }
 
@@ -927,4 +933,5 @@ float prec_CmnCnvCntToV(uint32_t field_len, uint32_t cnts, float adc_max_v, uint
 {
     return cmn_CnvCntToV(field_len, cnts, adc_max_v, calibScale, calib_dc_off, user_dc_off);
 }
+
 

@@ -20,11 +20,15 @@
 #include "scpi/parser.h"
 #include "redpitaya/rp.h"
 
+//bhaskarm
+#define SCPI_DEBUG 1
+
 #define SET_OK(cont) \
     	SCPI_ResultString(cont, "OK"); \
     	return SCPI_RES_OK;
 
 #define CH_NUM		4
+#define ASG_BUF_NUM		4 //number of asg buffers
 
 #define SCPI_CMD_NUM 	1
 
@@ -36,5 +40,6 @@ syslog(__VA_ARGS__);
 #endif
 
 int RP_ParseChArgv(scpi_t *context, rp_channel_t *channel);
+int RP_ParseChBufArgv(scpi_t *context, rp_channel_t *channel, int *buf_idx);
 
 #endif /* COMMON_H_ */

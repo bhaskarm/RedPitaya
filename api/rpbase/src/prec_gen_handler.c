@@ -28,7 +28,7 @@ float         chA_phase                = 0, chB_phase                = 0;
 int           chA_burstCount           = 1, chB_burstCount           = 1;
 int           chA_burstRepetition      = 1, chB_burstRepetition      = 1;
 uint32_t      chA_burstPeriod          = 0, chB_burstPeriod          = 0;
-rp_waveform_t chA_waveform                , chB_waveform                ;
+prec_waveform_t chA_waveform                , chB_waveform                ;
 uint32_t      chA_size     = BUFFER_LENGTH, chB_size     = BUFFER_LENGTH;
 uint32_t      chA_arb_size = BUFFER_LENGTH, chB_arb_size = BUFFER_LENGTH;
 
@@ -38,43 +38,33 @@ float chB_arbitraryData[BUFFER_LENGTH];
 int prec_gen_SetDefaultValues() {
     ECHECK(prec_gen_Disable(RP_CH_1));
     ECHECK(prec_gen_Disable(RP_CH_2));
-    ECHECK(prec_gen_setFrequency(RP_CH_1, 1000));
-    ECHECK(prec_gen_setFrequency(RP_CH_2, 1000));
-    ECHECK(prec_gen_setBurstRepetitions(RP_CH_1, 1));
-    ECHECK(prec_gen_setBurstRepetitions(RP_CH_2, 1));
-    ECHECK(prec_gen_setBurstPeriod(RP_CH_1, (uint32_t) (1 / 1000.0 * MICRO)));   // period = 1/frequency in us
-    ECHECK(prec_gen_setBurstPeriod(RP_CH_2, (uint32_t) (1 / 1000.0 * MICRO)));   // period = 1/frequency in us
-    ECHECK(prec_gen_setWaveform(RP_CH_1, RP_WAVEFORM_SINE));
-    ECHECK(prec_gen_setWaveform(RP_CH_2, RP_WAVEFORM_SINE));
-    ECHECK(prec_gen_setOffset(RP_CH_1, 0));
-    ECHECK(prec_gen_setOffset(RP_CH_2, 0));
-    ECHECK(prec_gen_setAmplitude(RP_CH_1, 1));
-    ECHECK(prec_gen_setAmplitude(RP_CH_2, 1));
-    ECHECK(prec_gen_setDutyCycle(RP_CH_1, 0.5));
-    ECHECK(prec_gen_setDutyCycle(RP_CH_2, 0.5));
-    ECHECK(prec_gen_setGenMode(RP_CH_1, RP_GEN_MODE_CONTINUOUS));
-    ECHECK(prec_gen_setGenMode(RP_CH_2, RP_GEN_MODE_CONTINUOUS));
-    ECHECK(prec_gen_setBurstCount(RP_CH_1, 1));
-    ECHECK(prec_gen_setBurstCount(RP_CH_2, 1));
-    ECHECK(prec_gen_setBurstPeriod(RP_CH_1, BURST_PERIOD_MIN));
-    ECHECK(prec_gen_setBurstPeriod(RP_CH_2, BURST_PERIOD_MIN));
+    ECHECK(prec_gen_setFrequency(RP_CH_1, 0, 1000));
+    ECHECK(prec_gen_setFrequency(RP_CH_2, 0, 1000));
+    ECHECK(prec_gen_setWaveform(RP_CH_1, 0, PREC_WAVEFORM_SINE));
+    ECHECK(prec_gen_setWaveform(RP_CH_2, 0, PREC_WAVEFORM_SINE));
+    ECHECK(prec_gen_setOffset(RP_CH_1, 0, 0));
+    ECHECK(prec_gen_setOffset(RP_CH_2, 0, 0));
+    ECHECK(prec_gen_setAmplitude(RP_CH_1, 0, 1));
+    ECHECK(prec_gen_setAmplitude(RP_CH_2, 0, 1));
+    ECHECK(prec_gen_setBurstCount(RP_CH_1, 0, 1));
+    ECHECK(prec_gen_setBurstCount(RP_CH_2, 0, 1));
     ECHECK(prec_gen_setTriggerSource(RP_CH_1, RP_GEN_TRIG_SRC_INTERNAL));
     ECHECK(prec_gen_setTriggerSource(RP_CH_2, RP_GEN_TRIG_SRC_INTERNAL));
-    ECHECK(prec_gen_setPhase(RP_CH_1, 0.0));
-    ECHECK(prec_gen_setPhase(RP_CH_2, 0.0));
+    ECHECK(prec_gen_setPhase(RP_CH_1, 0, 0.0));
+    ECHECK(prec_gen_setPhase(RP_CH_2, 0, 0.0));
     return RP_OK;
 }
 
 int prec_gen_Disable(rp_channel_t channel) {
-    return generate_setOutputDisable(channel, true);
+    return prec_generate_setOutputDisable(channel, true);
 }
 
 int prec_gen_Enable(rp_channel_t channel) {
-    return generate_setOutputDisable(channel, false);
+    return prec_generate_setOutputDisable(channel, false);
 }
 
 int prec_gen_IsEnable(rp_channel_t channel, bool *value) {
-    return generate_getOutputEnabled(channel, value);
+    return prec_generate_getOutputEnabled(channel, value);
 }
 
 int prec_gen_checkAmplitudeAndOffset(float amplitude, float offset) {
@@ -84,7 +74,7 @@ int prec_gen_checkAmplitudeAndOffset(float amplitude, float offset) {
     return RP_OK;
 }
 
-int prec_gen_setAmplitude(rp_channel_t channel, float amplitude) {
+int prec_gen_setAmplitude(rp_channel_t channel, int buf_idx, float amplitude) {
     float offset;
     CHANNEL_ACTION(channel,
             offset = chA_offset,
@@ -94,14 +84,14 @@ int prec_gen_setAmplitude(rp_channel_t channel, float amplitude) {
     CHANNEL_ACTION(channel,
             chA_amplitude = amplitude,
             chB_amplitude = amplitude)
-    return generate_setAmplitude(channel, amplitude);
+    return prec_generate_setAmplitude(channel, buf_idx, amplitude);
 }
 
-int prec_gen_getAmplitude(rp_channel_t channel, float *amplitude) {
-    return generate_getAmplitude(channel, amplitude);
+int prec_gen_getAmplitude(rp_channel_t channel, int buf_idx, float *amplitude) {
+    return prec_generate_getAmplitude(channel, buf_idx, amplitude);
 }
 
-int prec_gen_setOffset(rp_channel_t channel, float offset) {
+int prec_gen_setOffset(rp_channel_t channel, int buf_idx, float offset) {
     float amplitude;
     CHANNEL_ACTION(channel,
             amplitude = chA_amplitude,
@@ -111,40 +101,28 @@ int prec_gen_setOffset(rp_channel_t channel, float offset) {
     CHANNEL_ACTION(channel,
             chA_offset = offset,
             chB_offset = offset)
-    return generate_setDCOffset(channel, offset);
+    return prec_generate_setDCOffset(channel, buf_idx, offset);
 }
 
-int prec_gen_getOffset(rp_channel_t channel, float *offset) {
-    return generate_getDCOffset(channel, offset);
+int prec_gen_getOffset(rp_channel_t channel, int buf_idx, float *offset) {
+    return prec_generate_getDCOffset(channel, buf_idx, offset);
 }
 
-int prec_gen_setFrequency(rp_channel_t channel, float frequency) {
+int prec_gen_setFrequency(rp_channel_t channel, int buf_idx, float frequency) {
     if (frequency < FREQUENCY_MIN || frequency > FREQUENCY_MAX) {
         return RP_EOOR;
     }
 
-    if (channel == RP_CH_1) {
-        chA_frequency = frequency;
-        prec_gen_setBurstPeriod(channel, chA_burstPeriod);
-    }
-    else if (channel == RP_CH_2) {
-        chB_frequency = frequency;
-        prec_gen_setBurstPeriod(channel, chB_burstPeriod);
-    }
-    else {
-        return RP_EPN;
-    }
-
-    ECHECK(generate_setFrequency(channel, frequency));
-    ECHECK(synthesize_signal(channel));
+    ECHECK(prec_generate_setFrequency(channel, buf_idx, frequency));
+    ECHECK(prec_synthesize_signal(channel, buf_idx));
     return prec_gen_Synchronise();
 }
 
-int prec_gen_getFrequency(rp_channel_t channel, float *frequency) {
-    return generate_getFrequency(channel, frequency);
+int prec_gen_getFrequency(rp_channel_t channel, int buf_idx, float *frequency) {
+    return prec_generate_getFrequency(channel, buf_idx, frequency);
 }
 
-int prec_gen_setPhase(rp_channel_t channel, float phase) {
+int prec_gen_setPhase(rp_channel_t channel, int buf_idx, float phase) {
     if (phase < PHASE_MIN || phase > PHASE_MAX) {
         return RP_EOOR;
     }
@@ -155,22 +133,22 @@ int prec_gen_setPhase(rp_channel_t channel, float phase) {
             chA_phase = phase,
             chB_phase = phase)
 
-    ECHECK(synthesize_signal(channel));
+    ECHECK(prec_synthesize_signal(channel, buf_idx));
     return prec_gen_Synchronise();
 }
 
-int prec_gen_getPhase(rp_channel_t channel, float *phase) {
+int prec_gen_getPhase(rp_channel_t channel, int buf_idx, float *phase) {
     CHANNEL_ACTION(channel,
             *phase = chA_phase,
             *phase = chB_phase)
     return RP_OK;
 }
 
-int prec_gen_setWaveform(rp_channel_t channel, rp_waveform_t type) {
+int prec_gen_setWaveform(rp_channel_t channel, int buf_idx, prec_waveform_t type) {
     CHANNEL_ACTION(channel,
             chA_waveform = type,
             chB_waveform = type)
-    if (type == RP_WAVEFORM_ARBITRARY) {
+    if (type == PREC_WAVEFORM_ARBITRARY) {
         CHANNEL_ACTION(channel,
                 chA_size = chA_arb_size,
                 chB_size = chB_arb_size)
@@ -180,17 +158,17 @@ int prec_gen_setWaveform(rp_channel_t channel, rp_waveform_t type) {
                 chA_size = BUFFER_LENGTH,
                 chB_size = BUFFER_LENGTH)
     }
-    return synthesize_signal(channel);
+    return prec_synthesize_signal(channel, buf_idx);
 }
 
-int prec_gen_getWaveform(rp_channel_t channel, rp_waveform_t *type) {
+int prec_gen_getWaveform(rp_channel_t channel, int buf_idx, prec_waveform_t *type) {
     CHANNEL_ACTION(channel,
             *type = chA_waveform,
             *type = chB_waveform)
     return RP_OK;
 }
 
-int prec_gen_setArbWaveform(rp_channel_t channel, float *data, uint32_t length) {
+int prec_gen_setArbWaveform(rp_channel_t channel, int buf_idx, float *data, uint32_t length) {
     // Check if data is normalized
     float min = FLT_MAX, max = -FLT_MAX; // initial values
     int i;
@@ -218,14 +196,14 @@ int prec_gen_setArbWaveform(rp_channel_t channel, float *data, uint32_t length) 
 
     if (channel == RP_CH_1) {
         chA_arb_size = length;
-        if(chA_waveform==RP_WAVEFORM_ARBITRARY){
-        	return synthesize_signal(channel);
+        if(chA_waveform==PREC_WAVEFORM_ARBITRARY){
+        	return prec_synthesize_signal(channel, buf_idx);
         }
     }
     else if (channel == RP_CH_2) {
     	chA_arb_size = length;
-        if(chB_waveform==RP_WAVEFORM_ARBITRARY){
-        	return synthesize_signal(channel);
+        if(chB_waveform==PREC_WAVEFORM_ARBITRARY){
+        	return prec_synthesize_signal(channel, buf_idx);
         }
     }
     else {
@@ -235,7 +213,7 @@ int prec_gen_setArbWaveform(rp_channel_t channel, float *data, uint32_t length) 
     return RP_OK;
 }
 
-int prec_gen_getArbWaveform(rp_channel_t channel, float *data, uint32_t *length) {
+int prec_gen_getArbWaveform(rp_channel_t channel, int buf_idx, float *data, uint32_t *length) {
     // If this data was not set, then this method will return incorrect data
     float *pointer;
     if (channel == RP_CH_1) {
@@ -255,58 +233,7 @@ int prec_gen_getArbWaveform(rp_channel_t channel, float *data, uint32_t *length)
     return RP_OK;
 }
 
-int prec_gen_setDutyCycle(rp_channel_t channel, float ratio) {
-    if (ratio < DUTY_CYCLE_MIN || ratio > DUTY_CYCLE_MAX) {
-        return RP_EOOR;
-    }
-    CHANNEL_ACTION(channel,
-            chA_dutyCycle = ratio,
-            chB_dutyCycle = ratio)
-    return synthesize_signal(channel);
-}
-
-int prec_gen_getDutyCycle(rp_channel_t channel, float *ratio) {
-    CHANNEL_ACTION(channel,
-            *ratio = chA_dutyCycle,
-            *ratio = chB_dutyCycle)
-    return RP_OK;
-}
-
-int prec_gen_setGenMode(rp_channel_t channel, rp_gen_mode_t mode) {
-    if (mode == RP_GEN_MODE_CONTINUOUS) {
-        ECHECK(generate_setGatedBurst(channel, 0));
-        ECHECK(generate_setBurstDelay(channel, 0));
-        ECHECK(generate_setBurstRepetitions(channel, 0));
-        ECHECK(generate_setBurstCount(channel, 0));
-        return triggerIfInternal(channel);
-    }
-    else if (mode == RP_GEN_MODE_BURST) {
-        ECHECK(prec_gen_setBurstCount(channel, channel == RP_CH_1 ? chA_burstCount : chB_burstCount));
-        ECHECK(prec_gen_setBurstRepetitions(channel, channel == RP_CH_1 ? chA_burstRepetition : chB_burstRepetition));
-        ECHECK(prec_gen_setBurstPeriod(channel, channel == RP_CH_1 ? chA_burstPeriod : chB_burstPeriod));
-        return RP_OK;
-    }
-    else if (mode == RP_GEN_MODE_STREAM) {
-        return RP_EUF;
-    }
-    else {
-        return RP_EIPV;
-    }
-}
-
-int prec_gen_getGenMode(rp_channel_t channel, rp_gen_mode_t *mode) {
-    uint32_t num;
-    ECHECK(generate_getBurstCount(channel, &num));
-    if (num != 0) {
-        *mode = RP_GEN_MODE_BURST;
-    }
-    else {
-        *mode = RP_GEN_MODE_CONTINUOUS;
-    }
-    return RP_OK;
-}
-
-int prec_gen_setBurstCount(rp_channel_t channel, int num) {
+int prec_gen_setBurstCount(rp_channel_t channel, int buf_idx, int num) {
     if ((num < BURST_COUNT_MIN || num > BURST_COUNT_MAX) && num == 0) {
         return RP_EOOR;
     }
@@ -316,98 +243,25 @@ int prec_gen_setBurstCount(rp_channel_t channel, int num) {
     if (num == -1) {    // -1 represents infinity. In FPGA value 0 represents infinity
         num = 0;
     }
-    ECHECK(generate_setBurstCount(channel, (uint32_t) num));
+    ECHECK(prec_generate_setBurstCount(channel, buf_idx, (uint32_t) num));
 
     // trigger channel if internal trigger source
-    return triggerIfInternal(channel);
+    return prec_triggerIfInternal(channel);
 }
 
-int prec_gen_getBurstCount(rp_channel_t channel, int *num) {
-    return generate_getBurstCount(channel, (uint32_t *) num);
-}
-
-int prec_gen_setBurstRepetitions(rp_channel_t channel, int repetitions) {
-    if ((repetitions < BURST_REPETITIONS_MIN || repetitions > BURST_REPETITIONS_MAX) && repetitions != -1) {
-        return RP_EOOR;
-    }
-    CHANNEL_ACTION(channel,
-            chA_burstRepetition = repetitions,
-            chB_burstRepetition = repetitions)
-    if (repetitions == -1) {
-        repetitions = 0;
-    }
-    ECHECK(generate_setBurstRepetitions(channel, (uint32_t) (repetitions-1)));
-
-    // trigger channel if internal trigger source
-    return triggerIfInternal(channel);
-}
-
-int prec_gen_getBurstRepetitions(rp_channel_t channel, int *repetitions) {
-    uint32_t tmp;
-    ECHECK(generate_getBurstRepetitions(channel, &tmp));
-    *repetitions = tmp+1;
-    return RP_OK;
-}
-
-int prec_gen_setBurstPeriod(rp_channel_t channel, uint32_t period) {
-    if (period < BURST_PERIOD_MIN || period > BURST_PERIOD_MAX) {
-        return RP_EOOR;
-    }
-    int burstCount;
-    CHANNEL_ACTION(channel,
-            burstCount = chA_burstCount,
-            burstCount = chB_burstCount)
-    // period = signal_time * burst_count + delay_time
-    int delay = (int) (period - (1 / (channel == RP_CH_1 ? chA_frequency : chB_frequency) * MICRO) * burstCount);
-    if (delay <= 0) {
-        // if delay is 0, then FPGA generates continuous signal
-        delay = 1;
-    }
-    ECHECK(generate_setBurstDelay(channel, (uint32_t) delay));
-
-    CHANNEL_ACTION(channel,
-                   chA_burstPeriod = period,
-                   chB_burstPeriod = period)
-
-    // trigger channel if internal trigger source
-    return triggerIfInternal(channel);
-}
-
-int prec_gen_getBurstPeriod(rp_channel_t channel, uint32_t *period) {
-    uint32_t delay, burstCount;
-    float frequency;
-    ECHECK(generate_getBurstDelay(channel, &delay));
-    ECHECK(generate_getBurstCount(channel, &burstCount));
-    ECHECK(generate_getFrequency(channel, &frequency));
-
-    if (delay == 1) {    // if delay is 0, then FPGA generates continuous signal
-        delay = 0;
-    }
-    *period = (uint32_t) (delay + (1 / frequency * MICRO) * burstCount);
-    return RP_OK;
+int prec_gen_getBurstCount(rp_channel_t channel, int buf_idx, int *num) {
+    return prec_generate_getBurstCount(channel, buf_idx, (uint32_t *) num);
 }
 
 int prec_gen_setTriggerSource(rp_channel_t channel, rp_trig_src_t src) {
-    if (src == RP_GEN_TRIG_GATED_BURST) {
-        ECHECK(generate_setGatedBurst(channel, 1));
-        ECHECK(prec_gen_setGenMode(channel, RP_GEN_MODE_BURST));
-        return generate_setTriggerSource(channel, 2);
-    }
-    else {
-        ECHECK(generate_setGatedBurst(channel, 0));
-    }
-
     if (src == RP_GEN_TRIG_SRC_INTERNAL) {
-        ECHECK(prec_gen_setGenMode(channel, RP_GEN_MODE_CONTINUOUS));
-        return generate_setTriggerSource(channel, 1);
+        return prec_generate_setTriggerSource(channel, 1);
     }
     else if (src == RP_GEN_TRIG_SRC_EXT_PE) {
-        ECHECK(prec_gen_setGenMode(channel, RP_GEN_MODE_BURST));
-        return generate_setTriggerSource(channel, 2);
+        return prec_generate_setTriggerSource(channel, 2);
     }
     else if (src == RP_GEN_TRIG_SRC_EXT_NE) {
-        ECHECK(prec_gen_setGenMode(channel, RP_GEN_MODE_BURST));
-        return generate_setTriggerSource(channel, 3);
+        return prec_generate_setTriggerSource(channel, 3);
     }
     else {
         return RP_EIPV;
@@ -415,25 +269,18 @@ int prec_gen_setTriggerSource(rp_channel_t channel, rp_trig_src_t src) {
 }
 
 int prec_gen_getTriggerSource(rp_channel_t channel, rp_trig_src_t *src) {
-    uint32_t gated;
-    ECHECK(generate_getGatedBurst(channel, &gated));
-    if (gated == 1) {
-        *src = RP_GEN_TRIG_GATED_BURST;
-    }
-    else {
-        ECHECK(generate_getTriggerSource(channel, (uint32_t *) &src));
-    }
+    ECHECK(prec_generate_getTriggerSource(channel, (uint32_t *) &src));
     return RP_OK;
 }
 
 int prec_gen_setTriggerEventCondition(rp_trig_evt_t evt) {
-    ECHECK(generate_setTriggerEventCondition(evt));
+    ECHECK(prec_generate_setTriggerEventCondition(evt));
     return RP_OK;
 }
 
 int prec_gen_getTriggerEventCondition(rp_trig_evt_t *evt) {
     uint32_t event;
-    ECHECK(generate_getTriggerEventCondition(&event));
+    ECHECK(prec_generate_getTriggerEventCondition(&event));
     *evt = event & 0x0f;
     return RP_OK;
 }
@@ -442,25 +289,22 @@ int prec_gen_Trigger(uint32_t channel) {
     switch (channel) {
         case 0:
         case 1:
-            ECHECK(prec_gen_setGenMode(channel, RP_GEN_MODE_BURST));
-            return generate_setTriggerSource(channel, RP_GEN_TRIG_SRC_INTERNAL);
+            return prec_generate_setTriggerSource(channel, RP_GEN_TRIG_SRC_INTERNAL);
         case 2:
         case 3:
-            ECHECK(prec_gen_setGenMode(RP_CH_1, RP_GEN_MODE_BURST));
-            ECHECK(prec_gen_setGenMode(RP_CH_2, RP_GEN_MODE_BURST));
-            return generate_simultaneousTrigger();
+            return prec_generate_simultaneousTrigger();
         default:
             return RP_EOOR;
     }
 }
 
 int prec_gen_Synchronise() {
-    return generate_Synchronise();
+    return prec_generate_Synchronise();
 }
 
-int synthesize_signal(rp_channel_t channel) {
+int prec_synthesize_signal(rp_channel_t channel, int buf_idx) {
     float data[BUFFER_LENGTH];
-    rp_waveform_t waveform;
+    prec_waveform_t waveform;
     float dutyCycle, frequency;
     uint32_t size, phase;
 
@@ -483,34 +327,34 @@ int synthesize_signal(rp_channel_t channel) {
     }
 
     switch (waveform) {
-        case RP_WAVEFORM_SINE     : synthesis_sin      (data);                 break;
-        case RP_WAVEFORM_TRIANGLE : synthesis_triangle (data);                 break;
-        case RP_WAVEFORM_SQUARE   : synthesis_square   (frequency, data);      break;
-        case RP_WAVEFORM_RAMP_UP  : synthesis_rampUp   (data);                 break;
-        case RP_WAVEFORM_RAMP_DOWN: synthesis_rampDown (data);                 break;
-        case RP_WAVEFORM_DC       : synthesis_DC       (data);                 break;
-        case RP_WAVEFORM_PWM      : synthesis_PWM      (dutyCycle, data);      break;
-        case RP_WAVEFORM_ARBITRARY: synthesis_arbitrary(channel, data, &size); break;
+        case PREC_WAVEFORM_SINE     : prec_synthesis_sin      (data);                 break;
+        case PREC_WAVEFORM_TRIANGLE : prec_synthesis_triangle (data);                 break;
+        case PREC_WAVEFORM_SQUARE   : prec_synthesis_square   (frequency, data);      break;
+        case PREC_WAVEFORM_RAMP_UP  : prec_synthesis_rampUp   (data);                 break;
+        case PREC_WAVEFORM_RAMP_DOWN: prec_synthesis_rampDown (data);                 break;
+        case PREC_WAVEFORM_DC       : prec_synthesis_DC       (data);                 break;
+        case PREC_WAVEFORM_PWM      : prec_synthesis_PWM      (dutyCycle, data);      break;
+        case PREC_WAVEFORM_ARBITRARY: prec_synthesis_arbitrary(channel, data, &size); break;
         default:                    return RP_EIPV;
     }
-    return generate_writeData(channel, data, phase, size);
+    return prec_generate_writeData(channel, buf_idx, data, phase, size);
 }
 
-int synthesis_sin(float *data_out) {
+int prec_synthesis_sin(float *data_out) {
     for(int unsigned i = 0; i < BUFFER_LENGTH; i++) {
         data_out[i] = (float) (sin(2 * M_PI * (float) i / (float) BUFFER_LENGTH));
     }
     return RP_OK;
 }
 
-int synthesis_triangle(float *data_out) {
+int prec_synthesis_triangle(float *data_out) {
     for(int unsigned i = 0; i < BUFFER_LENGTH; i++) {
         data_out[i] = (float) ((asin(sin(2 * M_PI * (float) i / (float) BUFFER_LENGTH)) / M_PI * 2));
     }
     return RP_OK;
 }
 
-int synthesis_rampUp(float *data_out) {
+int prec_synthesis_rampUp(float *data_out) {
     data_out[BUFFER_LENGTH -1] = 0;
     for(int unsigned i = 0; i < BUFFER_LENGTH-1; i++) {
         data_out[BUFFER_LENGTH - i-2] = (float) (-1.0 * (acos(cos(M_PI * (float) i / (float) BUFFER_LENGTH)) / M_PI - 1));
@@ -518,21 +362,21 @@ int synthesis_rampUp(float *data_out) {
     return RP_OK;
 }
 
-int synthesis_rampDown(float *data_out) {
+int prec_synthesis_rampDown(float *data_out) {
     for(int unsigned i = 0; i < BUFFER_LENGTH; i++) {
         data_out[i] = (float) (-1.0 * (acos(cos(M_PI * (float) i / (float) BUFFER_LENGTH)) / M_PI - 1));
     }
     return RP_OK;
 }
 
-int synthesis_DC(float *data_out) {
+int prec_synthesis_DC(float *data_out) {
     for(int unsigned i = 0; i < BUFFER_LENGTH; i++) {
         data_out[i] = 1.0;
     }
     return RP_OK;
 }
 
-int synthesis_PWM(float ratio, float *data_out) {
+int prec_synthesis_PWM(float ratio, float *data_out) {
     // calculate number of samples that need to be high
     int h = (int) (BUFFER_LENGTH/2 * ratio);
 
@@ -547,7 +391,7 @@ int synthesis_PWM(float ratio, float *data_out) {
     return RP_OK;
 }
 
-int synthesis_arbitrary(rp_channel_t channel, float *data_out, uint32_t * size) {
+int prec_synthesis_arbitrary(rp_channel_t channel, float *data_out, uint32_t * size) {
     float *pointer;
     CHANNEL_ACTION(channel,
             pointer = chA_arbitraryData,
@@ -561,7 +405,7 @@ int synthesis_arbitrary(rp_channel_t channel, float *data_out, uint32_t * size) 
     return RP_OK;
 }
 
-int synthesis_square(float frequency, float *data_out) {
+int prec_synthesis_square(float frequency, float *data_out) {
     // Various locally used constants - HW specific parameters
     const int trans0 = 30;
     const int trans1 = 300;
@@ -580,11 +424,11 @@ int synthesis_square(float frequency, float *data_out) {
     return RP_OK;
 }
 
-int triggerIfInternal(rp_channel_t channel) {
+int prec_triggerIfInternal(rp_channel_t channel) {
     uint32_t value;
-    ECHECK(generate_getTriggerSource(channel, &value));
+    ECHECK(prec_generate_getTriggerSource(channel, &value));
     if (value == RP_GEN_TRIG_SRC_INTERNAL) {
-        ECHECK(generate_setTriggerSource(channel, 1))
+        ECHECK(prec_generate_setTriggerSource(channel, 1))
     }
     return RP_OK;
 }

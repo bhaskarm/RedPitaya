@@ -46,9 +46,9 @@ typedef struct ch_properties {
     unsigned int                    :2;
     unsigned int amplitudeOffset    :14;
     unsigned int                    :2;
-    uint32_t counterWrap;
-    uint32_t startOffset;
-    uint32_t counterStep;
+    uint32_t pointerEnd;
+    uint32_t pointerStart;
+    uint32_t pointerStep;
     unsigned int                    :2;
     uint32_t buffReadPointer        :14;
     unsigned int                    :16;
@@ -75,34 +75,33 @@ typedef struct generate_control_s {
     unsigned int                    :7;
 
     ch_properties_t properties_chA;
+    ch_properties_t properties_chA_ar[3];
     ch_properties_t properties_chB;
-
-    unsigned int trigger_event_cond :4;
-    unsigned int                    :28;
+    ch_properties_t properties_chB_ar[3];
 } generate_control_t;
 
-int generate_Init();
-int generate_Release();
+int prec_generate_Init();
+int prec_generate_Release();
 
-int generate_setOutputDisable(rp_channel_t channel, bool disable);
-int generate_getOutputEnabled(rp_channel_t channel, bool *disabled);
-int generate_setAmplitude(rp_channel_t channel, int buf_idx, float amplitude);
-int generate_getAmplitude(rp_channel_t channel, int buf_idx, float *amplitude);
-int generate_setDCOffset(rp_channel_t channel, int buf_idx, float offset);
-int generate_getDCOffset(rp_channel_t channel, int buf_idx, float *offset);
-int generate_setFrequency(rp_channel_t channel, int buf_idx, float frequency);
-int generate_getFrequency(rp_channel_t channel, int buf_idx, float *frequency);
-int generate_setWrapCounter(rp_channel_t channel, int buf_idx, uint32_t size);
-int generate_setTriggerSource(rp_channel_t channel, unsigned short value);
-int generate_getTriggerSource(rp_channel_t channel, uint32_t *value);
-int generate_setBurstCount(rp_channel_t channel, int buf_idx, uint32_t num);
-int generate_getBurstCount(rp_channel_t channel, int buf_idx, uint32_t *num);
-int generate_setTriggerEventCondition(unsigned short value);
-int generate_getTriggerEventCondition(uint32_t *value);
+int prec_generate_setOutputDisable(rp_channel_t channel, bool disable);
+int prec_generate_getOutputEnabled(rp_channel_t channel, bool *disabled);
+int prec_generate_setAmplitude(rp_channel_t channel, int buf_idx, float amplitude);
+int prec_generate_getAmplitude(rp_channel_t channel, int buf_idx, float *amplitude);
+int prec_generate_setDCOffset(rp_channel_t channel, int buf_idx, float offset);
+int prec_generate_getDCOffset(rp_channel_t channel, int buf_idx, float *offset);
+int prec_generate_setFrequency(rp_channel_t channel, int buf_idx, float frequency);
+int prec_generate_getFrequency(rp_channel_t channel, int buf_idx, float *frequency);
+int prec_generate_setWrapCounter(rp_channel_t channel, int buf_idx, uint32_t size);
+int prec_generate_setTriggerSource(rp_channel_t channel, unsigned short value);
+int prec_generate_getTriggerSource(rp_channel_t channel, uint32_t *value);
+int prec_generate_setBurstCount(rp_channel_t channel, int buf_idx, uint32_t num);
+int prec_generate_getBurstCount(rp_channel_t channel, int buf_idx, uint32_t *num);
+int prec_generate_setTriggerEventCondition(unsigned short value);
+int prec_generate_getTriggerEventCondition(uint32_t *value);
 
-int generate_simultaneousTrigger();
-int generate_Synchronise();
+int prec_generate_simultaneousTrigger();
+int prec_generate_Synchronise();
 
-int generate_writeData(rp_channel_t channel, int buf_idx, float *data, uint32_t start, uint32_t length);
+int prec_generate_writeData(rp_channel_t channel, int buf_idx, float *data, uint32_t start, uint32_t length);
 
 #endif //__PREC_GENERATE_H

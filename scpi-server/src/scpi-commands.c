@@ -23,6 +23,7 @@
 #include "apin.h"
 #include "acquire.h"
 #include "generate.h"
+#include "prec_generate.h"
 #include "scpi/error.h"
 #include "scpi/ieee488.h"
 #include "scpi/minimal.h"

@@ -1,9 +1,9 @@
 ##
-# $Id: $
+# $Id: Makefile 1249 2014-02-22 20:21:40Z ales.bardorfer $
 #
 # (c) Red Pitaya  http://www.redpitaya.com
 #
-# Library librp project file. To build the library run:
+# Monitor utility project file. To build executable for acquire utility run:
 # 'make all'
 #
 # This project file is written for GNU/Make software. For more details please 
@@ -17,40 +17,17 @@
 VERSION ?= 0.00-0000
 REVISION ?= devbuild
 
-# Extensions
-CPPEXT   = .c
-CXXEXT   = .cpp
-OBJEXT   = .o
+# List of compiled object files (not yet linked to executable)
+OBJS = quad_generate.o fpga_awg.o
+# List of raw source files (all object files, renamed from .o to .c)
+SRCS = $(subst .o,.c, $(OBJS)))
 
-# Directories paths
-OBJECTS_DIR = ../obj
-INSTALL_DIR ?= .
-SOURCE_DIR  = .
-OUTPUT_DIR  = ../../lib
-
-# Library name
-TARGET=$(OUTPUT_DIR)/librp.so
-
-# List of compiled object files
-OBJECTS =	common.o \
-		kiss_fft/kiss_fft.c \
-		kiss_fft/kiss_fftr.c \
-		oscilloscope.o \
-		acq_handler.o \
-		prec_gen_handler.o \
-		calib.o \
-		prec_generate.o \
-		spec_dsp.o \
-		spec_fpga.o \
-		rp.o
-
-OBJS = $(patsubst %$(OBJEXT), $(OBJECTS_DIR)/%$(OBJEXT), $(OBJECTS))
+# Executable name
+TARGET=quad_generate
 
 # GCC compiling & linking flags
-CFLAGS  = -std=gnu99 -Wall -Werror -fPIC -Ikiss_fft -Os -s
+CFLAGS=-g -std=gnu99 -Wall -Werror
 CFLAGS += -DVERSION=$(VERSION) -DREVISION=$(REVISION)
-CFLAGS += -I../../include
-LDFLAGS=-shared -Wl,--version-script=exportmap
 
 # Red Pitaya common SW directory
 SHARED=../../shared/
@@ -61,6 +38,20 @@ LIBS=-lm -lpthread
 
 # Main GCC executable (used for compiling and linking)
 CC=$(CROSS_COMPILE)gcc
+# Installation directory
+INSTALL_DIR ?= .
+
+# Makefile is composed of so called 'targets'. They give basic structure what 
+# needs to be execued during various stages of the building/removing/installing
+# of software package.
+# Simple Makefile targets have the following structure:
+# <name>: <dependencies>
+#	<command1>
+#       <command2>
+#       ...
+# The target <name> is completed in the following order:
+#   - list od <dependencies> finished
+#   - all <commands> in the body of targets are executed succsesfully
 
 # Main Makefile target 'all' - it iterates over all targets listed in $(TARGET)
 # variable.
@@ -70,15 +61,13 @@ all: $(TARGET)
 # It applies to all files ending with .o. During partial building only new object
 # files are created for the source files (.c) which have newer timestamp then 
 # objects (.o) files.
-$(OBJECTS_DIR)/%.o:$(SOURCE_DIR)/%.c
-	@mkdir -p $(@D)
+%.o: %.c version.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 # Makefile target with rules how to link executable for each target from $(TARGET)
 # list.
 $(TARGET): $(OBJS)
-	mkdir -p $(OUTPUT_DIR)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) $(LDFLAGS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 # Version header for traceability
 version.h:
@@ -86,13 +75,13 @@ version.h:
 
 # Clean target - when called it cleans all object files and executables.
 clean:
-	rm -f $(TARGET) $(OBJECTS_DIR)/*.o
-	rm -rf $(INSTALL_DIR)/lib
+	rm -f $(TARGET) *.o
 
 # Install target - creates 'bin/' sub-directory in $(INSTALL_DIR) and copies all
 # executables to that location.
 install:
-	mkdir -p $(INSTALL_DIR)/lib
-	mkdir -p $(INSTALL_DIR)/include
-	cp  $(TARGET) $(INSTALL_DIR)/lib
-	cp -r ../../include/redpitaya $(INSTALL_DIR)/include
+	mkdir -p $(INSTALL_DIR)/bin
+	cp $(TARGET) $(INSTALL_DIR)/bin
+	mkdir -p $(INSTALL_DIR)/src/utils/$(TARGET)
+	-rm -f $(TARGET) *.o
+	cp -r * $(INSTALL_DIR)/src/utils/$(TARGET)/

@@ -25,7 +25,7 @@ extern "C" {
 #include <stdbool.h>
 
 #define ADC_BUFFER_SIZE             (16*1024)
-#define RP_ASG_METHODS 1 // For now keep the leagcy code around
+#define RP_ASG_METHODS 0 // For now keep the leagcy code around
 
 /** @name Error codes
  *  Various error codes returned by the API.
@@ -153,6 +153,17 @@ typedef enum {
     RP_WAVEFORM_PWM,        //!< Wave form pwm
     RP_WAVEFORM_ARBITRARY   //!< Use defined wave form
 } rp_waveform_t;
+
+typedef enum {
+    PREC_WAVEFORM_SINE,       //!< Wave form sine
+    PREC_WAVEFORM_SQUARE,     //!< Wave form square
+    PREC_WAVEFORM_TRIANGLE,   //!< Wave form triangle
+    PREC_WAVEFORM_RAMP_UP,    //!< Wave form sawtooth (/|)
+    PREC_WAVEFORM_RAMP_DOWN,  //!< Wave form reversed sawtooth (|\)
+    PREC_WAVEFORM_DC,         //!< Wave form dc
+    PREC_WAVEFORM_PWM,        //!< Wave form pwm
+    PREC_WAVEFORM_ARBITRARY   //!< Use defined wave form
+} prec_waveform_t;
 
 typedef enum {
     RP_GEN_MODE_CONTINUOUS, //!< Continuous signal generation
@@ -1033,7 +1044,9 @@ int rp_AcqGetBufSize(uint32_t* size);
 ///@{
 
 
-#ifdef RP_ASG_METHODS
+int prec_GenReset();
+
+#if RP_ASG_METHODS
 /**
 * Sets generate to default values.
 */
@@ -1313,28 +1326,29 @@ float rp_CmnCnvCntToV(uint32_t field_len, uint32_t cnts, float adc_max_v, uint32
 * Precidyne Multibuf Generate functions
 */
 
+int rp_GenMyReset();
 int prec_GenReset();
-int prec_GenOutDisable(prec_channel_t channel);
-int prec_GenOutEnable(prec_channel_t channel);
-int prec_GenOutIsEnabled(prec_channel_t channel, bool *value);
-int prec_GenAmp(prec_channel_t channel, int buf_idx, float amplitude);
-int prec_GenGetAmp(prec_channel_t channel, int buf_idx, float *amplitude);
-int prec_GenOffset(prec_channel_t channel, int buf_idx, float offset);
-int prec_GenGetOffset(prec_channel_t channel, int buf_idx, float *offset);
-int prec_GenFreq(prec_channel_t channel, int buf_idx, float frequency);
-int prec_GenGetFreq(prec_channel_t channel, int buf_idx, float *frequency);
-int prec_GenPhase(prec_channel_t channel, int buf_idx, float phase);
-int prec_GenGetPhase(prec_channel_t channel, int buf_idx, float *phase);
-int prec_GenWaveform(prec_channel_t channel, int buf_idx, prec_waveform_t type);
-int prec_GenGetWaveform(prec_channel_t channel, int buf_idx, prec_waveform_t *type);
-int prec_GenArbWaveform(prec_channel_t channel, int buf_idx, float *waveform, uint32_t length);
-int prec_GenGetArbWaveform(prec_channel_t channel, int buf_idx, float *waveform, uint32_t *length);
-int prec_GenBurstCount(prec_channel_t channel, int buf_idx, int num);
-int prec_GenGetBurstCount(prec_channel_t channel, int buf_idx, int *num);
-int prec_GenTriggerSource(prec_channel_t channel, prec_trig_src_t src);
-int prec_GenGetTriggerSource(prec_channel_t channel, prec_trig_src_t *src);
+int prec_GenOutDisable(rp_channel_t channel);
+int prec_GenOutEnable(rp_channel_t channel);
+int prec_GenOutIsEnabled(rp_channel_t channel, bool *value);
+int prec_GenAmp(rp_channel_t channel, int buf_idx, float amplitude);
+int prec_GenGetAmp(rp_channel_t channel, int buf_idx, float *amplitude);
+int prec_GenOffset(rp_channel_t channel, int buf_idx, float offset);
+int prec_GenGetOffset(rp_channel_t channel, int buf_idx, float *offset);
+int prec_GenFreq(rp_channel_t channel, int buf_idx, float frequency);
+int prec_GenGetFreq(rp_channel_t channel, int buf_idx, float *frequency);
+int prec_GenPhase(rp_channel_t channel, int buf_idx, float phase);
+int prec_GenGetPhase(rp_channel_t channel, int buf_idx, float *phase);
+int prec_GenWaveform(rp_channel_t channel, int buf_idx, prec_waveform_t type);
+int prec_GenGetWaveform(rp_channel_t channel, int buf_idx, prec_waveform_t *type);
+int prec_GenArbWaveform(rp_channel_t channel, int buf_idx, float *waveform, uint32_t length);
+int prec_GenGetArbWaveform(rp_channel_t channel, int buf_idx, float *waveform, uint32_t *length);
+int prec_GenBurstCount(rp_channel_t channel, int buf_idx, int num);
+int prec_GenGetBurstCount(rp_channel_t channel, int buf_idx, int *num);
+int prec_GenTriggerSource(rp_channel_t channel, rp_trig_src_t src);
+int prec_GenGetTriggerSource(rp_channel_t channel, rp_trig_src_t *src);
 int prec_GenTrigger(uint32_t channel);
-float prec_CmnCnvCntToV(uint32_t field_len, uint32_t cnts, float adc_max_v, uint32_t calibScale, int calib_dc_off, float user_dc_off)
+float prec_CmnCnvCntToV(uint32_t field_len, uint32_t cnts, float adc_max_v, uint32_t calibScale, int calib_dc_off, float user_dc_off);
 #endif // RP_ASG_METHODS
 
 #ifdef __cplusplus

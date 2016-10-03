@@ -24,7 +24,7 @@ OBJEXT   = .o
 
 # Directories paths
 OBJECTS_DIR = ../obj
-OUTPUT_DIR  = ../
+OUTPUT_DIR  = ..
 SOURCE_DIR  = .
 INSTALL_DIR ?= .
 
@@ -38,7 +38,7 @@ OBJECTS =	scpi-commands.o \
 		dpin.o \
 		apin.o \
 		acquire.o \
-		generate.o \
+		prec_generate.o \
 		common.o
 
 OBJS = $(patsubst %$(OBJEXT), $(OBJECTS_DIR)/%$(OBJEXT), $(OBJECTS))

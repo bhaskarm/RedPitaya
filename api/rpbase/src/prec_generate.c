@@ -26,7 +26,7 @@ static volatile int32_t *data_chA = NULL;
 static volatile int32_t *data_chB = NULL;
 
 
-int generate_Init() {
+int prec_generate_Init() {
 //  ECHECK(cmn_Init());
     ECHECK(cmn_Map(GENERATE_BASE_SIZE, GENERATE_BASE_ADDR, (void **) &generate));
     data_chA = (int32_t *) ((char *) generate + (CHA_DATA_OFFSET));
@@ -34,7 +34,7 @@ int generate_Init() {
     return RP_OK;
 }
 
-int generate_Release() {
+int prec_generate_Release() {
     ECHECK(cmn_Unmap(GENERATE_BASE_SIZE, (void **) &generate));
 //  ECHECK(cmn_Release());
     data_chA = NULL;
@@ -49,7 +49,7 @@ int getChannelPropertiesAddress(volatile ch_properties_t **ch_properties, rp_cha
     return RP_OK;
 }
 
-int generate_setOutputDisable(rp_channel_t channel, bool disable) {
+int prec_generate_setOutputDisable(rp_channel_t channel, bool disable) {
     if (channel == RP_CH_1) {
         generate->AsetOutputTo0 = disable ? 1 : 0;
     }
@@ -62,7 +62,7 @@ int generate_setOutputDisable(rp_channel_t channel, bool disable) {
     return RP_OK;
 }
 
-int generate_getOutputEnabled(rp_channel_t channel, bool *enabled) {
+int prec_generate_getOutputEnabled(rp_channel_t channel, bool *enabled) {
     uint32_t value;
     CHANNEL_ACTION(channel,
             value = generate->AsetOutputTo0,
@@ -71,7 +71,7 @@ int generate_getOutputEnabled(rp_channel_t channel, bool *enabled) {
     return RP_OK;
 }
 
-int generate_setAmplitude(rp_channel_t channel, float amplitude) {
+int prec_generate_setAmplitude(rp_channel_t channel, int buf_idx, float amplitude) {
     volatile ch_properties_t *ch_properties;
 
     rp_calib_params_t calib = calib_GetParams();
@@ -82,7 +82,7 @@ int generate_setAmplitude(rp_channel_t channel, float amplitude) {
     return RP_OK;
 }
 
-int generate_getAmplitude(rp_channel_t channel, float *amplitude) {
+int prec_generate_getAmplitude(rp_channel_t channel, int buf_idx, float *amplitude) {
     volatile ch_properties_t *ch_properties;
 
     rp_calib_params_t calib = calib_GetParams();
@@ -93,7 +93,7 @@ int generate_getAmplitude(rp_channel_t channel, float *amplitude) {
     return RP_OK;
 }
 
-int generate_setDCOffset(rp_channel_t channel, float offset) {
+int prec_generate_setDCOffset(rp_channel_t channel, int buf_idx, float offset) {
     volatile ch_properties_t *ch_properties;
 
     rp_calib_params_t calib = calib_GetParams();
@@ -105,7 +105,7 @@ int generate_setDCOffset(rp_channel_t channel, float offset) {
     return RP_OK;
 }
 
-int generate_getDCOffset(rp_channel_t channel, float *offset) {
+int prec_generate_getDCOffset(rp_channel_t channel, int buf_idx, float *offset) {
     volatile ch_properties_t *ch_properties;
 
     rp_calib_params_t calib = calib_GetParams();
@@ -117,122 +117,80 @@ int generate_getDCOffset(rp_channel_t channel, float *offset) {
     return RP_OK;
 }
 
-int generate_setFrequency(rp_channel_t channel, float frequency) {
+int prec_generate_setFrequency(rp_channel_t channel, int buf_idx, float frequency) {
     volatile ch_properties_t *ch_properties;
     ECHECK(getChannelPropertiesAddress(&ch_properties, channel));
-    ch_properties->counterStep = (uint32_t) round(65536 * frequency / DAC_FREQUENCY * BUFFER_LENGTH);
+    ch_properties->pointerStep = (uint32_t) round(65536 * frequency / DAC_FREQUENCY * BUFFER_LENGTH);
     channel == RP_CH_1 ? (generate->ASM_WrapPointer = 1) : (generate->BSM_WrapPointer = 1);
     return RP_OK;
 }
 
-int generate_getFrequency(rp_channel_t channel, float *frequency) {
+int prec_generate_getFrequency(rp_channel_t channel, int buf_idx, float *frequency) {
     volatile ch_properties_t *ch_properties;
     ECHECK(getChannelPropertiesAddress(&ch_properties, channel));
-    *frequency = (float) round((ch_properties->counterStep * DAC_FREQUENCY) / (65536 * BUFFER_LENGTH));
+    *frequency = (float) round((ch_properties->pointerStep * DAC_FREQUENCY) / (65536 * BUFFER_LENGTH));
     return RP_OK;
 }
 
-int generate_setWrapCounter(rp_channel_t channel, uint32_t size) {
+int prec_generate_setWrapCounter(rp_channel_t channel, int buf_idx, uint32_t size) {
     CHANNEL_ACTION(channel,
-            generate->properties_chA.counterWrap = 65536 * size - 1,
-            generate->properties_chB.counterWrap = 65536 * size - 1)
+            generate->properties_chA.pointerEnd = 65536 * size - 1,
+            generate->properties_chB.pointerEnd = 65536 * size - 1)
     return RP_OK;
 }
 
-int generate_setTriggerSource(rp_channel_t channel, unsigned short value) {
+int prec_generate_setTriggerSource(rp_channel_t channel, unsigned short value) {
     CHANNEL_ACTION(channel,
             generate->AtriggerSelector = value,
             generate->BtriggerSelector = value)
     return RP_OK;
 }
 
-int generate_getTriggerSource(rp_channel_t channel, uint32_t *value) {
+int prec_generate_getTriggerSource(rp_channel_t channel, uint32_t *value) {
     CHANNEL_ACTION(channel,
             *value = generate->AtriggerSelector,
             *value = generate->BtriggerSelector)
     return RP_OK;
 }
 
-int generate_setGatedBurst(rp_channel_t channel, uint32_t value) {
-    CHANNEL_ACTION(channel,
-            generate->AgatedBursts = value,
-            generate->BgatedBursts = value)
-    return RP_OK;
-}
-
-int generate_getGatedBurst(rp_channel_t channel, uint32_t *value) {
-    CHANNEL_ACTION(channel,
-            *value = generate->AgatedBursts,
-            *value = generate->BgatedBursts)
-    return RP_OK;
-}
-
-int generate_setBurstCount(rp_channel_t channel, uint32_t num) {
+int prec_generate_setBurstCount(rp_channel_t channel, int buf_idx, uint32_t num) {
     volatile ch_properties_t *ch_properties;
     ECHECK(getChannelPropertiesAddress(&ch_properties, channel));
     ch_properties->cyclesInOneBurst = num;
     return RP_OK;
 }
 
-int generate_getBurstCount(rp_channel_t channel, uint32_t *num) {
+int prec_generate_getBurstCount(rp_channel_t channel, int buf_idx, uint32_t *num) {
     volatile ch_properties_t *ch_properties;
     ECHECK(getChannelPropertiesAddress(&ch_properties, channel));
     *num = ch_properties->cyclesInOneBurst;
     return RP_OK;
 }
 
-int generate_setBurstRepetitions(rp_channel_t channel, uint32_t repetitions) {
-    volatile ch_properties_t *ch_properties;
-    ECHECK(getChannelPropertiesAddress(&ch_properties, channel));
-    ch_properties->burstRepetitions = repetitions;
+int prec_generate_setTriggerEventCondition(unsigned short value) {
+    //generate->trigger_event_cond = value;
     return RP_OK;
 }
 
-int generate_getBurstRepetitions(rp_channel_t channel, uint32_t *repetitions) {
-    volatile ch_properties_t *ch_properties;
-    ECHECK(getChannelPropertiesAddress(&ch_properties, channel));
-    *repetitions = ch_properties->burstRepetitions;
+int prec_generate_getTriggerEventCondition(uint32_t *value) {
+    //*value = generate->trigger_event_cond;
     return RP_OK;
 }
 
-int generate_setBurstDelay(rp_channel_t channel, uint32_t delay) {
-    volatile ch_properties_t *ch_properties;
-    ECHECK(getChannelPropertiesAddress(&ch_properties, channel));
-    ch_properties->delayBetweenBurstRepetitions = delay;
-    return RP_OK;
-}
-
-int generate_getBurstDelay(rp_channel_t channel, uint32_t *delay) {
-    volatile ch_properties_t *ch_properties;
-    ECHECK(getChannelPropertiesAddress(&ch_properties, channel));
-    *delay = ch_properties->delayBetweenBurstRepetitions;
-    return RP_OK;
-}
-
-int generate_setTriggerEventCondition(unsigned short value) {
-    generate->trigger_event_cond = value;
-    return RP_OK;
-}
-
-int generate_getTriggerEventCondition(uint32_t *value) {
-    *value = generate->trigger_event_cond;
-    return RP_OK;
-}
-
-int generate_simultaneousTrigger() {
+int prec_generate_simultaneousTrigger() {
     // simultaneously trigger both channels
     return cmn_SetBits((uint32_t *) generate, 0x00010001, 0xFFFFFFFF);
 }
 
 
-int generate_Synchronise() {
+int prec_generate_Synchronise() {
     // Both channels must be reset simultaneously
     ECHECK(cmn_SetBits((uint32_t *) generate, 0x00400040, 0xFFFFFFFF));
     ECHECK(cmn_UnsetBits((uint32_t *) generate, 0x00400040, 0xFFFFFFFF));
     return RP_OK;
 }
 
-int generate_writeData(rp_channel_t channel, float *data, uint32_t start, uint32_t length) {
+int prec_generate_writeData(rp_channel_t channel, int buf_idx, float *data, uint32_t start, uint32_t length) {
     volatile int32_t *dataOut;
     CHANNEL_ACTION(channel,
             dataOut = data_chA,
@@ -240,7 +198,7 @@ int generate_writeData(rp_channel_t channel, float *data, uint32_t start, uint32
 
     volatile ch_properties_t *properties;
     ECHECK(getChannelPropertiesAddress(&properties, channel));
-    generate_setWrapCounter(channel, length);
+    prec_generate_setWrapCounter(channel, buf_idx, length);
 
     //rp_calib_params_t calib = calib_GetParams();
     int dc_offs = 0;//channel == RP_CH_1 ? calib.be_ch1_dc_offs: calib.be_ch2_dc_offs;
