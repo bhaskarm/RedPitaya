@@ -42,10 +42,10 @@ int prec_generate_Release() {
     return RP_OK;
 }
 
-int getChannelPropertiesAddress(volatile ch_properties_t **ch_properties, rp_channel_t channel) {
+int getChannelPropertiesAddress(volatile ch_properties_t **ch_properties, rp_channel_t channel, int buf_idx) {
     CHANNEL_ACTION(channel,
-            *ch_properties = &generate->properties_chA,
-            *ch_properties = &generate->properties_chB)
+            *ch_properties = &generate->properties_chA[buf_idx],
+            *ch_properties = &generate->properties_chB[buf_idx])
     return RP_OK;
 }
 
@@ -77,7 +77,7 @@ int prec_generate_setAmplitude(rp_channel_t channel, int buf_idx, float amplitud
     rp_calib_params_t calib = calib_GetParams();
     uint32_t amp_max = channel == RP_CH_1 ? calib.be_ch1_fs: calib.be_ch2_fs;
 
-    ECHECK(getChannelPropertiesAddress(&ch_properties, channel));
+    ECHECK(getChannelPropertiesAddress(&ch_properties, channel, buf_idx));
     ch_properties->amplitudeScale = cmn_CnvVToCnt(DATA_BIT_LENGTH, amplitude, AMPLITUDE_MAX, false, amp_max, 0, 0.0);
     return RP_OK;
 }
@@ -88,7 +88,7 @@ int prec_generate_getAmplitude(rp_channel_t channel, int buf_idx, float *amplitu
     rp_calib_params_t calib = calib_GetParams();
     uint32_t amp_max = channel == RP_CH_1 ? calib.be_ch1_fs: calib.be_ch2_fs;
 
-    ECHECK(getChannelPropertiesAddress(&ch_properties, channel));
+    ECHECK(getChannelPropertiesAddress(&ch_properties, channel, buf_idx));
     *amplitude = cmn_CnvCntToV(DATA_BIT_LENGTH, ch_properties->amplitudeScale, AMPLITUDE_MAX, amp_max, 0, 0.0);
     return RP_OK;
 }
@@ -100,7 +100,7 @@ int prec_generate_setDCOffset(rp_channel_t channel, int buf_idx, float offset) {
     int dc_offs = channel == RP_CH_1 ? calib.be_ch1_dc_offs: calib.be_ch2_dc_offs;
     uint32_t amp_max = channel == RP_CH_1 ? calib.be_ch1_fs: calib.be_ch2_fs;
 
-    ECHECK(getChannelPropertiesAddress(&ch_properties, channel));
+    ECHECK(getChannelPropertiesAddress(&ch_properties, channel, buf_idx));
     ch_properties->amplitudeOffset = cmn_CnvVToCnt(DATA_BIT_LENGTH, offset, (float) (OFFSET_MAX/2.f), false, amp_max, dc_offs, 0);
     return RP_OK;
 }
@@ -112,14 +112,14 @@ int prec_generate_getDCOffset(rp_channel_t channel, int buf_idx, float *offset) 
     int dc_offs = channel == RP_CH_1 ? calib.be_ch1_dc_offs: calib.be_ch2_dc_offs;
     uint32_t amp_max = channel == RP_CH_1 ? calib.be_ch1_fs: calib.be_ch2_fs;
 
-    ECHECK(getChannelPropertiesAddress(&ch_properties, channel));
+    ECHECK(getChannelPropertiesAddress(&ch_properties, channel, buf_idx));
     *offset = cmn_CnvCntToV(DATA_BIT_LENGTH, ch_properties->amplitudeOffset, (float) (OFFSET_MAX/2.f), amp_max, dc_offs, 0);
     return RP_OK;
 }
 
 int prec_generate_setFrequency(rp_channel_t channel, int buf_idx, float frequency) {
     volatile ch_properties_t *ch_properties;
-    ECHECK(getChannelPropertiesAddress(&ch_properties, channel));
+    ECHECK(getChannelPropertiesAddress(&ch_properties, channel, buf_idx));
     ch_properties->pointerStep = (uint32_t) round(65536 * frequency / DAC_FREQUENCY * BUFFER_LENGTH);
     channel == RP_CH_1 ? (generate->ASM_WrapPointer = 1) : (generate->BSM_WrapPointer = 1);
     return RP_OK;
@@ -127,15 +127,15 @@ int prec_generate_setFrequency(rp_channel_t channel, int buf_idx, float frequenc
 
 int prec_generate_getFrequency(rp_channel_t channel, int buf_idx, float *frequency) {
     volatile ch_properties_t *ch_properties;
-    ECHECK(getChannelPropertiesAddress(&ch_properties, channel));
+    ECHECK(getChannelPropertiesAddress(&ch_properties, channel, buf_idx));
     *frequency = (float) round((ch_properties->pointerStep * DAC_FREQUENCY) / (65536 * BUFFER_LENGTH));
     return RP_OK;
 }
 
 int prec_generate_setWrapCounter(rp_channel_t channel, int buf_idx, uint32_t size) {
     CHANNEL_ACTION(channel,
-            generate->properties_chA.pointerEnd = 65536 * size - 1,
-            generate->properties_chB.pointerEnd = 65536 * size - 1)
+            generate->properties_chA[buf_idx].pointerEnd = 65536 * size - 1,
+            generate->properties_chB[buf_idx].pointerEnd = 65536 * size - 1)
     return RP_OK;
 }
 
@@ -155,14 +155,14 @@ int prec_generate_getTriggerSource(rp_channel_t channel, uint32_t *value) {
 
 int prec_generate_setBurstCount(rp_channel_t channel, int buf_idx, uint32_t num) {
     volatile ch_properties_t *ch_properties;
-    ECHECK(getChannelPropertiesAddress(&ch_properties, channel));
+    ECHECK(getChannelPropertiesAddress(&ch_properties, channel, buf_idx));
     ch_properties->cyclesInOneBurst = num;
     return RP_OK;
 }
 
 int prec_generate_getBurstCount(rp_channel_t channel, int buf_idx, uint32_t *num) {
     volatile ch_properties_t *ch_properties;
-    ECHECK(getChannelPropertiesAddress(&ch_properties, channel));
+    ECHECK(getChannelPropertiesAddress(&ch_properties, channel, buf_idx));
     *num = ch_properties->cyclesInOneBurst;
     return RP_OK;
 }
@@ -197,7 +197,7 @@ int prec_generate_writeData(rp_channel_t channel, int buf_idx, float *data, uint
             dataOut = data_chB)
 
     volatile ch_properties_t *properties;
-    ECHECK(getChannelPropertiesAddress(&properties, channel));
+    ECHECK(getChannelPropertiesAddress(&properties, channel, buf_idx));
     prec_generate_setWrapCounter(channel, buf_idx, length);
 
     //rp_calib_params_t calib = calib_GetParams();

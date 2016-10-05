@@ -37,7 +37,6 @@ OBJECTS =	common.o \
 		kiss_fft/kiss_fftr.c \
 		oscilloscope.o \
 		acq_handler.o \
-		prec_gen_handler.o \
 		calib.o \
 		prec_generate.o \
 		spec_dsp.o \

@@ -124,7 +124,7 @@ scpi_result_t RP_GenFrequency(scpi_t *context){
     scpi_number_t frequency;
     rp_channel_t channel;
     int result;
-    int buf_idx;
+    int buf_idx = 0;
 
     if (RP_ParseChBufArgv(context, &channel, &buf_idx) != RP_OK){
         return SCPI_RES_ERR;
@@ -151,7 +151,7 @@ scpi_result_t RP_GenFrequencyQ(scpi_t *context) {
     float frequency;
     rp_channel_t channel;
     int result;
-    int buf_idx;
+    int buf_idx = 0;
 
     if (RP_ParseChBufArgv(context, &channel, &buf_idx) != RP_OK){
         return SCPI_RES_ERR;
@@ -175,7 +175,7 @@ scpi_result_t RP_GenWaveForm(scpi_t *context) {
     rp_channel_t channel;
     int32_t wave_form;
     int result;
-    int buf_idx;
+    int buf_idx = 0;
 
     if (RP_ParseChBufArgv(context, &channel, &buf_idx) != RP_OK){
         return SCPI_RES_ERR;
@@ -205,7 +205,7 @@ scpi_result_t RP_GenWaveFormQ(scpi_t *context) {
     const char *wf_name; 
     rp_channel_t channel;
     prec_waveform_t wave_form;
-    int buf_idx;
+    int buf_idx = 0;
 
     if (RP_ParseChBufArgv(context, &channel, &buf_idx) != RP_OK){
         return SCPI_RES_ERR;
@@ -233,7 +233,7 @@ scpi_result_t RP_GenAmplitude(scpi_t *context) {
     rp_channel_t channel;
     scpi_number_t amplitude;
     int result;
-    int buf_idx;
+    int buf_idx = 0;
 
     if (RP_ParseChBufArgv(context, &channel, &buf_idx) != RP_OK){
         return SCPI_RES_ERR;
@@ -259,7 +259,7 @@ scpi_result_t RP_GenAmplitudeQ(scpi_t *context) {
     rp_channel_t channel;
     float amplitude;
     int result;
-    int buf_idx;
+    int buf_idx = 0;
 
     if (RP_ParseChBufArgv(context, &channel, &buf_idx) != RP_OK){
         return SCPI_RES_ERR;
@@ -282,7 +282,7 @@ scpi_result_t RP_GenOffset(scpi_t *context) {
     rp_channel_t channel;
     scpi_number_t offset;
     int result;
-    int buf_idx;
+    int buf_idx = 0;
 
     if (RP_ParseChBufArgv(context, &channel, &buf_idx) != RP_OK){
         return SCPI_RES_ERR;
@@ -308,7 +308,7 @@ scpi_result_t RP_GenOffsetQ(scpi_t *context) {
     rp_channel_t channel;
     float offset;
     int result;
-    int buf_idx;
+    int buf_idx = 0;
 
     if (RP_ParseChBufArgv(context, &channel, &buf_idx) != RP_OK){
         return SCPI_RES_ERR;
@@ -332,7 +332,7 @@ scpi_result_t RP_GenPhase(scpi_t *context) {
     rp_channel_t channel;
     scpi_number_t phase;
     int result;
-    int buf_idx;
+    int buf_idx = 0;
 
     if (RP_ParseChBufArgv(context, &channel, &buf_idx) != RP_OK){
         return SCPI_RES_ERR;
@@ -359,7 +359,7 @@ scpi_result_t RP_GenPhaseQ(scpi_t *context) {
     rp_channel_t channel;
     int result;
     float phase;
-    int buf_idx;
+    int buf_idx = 0;
 
     if (RP_ParseChBufArgv(context, &channel, &buf_idx) != RP_OK){
         return SCPI_RES_ERR;
@@ -397,7 +397,7 @@ scpi_result_t RP_GenArbitraryWaveForm(scpi_t *context) {
     float buffer[BUFFER_LENGTH];
     uint32_t size;
     int result;
-    int buf_idx;
+    int buf_idx = 0;
 
     if (RP_ParseChBufArgv(context, &channel, &buf_idx) != RP_OK){
         return SCPI_RES_ERR;
@@ -426,7 +426,7 @@ scpi_result_t RP_GenArbitraryWaveFormQ(scpi_t *context) {
     float buffer[BUFFER_LENGTH];
     uint32_t size;
     int result;
-    int buf_idx;
+    int buf_idx = 0;
 
     if (RP_ParseChBufArgv(context, &channel, &buf_idx) != RP_OK){
         return SCPI_RES_ERR;
@@ -463,7 +463,7 @@ scpi_result_t RP_GenBurstCount(scpi_t *context) {
     
     rp_channel_t channel;
     int result, count;
-    int buf_idx;
+    int buf_idx = 0;
 
     if (RP_ParseChBufArgv(context, &channel, &buf_idx) != RP_OK){
         return SCPI_RES_ERR;
@@ -490,7 +490,7 @@ scpi_result_t RP_GenBurstCountQ(scpi_t *context) {
 
     rp_channel_t channel;
     int result, count;
-    int buf_idx;
+    int buf_idx = 0;
     
     if (RP_ParseChBufArgv(context, &channel, &buf_idx) != RP_OK){
         return SCPI_RES_ERR;

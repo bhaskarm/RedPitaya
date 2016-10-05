@@ -74,10 +74,8 @@ typedef struct generate_control_s {
     unsigned int BgatedBursts       :1;
     unsigned int                    :7;
 
-    ch_properties_t properties_chA;
-    ch_properties_t properties_chA_ar[3];
-    ch_properties_t properties_chB;
-    ch_properties_t properties_chB_ar[3];
+    ch_properties_t properties_chA[4];
+    ch_properties_t properties_chB[4];
 } generate_control_t;
 
 int prec_generate_Init();

@@ -14,7 +14,9 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <float.h>
 
+#include "math.h"
 #include "version.h"
 #include "common.h"
 #include "housekeeping.h"
@@ -25,9 +27,15 @@
 //#include "generate.h"
 //#include "gen_handler.h"
 #include "prec_generate.h"
-#include "prec_gen_handler.h"
+//#include "prec_gen_handler.h"
 
 static char version[50];
+uint32_t      chA_size     = BUFFER_LENGTH, chB_size     = BUFFER_LENGTH;
+uint32_t      chA_arb_size = BUFFER_LENGTH, chB_arb_size = BUFFER_LENGTH;
+
+float chA_arbitraryData[BUFFER_LENGTH];
+float chB_arbitraryData[BUFFER_LENGTH];
+
 
 /**
  * Global methods
@@ -845,88 +853,229 @@ float rp_CmnCnvCntToV(uint32_t field_len, uint32_t cnts, float adc_max_v, uint32
 * Precidyne Multi buf Generate functions
 */
 
+int prec_GenCheckAmplitudeAndOffset(float amplitude, float offset) {
+    if (fabs(amplitude) + fabs(offset) > 1.0) { //LEVEL_MAX) {
+        return RP_EOOR;
+    }
+    return RP_OK;
+}
 int prec_GenReset() {
-    return prec_gen_SetDefaultValues();
+    //return prec_gen_SetDefaultValues();
+    ECHECK(prec_GenOutDisable(RP_CH_1));
+    ECHECK(prec_GenOutDisable(RP_CH_2));
+    ECHECK(prec_GenFreq(RP_CH_1, 0, 1000));
+    ECHECK(prec_GenFreq(RP_CH_2, 0, 1000));
+    ECHECK(prec_GenWaveform(RP_CH_1, 0, PREC_WAVEFORM_SINE));
+    ECHECK(prec_GenWaveform(RP_CH_2, 0, PREC_WAVEFORM_SINE));
+    ECHECK(prec_GenOffset(RP_CH_1, 0, 0));
+    ECHECK(prec_GenOffset(RP_CH_2, 0, 0));
+    ECHECK(prec_GenAmp(RP_CH_1, 0, 1));
+    ECHECK(prec_GenAmp(RP_CH_2, 0, 1));
+    ECHECK(prec_GenBurstCount(RP_CH_1, 0, 1));
+    ECHECK(prec_GenBurstCount(RP_CH_2, 0, 1));
+    ECHECK(prec_GenTriggerSource(RP_CH_1, RP_GEN_TRIG_SRC_INTERNAL));
+    ECHECK(prec_GenTriggerSource(RP_CH_2, RP_GEN_TRIG_SRC_INTERNAL));
+    ECHECK(prec_GenPhase(RP_CH_1, 0, 0.0));
+    ECHECK(prec_GenPhase(RP_CH_2, 0, 0.0));
+    return RP_OK;
 }
 
 int prec_GenOutDisable(rp_channel_t channel) {
-    return prec_gen_Disable(channel);
+    //return prec_gen_Disable(channel);
+    return prec_generate_setOutputDisable(channel, true);
 }
 
 int prec_GenOutEnable(rp_channel_t channel) {
-    return prec_gen_Enable(channel);
+    //return prec_gen_Enable(channel);
+    return prec_generate_setOutputDisable(channel, false);
 }
 
 int prec_GenOutIsEnabled(rp_channel_t channel, bool *value) {
-    return prec_gen_IsEnable(channel, value);
+    //return prec_gen_IsEnable(channel, value);
+    return prec_generate_getOutputEnabled(channel, value);
 }
 
 int prec_GenAmp(rp_channel_t channel, int buf_idx, float amplitude) {
-    return prec_gen_setAmplitude(channel, buf_idx, amplitude);
+    //return prec_gen_setAmplitude(channel, buf_idx, amplitude);
+    return prec_generate_setAmplitude(channel, buf_idx, amplitude);
 }
 
 int prec_GenGetAmp(rp_channel_t channel, int buf_idx, float *amplitude) {
-    return prec_gen_getAmplitude(channel, buf_idx, amplitude);
+    //return prec_gen_getAmplitude(channel, buf_idx, amplitude);
+    return prec_generate_getAmplitude(channel, buf_idx, amplitude);
 }
 
 int prec_GenOffset(rp_channel_t channel, int buf_idx, float offset) {
-    return prec_gen_setOffset(channel, buf_idx, offset);
+    //return prec_gen_setOffset(channel, buf_idx, offset);
+    return prec_generate_setDCOffset(channel, buf_idx, offset);
 }
 
 int prec_GenGetOffset(rp_channel_t channel, int buf_idx, float *offset) {
-    return prec_gen_getOffset(channel, buf_idx, offset);
+    //return prec_gen_getOffset(channel, buf_idx, offset);
+    return prec_generate_getDCOffset(channel, buf_idx, offset);
 }
 
 int prec_GenFreq(rp_channel_t channel, int buf_idx, float frequency) {
-    return prec_gen_setFrequency(channel, buf_idx, frequency);
+    //return prec_gen_setFrequency(channel, buf_idx, frequency);
+    if (frequency < FREQUENCY_MIN || frequency > FREQUENCY_MAX) {
+        return RP_EOOR;
+    }
+
+    ECHECK(prec_generate_setFrequency(channel, buf_idx, frequency));
+    //Incorrect usage ECHECK(prec_synthesize_signal(channel, buf_idx));
+    return prec_generate_Synchronise();
 }
 
 int prec_GenGetFreq(rp_channel_t channel, int buf_idx, float *frequency) {
-    return prec_gen_getFrequency(channel, buf_idx, frequency);
+    //return prec_gen_getFrequency(channel, buf_idx, frequency);
+    return prec_generate_getFrequency(channel, buf_idx, frequency);
 }
 
 int prec_GenPhase(rp_channel_t channel, int buf_idx, float phase) {
-    return prec_gen_setPhase(channel, buf_idx, phase);
+    //return prec_gen_setPhase(channel, buf_idx, phase);
+    if (phase < PHASE_MIN || phase > PHASE_MAX) {
+        return RP_EOOR;
+    }
+    if (phase < 0) {
+        phase += 360;
+    }
+    //Incorrect usage ECHECK(prec_synthesize_signal(channel, buf_idx));
+    return prec_generate_Synchronise();
 }
 
 int prec_GenGetPhase(rp_channel_t channel, int buf_idx, float *phase) {
-    return prec_gen_getPhase(channel, buf_idx, phase);
+    //return prec_gen_getPhase(channel, buf_idx, phase);
+    return RP_OK;
 }
 
 int prec_GenWaveform(rp_channel_t channel, int buf_idx, prec_waveform_t type) {
-    return prec_gen_setWaveform(channel, buf_idx, type);
+    //return prec_gen_setWaveform(channel, buf_idx, type);
+    //Not available anymore return prec_synthesize_signal(channel, buf_idx);
+    return RP_OK;
 }
 
 int prec_GenGetWaveform(rp_channel_t channel, int buf_idx, prec_waveform_t *type) {
-    return prec_gen_getWaveform(channel, buf_idx, type);
+    //return prec_gen_getWaveform(channel, buf_idx, type);
+    //No implemented yet
+    return RP_OK;
 }
 
 int prec_GenArbWaveform(rp_channel_t channel, int buf_idx, float *waveform, uint32_t length) {
-    return prec_gen_setArbWaveform(channel, buf_idx, waveform, length);
+    //return prec_gen_setArbWaveform(channel, buf_idx, waveform, length);
+    // Check if data is normalized
+    float min = FLT_MAX, max = -FLT_MAX; // initial values
+    int i;
+    for(i = 0; i < length; i++) {
+        if (waveform[i] < min)
+            min = waveform[i];
+        if (waveform[i] > max)
+            max = waveform[i];
+    }
+    if (min < ARBITRARY_MIN || max > ARBITRARY_MAX) {
+        return RP_ENN;
+    }
+
+    // Save data
+    float *pointer;
+    CHANNEL_ACTION(channel,
+            pointer = chA_arbitraryData,
+            pointer = chB_arbitraryData)
+    for(i = 0; i < length; i++) {
+        pointer[i] = waveform[i];
+    }
+    for(i = length; i < BUFFER_LENGTH; i++) { // clear the rest of the buffer
+        pointer[i] = 0;
+    }
+
+    if (channel == RP_CH_1) {
+        chA_arb_size = length;
+        return prec_generate_writeData(channel, buf_idx, pointer, 0, length);
+    }
+    else if (channel == RP_CH_2) {
+        chA_arb_size = length;
+        return prec_generate_writeData(channel, buf_idx, pointer, 0, length);
+    }
+    else {
+        return RP_EPN;
+    }
+
+    return RP_OK;
 }
 
 int prec_GenGetArbWaveform(rp_channel_t channel, int buf_idx, float *waveform, uint32_t *length) {
-    return prec_gen_getArbWaveform(channel, buf_idx, waveform, length);
+    //return prec_gen_getArbWaveform(channel, buf_idx, waveform, length);
+    // If this data was not set, then this method will return incorrect data
+    float *pointer;
+    if (channel == RP_CH_1) {
+        *length = chA_arb_size;
+        pointer = chA_arbitraryData;
+    }
+    else if (channel == RP_CH_2) {
+        *length = chB_arb_size;
+        pointer = chB_arbitraryData;
+    }
+    else {
+        return RP_EPN;
+    }
+    for (int i = 0; i < *length; ++i) {
+        waveform[i] = pointer[i];
+    }
+    return RP_OK;
 }
 
 int prec_GenBurstCount(rp_channel_t channel, int buf_idx, int num) {
-    return prec_gen_setBurstCount(channel, buf_idx, num);
+    //return prec_gen_setBurstCount(channel, buf_idx, num);
+    if ((num < BURST_COUNT_MIN || num > BURST_COUNT_MAX) && num == 0) {
+        return RP_EOOR;
+    }
+    if (num == -1) {    // -1 represents infinity. In FPGA value 0 represents infinity
+        num = 0;
+    }
+    ECHECK(prec_generate_setBurstCount(channel, buf_idx, (uint32_t) num));
+    return RP_OK;
+    // trigger channel if internal trigger source
+    // This will be done seperately return prec_triggerIfInternal(channel);
 }
 
 int prec_GenGetBurstCount(rp_channel_t channel, int buf_idx, int *num) {
-    return prec_gen_getBurstCount(channel, buf_idx, num);
+    //return prec_gen_getBurstCount(channel, buf_idx, num);
+    return prec_generate_getBurstCount(channel, buf_idx, (uint32_t *) num);
 }
 
 int prec_GenTriggerSource(rp_channel_t channel, rp_trig_src_t src) {
-    return prec_gen_setTriggerSource(channel, src);
+    //return prec_gen_setTriggerSource(channel, src);
+    if (src == RP_GEN_TRIG_SRC_INTERNAL) {
+        return prec_generate_setTriggerSource(channel, 1);
+    }
+    else if (src == RP_GEN_TRIG_SRC_EXT_PE) {
+        return prec_generate_setTriggerSource(channel, 2);
+    }
+    else if (src == RP_GEN_TRIG_SRC_EXT_NE) {
+        return prec_generate_setTriggerSource(channel, 3);
+    }
+    else {
+        return RP_EIPV;
+    }
 }
 
 int prec_GenGetTriggerSource(rp_channel_t channel, rp_trig_src_t *src) {
-    return prec_gen_getTriggerSource(channel, src);
+    //return prec_gen_getTriggerSource(channel, src);
+    ECHECK(prec_generate_getTriggerSource(channel, (uint32_t *) &src));
+    return RP_OK;
 }
 
 int prec_GenTrigger(uint32_t channel) {
-    return prec_gen_Trigger(channel);
+    //return prec_gen_Trigger(channel);
+    //All channels are enabled for now, fix this
+    switch (channel) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+            return prec_generate_simultaneousTrigger();
+        default:
+            return RP_EOOR;
+    }
 }
 
 float prec_CmnCnvCntToV(uint32_t field_len, uint32_t cnts, float adc_max_v, uint32_t calibScale, int calib_dc_off, float user_dc_off)
@@ -934,4 +1083,12 @@ float prec_CmnCnvCntToV(uint32_t field_len, uint32_t cnts, float adc_max_v, uint
     return cmn_CnvCntToV(field_len, cnts, adc_max_v, calibScale, calib_dc_off, user_dc_off);
 }
 
+int prec_triggerIfInternal(rp_channel_t channel) {
+    uint32_t value;
+    ECHECK(prec_generate_getTriggerSource(channel, &value));
+    if (value == RP_GEN_TRIG_SRC_INTERNAL) {
+        ECHECK(prec_generate_setTriggerSource(channel, 1))
+    }
+    return RP_OK;
+}
 
