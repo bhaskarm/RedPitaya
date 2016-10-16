@@ -45,7 +45,7 @@ int rp_Init()
 {
     ECHECK(cmn_Init());
 	
-    //ECHECK(calib_Init());
+    ECHECK(calib_Init());
     ECHECK(hk_Init());
     ECHECK(ams_Init());
     //ECHECK(generate_Init());
@@ -61,7 +61,7 @@ int rp_Init()
 
 int rp_CalibInit()
 {
-    //ECHECK(calib_Init());
+    ECHECK(calib_Init());
 
     return RP_OK;
 }
@@ -73,7 +73,7 @@ int rp_Release()
     ECHECK(prec_generate_Release());
     ECHECK(ams_Release());
     ECHECK(hk_Release());
-    //ECHECK(calib_Release());
+    ECHECK(calib_Release());
     ECHECK(cmn_Release());
     // TODO: Place other module releasing here (in reverse order)
     return RP_OK;
@@ -863,20 +863,21 @@ int prec_GenReset() {
     //return prec_gen_SetDefaultValues();
     ECHECK(prec_GenOutDisable(RP_CH_1));
     ECHECK(prec_GenOutDisable(RP_CH_2));
-    ECHECK(prec_GenFreq(RP_CH_1, 0, 1000));
-    ECHECK(prec_GenFreq(RP_CH_2, 0, 1000));
+    ECHECK(prec_GenFreq(RP_CH_1, 0, 0));
+    ECHECK(prec_GenFreq(RP_CH_2, 0, 0));
     ECHECK(prec_GenWaveform(RP_CH_1, 0, PREC_WAVEFORM_SINE));
     ECHECK(prec_GenWaveform(RP_CH_2, 0, PREC_WAVEFORM_SINE));
     ECHECK(prec_GenOffset(RP_CH_1, 0, 0));
     ECHECK(prec_GenOffset(RP_CH_2, 0, 0));
-    ECHECK(prec_GenAmp(RP_CH_1, 0, 1));
-    ECHECK(prec_GenAmp(RP_CH_2, 0, 1));
+    ECHECK(prec_GenAmp(RP_CH_1, 0, 0));
+    ECHECK(prec_GenAmp(RP_CH_2, 0, 0));
     ECHECK(prec_GenBurstCount(RP_CH_1, 0, 1));
     ECHECK(prec_GenBurstCount(RP_CH_2, 0, 1));
     ECHECK(prec_GenTriggerSource(RP_CH_1, RP_GEN_TRIG_SRC_INTERNAL));
     ECHECK(prec_GenTriggerSource(RP_CH_2, RP_GEN_TRIG_SRC_INTERNAL));
     ECHECK(prec_GenPhase(RP_CH_1, 0, 0.0));
     ECHECK(prec_GenPhase(RP_CH_2, 0, 0.0));
+    prec_generate_Synchronise();
     return RP_OK;
 }
 
@@ -965,6 +966,7 @@ int prec_GenArbWaveform(rp_channel_t channel, int buf_idx, float *waveform, uint
     // Check if data is normalized
     float min = FLT_MAX, max = -FLT_MAX; // initial values
     int i;
+    printf("API stage buffer load: buf_idx %d, length %d, 2 samples - %f %f\n", buf_idx, length, waveform[0], waveform[1]);
     for(i = 0; i < length; i++) {
         if (waveform[i] < min)
             min = waveform[i];

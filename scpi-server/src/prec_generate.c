@@ -391,6 +391,44 @@ scpi_result_t RP_GenDutyCycleQ(scpi_t *context) {
     return SCPI_RES_OK;
 }
 
+scpi_result_t RP_GenArbitraryWaveFormFixedPoint(scpi_t *context) {
+    
+    rp_channel_t channel;
+    float buffer[BUFFER_LENGTH]; // floating point for parsing and storing calculated values
+    uint32_t size;
+    int result;
+    int buf_idx = 0;
+
+    if (RP_ParseChBufArgv(context, &channel, &buf_idx) != RP_OK){
+        return SCPI_RES_ERR;
+    }
+
+    if(!SCPI_ParamBufferFloat(context, buffer, &size, true)){
+        RP_LOG(LOG_ERR, "*SOUR#:TRAC:FIXD:DATA Failed to "
+            "arbitrary waveform data parameter.\n");
+        return SCPI_RES_ERR;
+    }
+
+    for (int samp_cnt=0; samp_cnt<BUFFER_LENGTH; samp_cnt++){
+        buffer[samp_cnt] = buffer[samp_cnt] / (1<<13); //Scale it down to 2 Vpp (14 bit DAC)
+        buffer[samp_cnt] = buffer[samp_cnt] - 1.0; //Change from unipolar to bipolar
+    }
+
+    result = prec_GenArbWaveform(channel, buf_idx, buffer, size);
+    if(result != RP_OK){
+        RP_LOG(LOG_ERR, "*SOUR#:TRAC:FIXD:DATA Failed to "
+            "set arbitrary waveform data: %s\n", rp_GetError(result));
+        return SCPI_RES_ERR;
+    }
+
+    RP_LOG(LOG_INFO, "*SOUR#:TRAC:FIXD:DATA Successfully set arbitrary waveform data.\n");
+    return SCPI_RES_OK;
+}
+
+scpi_result_t RP_GenArbitraryWaveFormFixedPointQ(scpi_t *context) {
+    return RP_GenArbitraryWaveForm(context); // Fixed point not implemented yet, return float values for now
+}
+
 scpi_result_t RP_GenArbitraryWaveForm(scpi_t *context) {
     
     rp_channel_t channel;

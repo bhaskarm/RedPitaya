@@ -200,6 +200,8 @@ int prec_generate_writeData(rp_channel_t channel, int buf_idx, float *data, uint
     ECHECK(getChannelPropertiesAddress(&properties, channel, buf_idx));
     prec_generate_setWrapCounter(channel, buf_idx, length);
 
+    printf("Driver stage buffer load: buf_idx %d, length %d, 2 samples - %f %f\n", buf_idx, length, data[0], data[1]);
+
     //rp_calib_params_t calib = calib_GetParams();
     int dc_offs = 0;//channel == RP_CH_1 ? calib.be_ch1_dc_offs: calib.be_ch2_dc_offs;
     uint32_t amp_max = 0; //channel == RP_CH_1 ? calib.be_ch1_fs: calib.be_ch2_fs;
@@ -207,5 +209,6 @@ int prec_generate_writeData(rp_channel_t channel, int buf_idx, float *data, uint
     for(int i = start; i < start+BUFFER_LENGTH; i++) {
         dataOut[i % BUFFER_LENGTH] = cmn_CnvVToCnt(DATA_BIT_LENGTH, data[i-start], AMPLITUDE_MAX, false, amp_max, dc_offs, 0.0);
     }
+    printf("Driver stage calculated data: 2 samples - %d %d\n", dataOut[0], dataOut[1]);
     return RP_OK;
 }

@@ -33,6 +33,8 @@ scpi_result_t RP_GenPhase(scpi_t * context);
 scpi_result_t RP_GenPhaseQ(scpi_t * context);
 scpi_result_t RP_GenDutyCycle(scpi_t * context);
 scpi_result_t RP_GenDutyCycleQ(scpi_t * context);
+scpi_result_t RP_GenArbitraryWaveFormFixedPoint(scpi_t * context);
+scpi_result_t RP_GenArbitraryWaveFormFixedPointQ(scpi_t * context);
 scpi_result_t RP_GenArbitraryWaveForm(scpi_t * context);
 scpi_result_t RP_GenArbitraryWaveFormQ(scpi_t * context);
 scpi_result_t RP_GenGenerateMode(scpi_t * context);

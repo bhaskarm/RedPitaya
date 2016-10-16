@@ -208,6 +208,8 @@ static const scpi_command_t scpi_commands[] = {
     {.pattern = "SOUR#:BUF#:DCYC?", .callback                = RP_GenDutyCycleQ,},
     {.pattern = "SOUR#:BUF#:TRAC:DATA:DATA", .callback       = RP_GenArbitraryWaveForm,},
     {.pattern = "SOUR#:BUF#:TRAC:DATA:DATA?", .callback      = RP_GenArbitraryWaveFormQ,},
+    {.pattern = "SOUR#:BUF#:TRAC:FIXD:DATA", .callback       = RP_GenArbitraryWaveFormFixedPoint,},
+    {.pattern = "SOUR#:BUF#:TRAC:FIXD:DATA?", .callback      = RP_GenArbitraryWaveFormFixedPointQ,},
     {.pattern = "SOUR#:BUF#:BURS:STAT", .callback            = RP_GenGenerateMode,},
     {.pattern = "SOUR#:BUF#:BURS:STAT?", .callback           = RP_GenGenerateModeQ,},
     {.pattern = "SOUR#:BUF#:BURS:NCYC", .callback            = RP_GenBurstCount,},
@@ -231,7 +233,8 @@ static scpi_interface_t scpi_interface = {
     .reset = SCPI_Reset,
 };
 
-#define SCPI_INPUT_BUFFER_LENGTH 538688
+//#define SCPI_INPUT_BUFFER_LENGTH 538688
+#define SCPI_INPUT_BUFFER_LENGTH 2538688
 static char scpi_input_buffer[SCPI_INPUT_BUFFER_LENGTH];
 
 static scpi_reg_val_t scpi_regs[SCPI_REG_COUNT];

@@ -32,14 +32,14 @@
 #define DAC_FREQUENCY           125e6       // Hz
 
 #define BUFFER_LENGTH           (16 * 1024)
-#define CHA_DATA_OFFSET         0x10000
-#define CHB_DATA_OFFSET         0x20000
+#define CHA_DATA_OFFSET         0x40000
+#define CHB_DATA_OFFSET         0x80000
 #define DATA_BIT_LENGTH         14
 #define MICRO                   1e6
 
 // Base Generate address
 #define GENERATE_BASE_ADDR      0x40200000
-#define GENERATE_BASE_SIZE      0x00030000
+#define GENERATE_BASE_SIZE      0x000C0000
 
 typedef struct ch_properties {
     unsigned int amplitudeScale     :14;
