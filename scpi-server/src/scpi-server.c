@@ -36,7 +36,7 @@
 
 #define LISTEN_BACKLOG 50
 #define LISTEN_PORT 5000
-#define MAX_BUFF_SIZE 1024
+#define MAX_BUFF_SIZE 4096
 
 static bool app_exit = false;
 static char delimiter[] = "\r\n";
@@ -156,7 +156,10 @@ static int handleConnection(int connfd) {
 
             // Log out message
             LogMessage(m, pos);
+            RP_LOG(LOG_INFO, "Command recvd sending for parsing.\n");
 
+            RP_LOG(LOG_INFO, "full cmd size = %d\n", pos);
+            //RP_LOG(LOG_INFO, "full cmd = %s\n", m);
             //Parse the message and return response
             SCPI_Input(&scpi_context, m, pos);
             m += pos;

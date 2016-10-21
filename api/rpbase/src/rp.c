@@ -863,20 +863,22 @@ int prec_GenReset() {
     //return prec_gen_SetDefaultValues();
     ECHECK(prec_GenOutDisable(RP_CH_1));
     ECHECK(prec_GenOutDisable(RP_CH_2));
-    ECHECK(prec_GenFreq(RP_CH_1, 0, 0));
-    ECHECK(prec_GenFreq(RP_CH_2, 0, 0));
-    ECHECK(prec_GenWaveform(RP_CH_1, 0, PREC_WAVEFORM_SINE));
-    ECHECK(prec_GenWaveform(RP_CH_2, 0, PREC_WAVEFORM_SINE));
-    ECHECK(prec_GenOffset(RP_CH_1, 0, 0));
-    ECHECK(prec_GenOffset(RP_CH_2, 0, 0));
-    ECHECK(prec_GenAmp(RP_CH_1, 0, 0));
-    ECHECK(prec_GenAmp(RP_CH_2, 0, 0));
-    ECHECK(prec_GenBurstCount(RP_CH_1, 0, 1));
-    ECHECK(prec_GenBurstCount(RP_CH_2, 0, 1));
     ECHECK(prec_GenTriggerSource(RP_CH_1, RP_GEN_TRIG_SRC_INTERNAL));
     ECHECK(prec_GenTriggerSource(RP_CH_2, RP_GEN_TRIG_SRC_INTERNAL));
-    ECHECK(prec_GenPhase(RP_CH_1, 0, 0.0));
-    ECHECK(prec_GenPhase(RP_CH_2, 0, 0.0));
+    for (int buf_idx=0; buf_idx<4; buf_idx++) {
+        ECHECK(prec_GenFreq(RP_CH_1, buf_idx, 0));
+        ECHECK(prec_GenFreq(RP_CH_2, buf_idx, 0));
+        ECHECK(prec_GenWaveform(RP_CH_1, buf_idx, PREC_WAVEFORM_SINE));
+        ECHECK(prec_GenWaveform(RP_CH_2, buf_idx, PREC_WAVEFORM_SINE));
+        ECHECK(prec_GenOffset(RP_CH_1, buf_idx, 0));
+        ECHECK(prec_GenOffset(RP_CH_2, buf_idx, 0));
+        ECHECK(prec_GenAmp(RP_CH_1, buf_idx, 0));
+        ECHECK(prec_GenAmp(RP_CH_2, buf_idx, 0));
+        ECHECK(prec_GenBurstCount(RP_CH_1, buf_idx, 1));
+        ECHECK(prec_GenBurstCount(RP_CH_2, buf_idx, 1));
+        ECHECK(prec_GenPhase(RP_CH_1, buf_idx, 0.0));
+        ECHECK(prec_GenPhase(RP_CH_2, buf_idx, 0.0));
+    }
     prec_generate_Synchronise();
     return RP_OK;
 }

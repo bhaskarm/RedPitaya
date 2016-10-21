@@ -53,6 +53,24 @@ const scpi_choice_def_t scpi_RpGenMode[] = {
     SCPI_CHOICE_LIST_END
 };
 
+/**
+ * Hacked parser function
+ * TODO, replace with upstream equivalent
+ */
+scpi_bool_t SCPI_ParamBufferUInt32(scpi_t * context, uint32_t *data, uint32_t *size, scpi_bool_t mandatory) {
+    *size = 0;
+    uint32_t value;
+    while (true) {
+        if (!SCPI_ParamUInt32(context, &value, mandatory)) {
+            break;
+        }
+        data[*size] = (uint32_t) value;
+        *size = *size + 1;
+        mandatory = false;          // only first is mandatory
+    }
+    return true;
+}
+
 scpi_result_t RP_GenReset(scpi_t *context) {
     int result = prec_GenReset();
     if (RP_OK != result) {
@@ -394,6 +412,7 @@ scpi_result_t RP_GenDutyCycleQ(scpi_t *context) {
 scpi_result_t RP_GenArbitraryWaveFormFixedPoint(scpi_t *context) {
     
     rp_channel_t channel;
+    uint32_t buffer32[BUFFER_LENGTH]; // floating point for parsing and storing calculated values
     float buffer[BUFFER_LENGTH]; // floating point for parsing and storing calculated values
     uint32_t size;
     int result;
@@ -403,14 +422,14 @@ scpi_result_t RP_GenArbitraryWaveFormFixedPoint(scpi_t *context) {
         return SCPI_RES_ERR;
     }
 
-    if(!SCPI_ParamBufferFloat(context, buffer, &size, true)){
+    if(!SCPI_ParamBufferUInt32(context, buffer32, &size, true)){
         RP_LOG(LOG_ERR, "*SOUR#:TRAC:FIXD:DATA Failed to "
             "arbitrary waveform data parameter.\n");
         return SCPI_RES_ERR;
     }
 
     for (int samp_cnt=0; samp_cnt<BUFFER_LENGTH; samp_cnt++){
-        buffer[samp_cnt] = buffer[samp_cnt] / (1<<13); //Scale it down to 2 Vpp (14 bit DAC)
+        buffer[samp_cnt] = (float)buffer32[samp_cnt] / (1<<13); //Scale it down to 2 Vpp (14 bit DAC)
         buffer[samp_cnt] = buffer[samp_cnt] - 1.0; //Change from unipolar to bipolar
     }
 
@@ -421,7 +440,7 @@ scpi_result_t RP_GenArbitraryWaveFormFixedPoint(scpi_t *context) {
         return SCPI_RES_ERR;
     }
 
-    RP_LOG(LOG_INFO, "*SOUR#:TRAC:FIXD:DATA Successfully set arbitrary waveform data.\n");
+    RP_LOG(LOG_INFO, "*SOUR#:TRAC:FIXD:DATA Successfully set arbitrary waveform data. size of buffer = %d\n", size);
     return SCPI_RES_OK;
 }
 

@@ -87,7 +87,6 @@ BOOT_UBOOT      = $(TMP)/boot.bin
 
 IDGEN           = $(INSTALL_DIR)/sbin/idgen
 DISCOVERY       = $(INSTALL_DIR)/sbin/discovery.sh
-HEARTBEAT       = $(INSTALL_DIR)/sbin/heartbeat.sh
 
 ################################################################################
 # versioning system
@@ -415,9 +414,6 @@ rp_communication:
 $(DISCOVERY):
 	mkdir -p $(INSTALL_DIR)/sbin
 	cp $(OS_TOOLS_DIR)/discovery.sh $@
-
-$(HEARTBEAT):
-	cp $(OS_TOOLS_DIR)/heartbeat.sh $@
 
 ################################################################################
 # Red Pitaya ecosystem and free applications

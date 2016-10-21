@@ -120,7 +120,8 @@ int prec_generate_getDCOffset(rp_channel_t channel, int buf_idx, float *offset) 
 int prec_generate_setFrequency(rp_channel_t channel, int buf_idx, float frequency) {
     volatile ch_properties_t *ch_properties;
     ECHECK(getChannelPropertiesAddress(&ch_properties, channel, buf_idx));
-    ch_properties->pointerStep = (uint32_t) round(65536 * frequency / DAC_FREQUENCY * BUFFER_LENGTH);
+    ch_properties->pointerStep = (uint32_t) round(65536 * (frequency / DAC_FREQUENCY) * BUFFER_LENGTH);
+    //BM ch_properties->pointerStep = frequency / (DAC_FREQUENCY * BUFFER_LENGTH);
     channel == RP_CH_1 ? (generate->ASM_WrapPointer = 1) : (generate->BSM_WrapPointer = 1);
     return RP_OK;
 }
@@ -129,6 +130,7 @@ int prec_generate_getFrequency(rp_channel_t channel, int buf_idx, float *frequen
     volatile ch_properties_t *ch_properties;
     ECHECK(getChannelPropertiesAddress(&ch_properties, channel, buf_idx));
     *frequency = (float) round((ch_properties->pointerStep * DAC_FREQUENCY) / (65536 * BUFFER_LENGTH));
+    //BM *frequency = (float) round((ch_properties->pointerStep * DAC_FREQUENCY) / (BUFFER_LENGTH));
     return RP_OK;
 }
 

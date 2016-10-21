@@ -32,9 +32,9 @@
 +};
 +&spi1 {
 +	spidev@0 {
-+		compatible="spidev";
-+		reg =<0>; //chipselect 0
-+		spi-max-frequency= <50000000>;
++		compatible = "spidev";
++		reg = <0>; //chipselect 0
++		spi-max-frequency = <50000000>;
 +	};
 +};
 +&clkc {
@@ -76,7 +76,7 @@
 +	        label = "led9";
 +	        gpios = <&gpio0 7 0>;
 +	        default-state = "off";
-+		linux,default-trigger = "hartbeat";
++		linux,default-trigger = "heartbeat";
 +	    };
 +	};
 +};

@@ -49,4 +49,6 @@ scpi_result_t RP_GenTriggerSource(scpi_t * context);
 scpi_result_t RP_GenTriggerSourceQ(scpi_t * context);
 scpi_result_t RP_GenTrigger(scpi_t *context);
 
+// Hack to add uin32 parser command
+scpi_bool_t SCPI_ParamBufferUInt32(scpi_t * context, uint32_t *data, uint32_t *size, scpi_bool_t mandatory);
 #endif /* PREC_SCPI_GENERATE_H_ */
