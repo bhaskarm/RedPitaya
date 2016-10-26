@@ -10,9 +10,9 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="200000000001fs"></ZoomEndTime>
-      <Cursor1Time time="200000000000fs"></Cursor1Time>
+      <ZoomStartTime time="172134273439fs"></ZoomStartTime>
+      <ZoomEndTime time="172240517856fs"></ZoomEndTime>
+      <Cursor1Time time="645036000000fs"></Cursor1Time>
    </zoom_setting>
    <WVObjectSize size="3" />
    <wvobject type="group" fp_name="group194">
@@ -390,6 +390,7 @@
    <wvobject type="group" fp_name="group259">
       <obj_property name="label">Channel A</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /dac_o">
          <obj_property name="ElementShortName">dac_o[13:0]</obj_property>
          <obj_property name="ObjectShortName">dac_o[13:0]</obj_property>
@@ -502,6 +503,14 @@
          <obj_property name="ElementShortName">next_asg_state[2:0]</obj_property>
          <obj_property name="ObjectShortName">next_asg_state[2:0]</obj_property>
       </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /next_ncyc_i">
+         <obj_property name="ElementShortName">next_ncyc_i</obj_property>
+         <obj_property name="ObjectShortName">next_ncyc_i</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /next_start_i">
+         <obj_property name="ElementShortName">next_start_i</obj_property>
+         <obj_property name="ObjectShortName">next_start_i</obj_property>
+      </wvobject>
       <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[0] /trig_in">
          <obj_property name="ElementShortName">trig_in</obj_property>
          <obj_property name="ObjectShortName">trig_in</obj_property>
@@ -510,6 +519,7 @@
    <wvobject type="group" fp_name="group188">
       <obj_property name="label">Channel B</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject db_ref_id="1" type="array" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[1] /dac_o">
          <obj_property name="ElementShortName">dac_o[13:0]</obj_property>
          <obj_property name="ObjectShortName">dac_o[13:0]</obj_property>
@@ -697,6 +707,14 @@
       <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[1] /trig_in">
          <obj_property name="ElementShortName">trig_in</obj_property>
          <obj_property name="ObjectShortName">trig_in</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[1] /next_start_i">
+         <obj_property name="ElementShortName">next_start_i</obj_property>
+         <obj_property name="ObjectShortName">next_start_i</obj_property>
+      </wvobject>
+      <wvobject db_ref_id="1" type="logic" fp_name="/red_pitaya_asg_double_buf_tb/asg/\ch[1] /next_ncyc_i">
+         <obj_property name="ElementShortName">next_ncyc_i</obj_property>
+         <obj_property name="ObjectShortName">next_ncyc_i</obj_property>
       </wvobject>
    </wvobject>
 </wave_config>

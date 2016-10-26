@@ -95,9 +95,12 @@ wire     [RSZ+15: 0] set_start_i     ;  //!< set reset offset
 wire     [  16-1: 0] set_ncyc_i    ;  //!< set number of cycle
 wire     [  16-1: 0] set_rnum_i    ;  //!< set number of repetitions
 wire     [  32-1: 0] set_rdly_i    ;  //!< set delay between repetitions
+wire     [RSZ+15: 0] next_start_i  ;
+wire     [  16-1: 0] next_ncyc_i   ;
 reg      [  16-1: 0] cyc_cnt      ;
 reg                  trig_in_latch;
 reg      [     1:0 ] current_buf  ;
+wire     [     1:0 ] next_buf     ;
 reg                  cyc_done     ;
 reg                  buf_done     ;
 reg      [     2: 0] asg_state    ;
@@ -148,6 +151,7 @@ reg              trig_in      ;
 wire             ext_trig_p   ;
 wire             ext_trig_n   ;
 
+// The config for the current buffer
 assign  set_amp_i      = set_amp_all_i   [ (14*(current_buf)) +: 14];
 assign  set_dc_i       = set_dc_all_i    [ (14*(current_buf)) +: 14];
 assign  set_end_i     = set_end_all_i  [ ((RSZ+16)*(current_buf)) +: (RSZ+16)];
@@ -156,6 +160,10 @@ assign  set_start_i      = set_start_all_i   [ ((RSZ+16)*(current_buf)) +: (RSZ+
 assign  set_ncyc_i     = set_ncyc_all_i  [ (16*(current_buf)) +: 16];
 assign  set_rnum_i     = set_rnum_all_i  [ (16*(current_buf)) +: 16];
 assign  set_rdly_i     = set_rdly_all_i  [ (32*(current_buf)) +: 32];
+// The config for the next buffer
+assign  next_buf          = current_buf + 1;
+assign  next_start_i      = set_start_all_i   [ ((RSZ+16)*(next_buf)) +: (RSZ+16)];
+assign  next_ncyc_i     = set_ncyc_all_i  [ (16*(next_buf)) +: 16];
 
 always @(posedge dac_clk_i) begin
    // Latch the dac trigger for as long as the DAC is not reset
@@ -196,36 +204,37 @@ always @(posedge dac_clk_i) begin
            cyc_cnt <= 16'h0000;
            dac_ptr <= {RSZ+16{1'b0}};
        end
-       SM_START_PTR  : begin
+       SM_START_PTR  : begin // This state is traversed once at the start and never again
            current_buf <= current_buf;
            cyc_cnt <= set_ncyc_i;
            dac_ptr <= set_start_i;
        end
        SM_DRIVE_DAC  : begin
            if (dac_ptr + set_step_i >= set_end_i) begin
-             dac_ptr = set_start_i;
-             if (cyc_cnt == 16'h0001) begin
+             if (cyc_cnt == 16'h0001 || cyc_cnt == 16'h0000) begin // All cycles done, Next buffer is ready to begin
                current_buf <= current_buf + 1;
-               cyc_cnt <= set_ncyc_i;
-             end else begin
+               cyc_cnt <= next_ncyc_i;
+               dac_ptr <= next_start_i;
+             end else begin // 1 Cycle is done but more cycles are left in the same buffer
                current_buf <= current_buf;
                cyc_cnt <= cyc_cnt - 1;
+               dac_ptr <= set_start_i;
              end
-           end else begin
-             dac_ptr = dac_ptr + set_step_i;
-             current_buf = current_buf;
-             cyc_cnt = cyc_cnt;
+           end else begin // Just step to next sample
+             dac_ptr <= dac_ptr + set_step_i;
+             current_buf <= current_buf;
+             cyc_cnt <= cyc_cnt;
            end
        end
-       SM_START_NEXT_BUF: begin
-           current_buf = current_buf;
-           cyc_cnt = set_ncyc_i;
-           dac_ptr = set_start_i;
+       SM_START_NEXT_BUF: begin // Deprecated state that would go to the next buffer
+           current_buf <= current_buf;
+           cyc_cnt <= set_ncyc_i;
+           dac_ptr <= set_start_i;
        end
        default : begin
-           current_buf = 2'b00;
-           cyc_cnt = 16'h0000;
-           dac_ptr = {RSZ+16{1'b0}};
+           current_buf <= 2'b00;
+           cyc_cnt <= 16'h0000;
+           dac_ptr <= {RSZ+16{1'b0}};
        end
      endcase
    end
@@ -243,17 +252,17 @@ always @(*) begin
             cyc_done = 1'b0;
             buf_done = 1'b0;
         end
-        SM_START_PTR : begin
+        SM_START_PTR : begin // This state is traversed once at the start and never again
             next_asg_state = SM_DRIVE_DAC;
             cyc_done = 1'b0;
             buf_done = 1'b0;
         end
         SM_DRIVE_DAC : begin
             if (dac_ptr + set_step_i >= set_end_i) begin
-              if (cyc_cnt == 16'h0001) begin
-                next_asg_state = SM_START_NEXT_BUF;
+              if (cyc_cnt == 16'h0001 || cyc_cnt == 16'h0000) begin
+                next_asg_state = SM_DRIVE_DAC; //SM_START_PTR;
                 cyc_done = 1'b1;
-                buf_done = 1'b0; // Next state activated the signal
+                buf_done = 1'b1; // Next state activated the signal
               end else begin
                 next_asg_state = SM_DRIVE_DAC;
                 cyc_done = 1'b1;
