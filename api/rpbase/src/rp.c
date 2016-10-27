@@ -861,15 +861,16 @@ int prec_GenCheckAmplitudeAndOffset(float amplitude, float offset) {
 }
 int prec_GenReset() {
     //return prec_gen_SetDefaultValues();
-    ECHECK(prec_GenOutDisable(RP_CH_1));
-    ECHECK(prec_GenOutDisable(RP_CH_2));
+    // Do not set the DAC data to absolute zero since it might not correspond to 0v output. Reset state machine and set amplitude to zero
+    //ECHECK(prec_GenOutDisable(RP_CH_1));
+    //ECHECK(prec_GenOutDisable(RP_CH_2));
     ECHECK(prec_GenTriggerSource(RP_CH_1, RP_GEN_TRIG_SRC_INTERNAL));
     ECHECK(prec_GenTriggerSource(RP_CH_2, RP_GEN_TRIG_SRC_INTERNAL));
     for (int buf_idx=0; buf_idx<4; buf_idx++) {
         ECHECK(prec_GenFreq(RP_CH_1, buf_idx, 0));
         ECHECK(prec_GenFreq(RP_CH_2, buf_idx, 0));
-        ECHECK(prec_GenWaveform(RP_CH_1, buf_idx, PREC_WAVEFORM_SINE));
-        ECHECK(prec_GenWaveform(RP_CH_2, buf_idx, PREC_WAVEFORM_SINE));
+        //ECHECK(prec_GenWaveform(RP_CH_1, buf_idx, PREC_WAVEFORM_SINE));
+        //ECHECK(prec_GenWaveform(RP_CH_2, buf_idx, PREC_WAVEFORM_SINE));
         ECHECK(prec_GenOffset(RP_CH_1, buf_idx, 0));
         ECHECK(prec_GenOffset(RP_CH_2, buf_idx, 0));
         ECHECK(prec_GenAmp(RP_CH_1, buf_idx, 0));
