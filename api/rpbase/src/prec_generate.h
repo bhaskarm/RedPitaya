@@ -53,7 +53,8 @@ typedef struct ch_properties {
     uint32_t buffReadPointer        :14;
     unsigned int                    :16;
     uint32_t cyclesInOneBurst;
-    uint32_t burstRepetitions;
+    uint32_t burstRepetitions       :16;
+    uint32_t phaseBitsPattern       :16; // only 8 bits used
     uint32_t delayBetweenBurstRepetitions;
 } ch_properties_t;
 
@@ -94,6 +95,8 @@ int prec_generate_setTriggerSource(rp_channel_t channel, unsigned short value);
 int prec_generate_getTriggerSource(rp_channel_t channel, uint32_t *value);
 int prec_generate_setBurstCount(rp_channel_t channel, int buf_idx, uint32_t num);
 int prec_generate_getBurstCount(rp_channel_t channel, int buf_idx, uint32_t *num);
+int prec_generate_setPhaseBits(rp_channel_t channel, int buf_idx, uint32_t pbits);
+int prec_generate_getPhaseBits(rp_channel_t channel, int buf_idx, uint32_t *pbits);
 int prec_generate_setTriggerEventCondition(unsigned short value);
 int prec_generate_getTriggerEventCondition(uint32_t *value);
 

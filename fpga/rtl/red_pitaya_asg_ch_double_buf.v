@@ -63,11 +63,12 @@ module red_pitaya_asg_ch_double_buf #(
    input     [((RSZ+16)*N_BUF)-1: 0] set_start_all_i     ,  //!< set reset offset
    input     [  (16*N_BUF)-1: 0] set_ncyc_all_i    ,  //!< set number of cycle
    input     [  (16*N_BUF)-1: 0] set_rnum_all_i    ,  //!< set number of repetitions
+   input     [  ( 2*N_BUF)-1: 0] set_phase_bits_all_i    ,  //!< set sequence of 2 bit phase output
    input     [  (32*N_BUF)-1: 0] set_rdly_all_i    ,  //!< set delay between repetitions
    input                 set_rst_i       ,  //!< set FSM to reset
    input                 set_zero_i      ,  //!< set output to zero
    // Debug signals
-   output         [15-1: 0] debug_bus
+   output         [16-1: 0] debug_bus
 );
 
 //---------------------------------------------------------------------------------
@@ -94,6 +95,7 @@ wire     [RSZ+15: 0] set_step_i    ;  //!< set pointer step
 wire     [RSZ+15: 0] set_start_i     ;  //!< set reset offset
 wire     [  16-1: 0] set_ncyc_i    ;  //!< set number of cycle
 wire     [  16-1: 0] set_rnum_i    ;  //!< set number of repetitions
+wire     [   2-1: 0] set_phase_bits_i    ;  //!< set sequence of 2 bit phase output
 wire     [  32-1: 0] set_rdly_i    ;  //!< set delay between repetitions
 wire     [RSZ+15: 0] next_start_i  ;
 wire     [  16-1: 0] next_ncyc_i   ;
@@ -106,12 +108,10 @@ reg                  buf_done     ;
 reg      [     2: 0] asg_state    ;
 reg      [     2: 0] next_asg_state    ;
 parameter SM_IDLE=0, SM_START_PTR=1, SM_DRIVE_DAC=2, SM_START_NEXT_BUF=3;
-assign debug_bus =  { cyc_cnt[5:0], 
- set_ncyc_i[4:0],
- current_buf,
- trig_in,    
+assign debug_bus =  { cyc_cnt[11:0], 
  cyc_done_o,
- buf_done_o };
+ buf_done_o,
+ set_phase_bits_i };
 
 assign buf_done_o = buf_done;
 assign cyc_done_o = cyc_done;
@@ -159,6 +159,7 @@ assign  set_step_i     = set_step_all_i  [ ((RSZ+16)*(current_buf)) +: (RSZ+16)]
 assign  set_start_i      = set_start_all_i   [ ((RSZ+16)*(current_buf)) +: (RSZ+16)];
 assign  set_ncyc_i     = set_ncyc_all_i  [ (16*(current_buf)) +: 16];
 assign  set_rnum_i     = set_rnum_all_i  [ (16*(current_buf)) +: 16];
+assign  set_phase_bits_i     = set_phase_bits_all_i  [ (2*(current_buf)) +: 2];
 assign  set_rdly_i     = set_rdly_all_i  [ (32*(current_buf)) +: 32];
 // The config for the next buffer
 assign  next_buf          = current_buf + 1;

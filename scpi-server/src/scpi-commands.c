@@ -214,6 +214,8 @@ static const scpi_command_t scpi_commands[] = {
     {.pattern = "SOUR#:BUF#:BURS:STAT?", .callback           = RP_GenGenerateModeQ,},
     {.pattern = "SOUR#:BUF#:BURS:NCYC", .callback            = RP_GenBurstCount,},
     {.pattern = "SOUR#:BUF#:BURS:NCYC?", .callback           = RP_GenBurstCountQ,},
+    {.pattern = "SOUR#:BUF#:BURS:PBITS", .callback           = RP_GenPhaseBits,},
+    {.pattern = "SOUR#:BUF#:BURS:PBITS?", .callback          = RP_GenPhaseBitsQ,},
     {.pattern = "SOUR#:BUF#:BURS:NOR", .callback             = RP_GenBurstRepetitions,},
     {.pattern = "SOUR#:BUF#:BURS:NOR?", .callback            = RP_GenBurstRepetitionsQ,},
     {.pattern = "SOUR#:BUF#:BURS:INT:PER", .callback         = RP_GenBurstPeriod,},

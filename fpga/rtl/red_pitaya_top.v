@@ -413,14 +413,14 @@ red_pitaya_hk i_hk (
   .sys_ack         (  sys_ack[0]                 )   // acknowledge signal
 );
 
-//IOBUF i_iobufp [8-1:0] (.O(exp_p_in), .IO(exp_p_io), .I(exp_p_out), .T(~exp_p_dir) );
-//IOBUF i_iobufn [8-1:0] (.O(exp_n_in), .IO(exp_n_io), .I(exp_n_out), .T(~exp_n_dir) );
+//IOBUF i_iobufp [8-1:0] (.O(exp_p_in), .IO(exp_p_io), .I(exp_p_out), .T(~exp_p_dir) ); // P port pins are used for ASG driven pins 
+IOBUF i_iobufn [8-1:0] (.O(exp_n_in), .IO(exp_n_io), .I(exp_n_out), .T(~exp_n_dir) );
 assign debug_dir_out = 8'hff; // One debug port is output
 assign debug_dir_in  = 8'h00; // One debug port is input
 assign debug_bus_0 = debug_bus_asg[7:0];
 assign debug_bus_1 = debug_bus_asg[15:8];
 IOBUF i_iobufp [8-1:0] (.O(), .IO(exp_p_io), .I(debug_bus_0), .T(~debug_dir_out) );
-IOBUF i_iobufn [8-1:0] (.O(), .IO(exp_n_io), .I(debug_bus_1), .T(~debug_dir_out) );
+//IOBUF i_iobufn [8-1:0] (.O(), .IO(exp_n_io), .I(debug_bus_1), .T(~debug_dir_out) ); // N port pins are driven as direct digital IO 
 
 //---------------------------------------------------------------------------------
 //  Oscilloscope application

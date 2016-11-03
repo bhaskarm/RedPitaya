@@ -105,7 +105,7 @@ initial begin
   bus.write(`CH_OFFSET+32'h0000C,{16'h0, 16'h0}             );  // reset offset
   bus.write(`CH_OFFSET+32'h00010,{16'h34, 16'h0}             );  // table step
   bus.write(`CH_OFFSET+32'h00018,{16'h0, 16'd1}                   );  // number of cycles
-  bus.write(`CH_OFFSET+32'h0001C,{16'h0, 16'd0}                   );  // number of repetitions
+  bus.write(`CH_OFFSET+32'h0001C,{8'h0, 8'hff, 16'd0}             );  // phase btsi and number of repetitions
   bus.write(`CH_OFFSET+32'h00020,{32'd0}                          );  // number of 1us delay between repetitions
 
   bus.write(`CH_OFFSET+32'h00024,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude

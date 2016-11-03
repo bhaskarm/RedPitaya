@@ -169,6 +169,20 @@ int prec_generate_getBurstCount(rp_channel_t channel, int buf_idx, uint32_t *num
     return RP_OK;
 }
 
+int prec_generate_setPhaseBits(rp_channel_t channel, int buf_idx, uint32_t pbits) {
+    volatile ch_properties_t *ch_properties;
+    ECHECK(getChannelPropertiesAddress(&ch_properties, channel, buf_idx));
+    ch_properties->phaseBitsPattern = pbits;
+    return RP_OK;
+}
+
+int prec_generate_getPhaseBits(rp_channel_t channel, int buf_idx, uint32_t *pbits) {
+    volatile ch_properties_t *ch_properties;
+    ECHECK(getChannelPropertiesAddress(&ch_properties, channel, buf_idx));
+    *pbits = ch_properties->phaseBitsPattern;
+    return RP_OK;
+}
+
 int prec_generate_setTriggerEventCondition(unsigned short value) {
     //generate->trigger_event_cond = value;
     return RP_OK;

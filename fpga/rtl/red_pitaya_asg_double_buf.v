@@ -85,6 +85,7 @@ reg   [RSZ+15: 0] set_a_step_0 , set_b_step_0 ;
 reg   [RSZ+15: 0] set_a_start_0  , set_b_start_0  ;
 reg   [  16-1: 0] set_a_ncyc_0 , set_b_ncyc_0 ;
 reg   [  16-1: 0] set_a_rnum_0 , set_b_rnum_0 ;
+reg   [   8-1: 0] set_a_phase_bits , set_b_phase_bits ;
 reg   [  32-1: 0] set_a_rdly_0 , set_b_rdly_0 ;
 reg   [  14-1: 0] set_a_amp_1  , set_b_amp_1  ;
 reg   [  14-1: 0] set_a_dc_1   , set_b_dc_1   ;
@@ -123,7 +124,7 @@ reg   [   3-1: 0] trig_a_src   , trig_b_src   ;
 wire              trig_a_done  , trig_b_done  ;
 reg               trig_evt_ab                 ;
 reg   [   3-1: 0] trig_evt                    ;
-wire  [  15-1: 0] ch_a_debug   , ch_b_debug   ;
+wire  [  16-1: 0] ch_a_debug   , ch_b_debug   ;
 
 wire   [  (14*N_BUF)-1: 0] set_a_amp    , set_b_amp    ;
 wire   [  (14*N_BUF)-1: 0] set_a_dc     , set_b_dc     ;
@@ -202,6 +203,7 @@ red_pitaya_asg_ch_double_buf  #(.RSZ (RSZ), .N_BUF(N_BUF)) ch [1:0] (
   .set_start_all_i   ({set_b_start        , set_a_start        }),  // set reset offset
   .set_ncyc_all_i  ({set_b_ncyc       , set_a_ncyc       }),  // set number of cycle
   .set_rnum_all_i  ({set_b_rnum       , set_a_rnum       }),  // set number of repetitions
+  .set_phase_bits_all_i  ({set_b_phase_bits       , set_a_phase_bits       }),  // set the sequence of 2 bit phase output
   .set_rdly_all_i  ({set_b_rdly       , set_a_rdly       }),  // set delay between repetitions
    // Controls for the whole generator
   .set_rst_i       ({set_b_rst        , set_a_rst        }),  // set FMS to reset
@@ -239,6 +241,7 @@ if (dac_rstn_i == 1'b0) begin
    set_a_step_0 <={{RSZ+15{1'b0}},1'b0} ;
    set_a_ncyc_0 <= 16'h0    ;
    set_a_rnum_0 <= 16'h0    ;
+   set_a_phase_bits <= 8'he4; // 11 10 01 00
    set_a_rdly_0 <= 32'h0    ;
    set_a_amp_1  <= 14'h2000 ;
    set_a_dc_1   <= 14'h0    ;
@@ -273,6 +276,7 @@ if (dac_rstn_i == 1'b0) begin
    set_b_step_0 <={{RSZ+15{1'b0}},1'b0} ;
    set_b_ncyc_0 <= 16'h0    ;
    set_b_rnum_0 <= 16'h0    ;
+   set_b_phase_bits <= 8'he4; // 11 10 01 00
    set_b_rdly_0 <= 32'h0    ;
    set_b_amp_1  <= 14'h2000 ;
    set_b_dc_1   <= 14'h0    ;
@@ -325,6 +329,7 @@ end else begin
       if (sys_addr[19:0]==20'h10)  set_a_step_0 <= sys_wdata[RSZ+15: 0] ;
       if (sys_addr[19:0]==20'h18)  set_a_ncyc_0 <= sys_wdata[  16-1: 0] ;
       if (sys_addr[19:0]==20'h1C)  set_a_rnum_0 <= sys_wdata[  16-1: 0] ;
+      if (sys_addr[19:0]==20'h1C)  set_a_phase_bits <= sys_wdata[  16-1+8: 16] ; // All phase bits are saved in one register, this is a bad design choice. Split them into each buffer.
       if (sys_addr[19:0]==20'h20)  set_a_rdly_0 <= sys_wdata[  32-1: 0] ;
 
       if (sys_addr[19:0]==20'h24)  set_a_amp_1  <= sys_wdata[  0+13: 0] ;
@@ -361,6 +366,7 @@ end else begin
       if (sys_addr[19:0]==20'h90)  set_b_step_0 <= sys_wdata[RSZ+15: 0] ;
       if (sys_addr[19:0]==20'h98)  set_b_ncyc_0 <= sys_wdata[  16-1: 0] ;
       if (sys_addr[19:0]==20'h9C)  set_b_rnum_0 <= sys_wdata[  16-1: 0] ;
+      if (sys_addr[19:0]==20'h9C)  set_b_phase_bits <= sys_wdata[  16-1+8: 16] ;
       if (sys_addr[19:0]==20'hA0)  set_b_rdly_0 <= sys_wdata[  32-1: 0] ;
 
       if (sys_addr[19:0]==20'hA4)  set_b_amp_1  <= sys_wdata[  0+13: 0] ;
@@ -425,7 +431,7 @@ end else begin
      20'h00010 : begin sys_ack <= sys_en;          sys_rdata <= {{32-RSZ-16{1'b0}},set_a_step_0}     ; end
      20'h00014 : begin sys_ack <= sys_en;          sys_rdata <= buf_a_rpnt_rd                      ; end
      20'h00018 : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_a_ncyc_0}         ; end
-     20'h0001C : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_a_rnum_0}         ; end
+     20'h0001C : begin sys_ack <= sys_en;          sys_rdata <= {{32-8{1'b0}},set_a_phase_bits, set_a_rnum_0}         ; end
      20'h00020 : begin sys_ack <= sys_en;          sys_rdata <= set_a_rdly_0                         ; end
 
      20'h00024 : begin sys_ack <= sys_en;          sys_rdata <= {2'h0, set_a_dc_1, 2'h0, set_a_amp_1}  ; end
@@ -461,7 +467,7 @@ end else begin
      20'h00090 : begin sys_ack <= sys_en;          sys_rdata <= {{32-RSZ-16{1'b0}},set_b_step_0}     ; end
      20'h00094 : begin sys_ack <= sys_en;          sys_rdata <= buf_b_rpnt_rd                      ; end
      20'h00098 : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_b_ncyc_0}         ; end
-     20'h0009C : begin sys_ack <= sys_en;          sys_rdata <= {{32-16{1'b0}},set_b_rnum_0}         ; end
+     20'h0009C : begin sys_ack <= sys_en;          sys_rdata <= {{32-8{1'b0}},set_b_phase_bits, set_b_rnum_0}         ; end
      20'h000A0 : begin sys_ack <= sys_en;          sys_rdata <= set_b_rdly_0                         ; end
 
      20'h000A4 : begin sys_ack <= sys_en;          sys_rdata <= {2'h0, set_b_dc_1, 2'h0, set_b_amp_1}  ; end

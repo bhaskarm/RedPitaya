@@ -1047,6 +1047,15 @@ int prec_GenGetBurstCount(rp_channel_t channel, int buf_idx, int *num) {
     return prec_generate_getBurstCount(channel, buf_idx, (uint32_t *) num);
 }
 
+int prec_GenPhaseBits(rp_channel_t channel, int buf_idx, int num) {
+    ECHECK(prec_generate_setPhaseBits(channel, buf_idx, (uint32_t) num));
+    return RP_OK;
+}
+
+int prec_GenGetPhaseBits(rp_channel_t channel, int buf_idx, int *num) {
+    return prec_generate_getPhaseBits(channel, buf_idx, (uint32_t *) num);
+}
+
 int prec_GenTriggerSource(rp_channel_t channel, rp_trig_src_t src) {
     //return prec_gen_setTriggerSource(channel, src);
     if (src == RP_GEN_TRIG_SRC_INTERNAL) {

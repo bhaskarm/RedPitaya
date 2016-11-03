@@ -41,6 +41,8 @@ scpi_result_t RP_GenGenerateMode(scpi_t * context);
 scpi_result_t RP_GenGenerateModeQ(scpi_t * context);
 scpi_result_t RP_GenBurstCount(scpi_t * context);
 scpi_result_t RP_GenBurstCountQ(scpi_t * context);
+scpi_result_t RP_GenPhaseBits(scpi_t * context);
+scpi_result_t RP_GenPhaseBitsQ(scpi_t * context);
 scpi_result_t RP_GenBurstRepetitions(scpi_t * context);
 scpi_result_t RP_GenBurstRepetitionsQ(scpi_t * context);
 scpi_result_t RP_GenBurstPeriod(scpi_t * context);

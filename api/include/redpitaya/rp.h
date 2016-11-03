@@ -1345,6 +1345,8 @@ int prec_GenArbWaveform(rp_channel_t channel, int buf_idx, float *waveform, uint
 int prec_GenGetArbWaveform(rp_channel_t channel, int buf_idx, float *waveform, uint32_t *length);
 int prec_GenBurstCount(rp_channel_t channel, int buf_idx, int num);
 int prec_GenGetBurstCount(rp_channel_t channel, int buf_idx, int *num);
+int prec_GenPhaseBits(rp_channel_t channel, int buf_idx, int num);
+int prec_GenGetPhaseBits(rp_channel_t channel, int buf_idx, int *num);
 int prec_GenTriggerSource(rp_channel_t channel, rp_trig_src_t src);
 int prec_GenGetTriggerSource(rp_channel_t channel, rp_trig_src_t *src);
 int prec_GenTrigger(uint32_t channel);

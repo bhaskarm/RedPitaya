@@ -527,19 +527,19 @@ scpi_result_t RP_GenBurstCount(scpi_t *context) {
     }
 
     if(!SCPI_ParamInt32(context, &count, true)){
-        RP_LOG(LOG_ERR, "*SOUR#:BURS:STAT Failed to parse "
+        RP_LOG(LOG_ERR, "*SOUR#:BURS:NCYC Failed to parse "
             "first parameter.\n");
         return SCPI_RES_ERR;
     }
 
     result = prec_GenBurstCount(channel, buf_idx, count);
     if(result != RP_OK){
-        RP_LOG(LOG_ERR, "*SOUR#:BURS:STAT Failed to set "
+        RP_LOG(LOG_ERR, "*SOUR#:BURS:NCYC Failed to set "
             "count parameter: %s", rp_GetError(result));
         return SCPI_RES_ERR;
     }
 
-    RP_LOG(LOG_INFO, "*SOUR#:BURS:STAT Successfully set generate burst count.\n");
+    RP_LOG(LOG_INFO, "*SOUR#:BURS:NCYC Successfully set generate burst count.\n");
     return SCPI_RES_OK;
 }
 
@@ -555,15 +555,66 @@ scpi_result_t RP_GenBurstCountQ(scpi_t *context) {
 
     result = prec_GenGetBurstCount(channel, buf_idx, &count);
     if(result != RP_OK){
-        RP_LOG(LOG_ERR, "*SOUR#:BURS:STAT? Failed to get generate "
+        RP_LOG(LOG_ERR, "*SOUR#:BURS:NCYC? Failed to get generate "
             "burst count: %s\n", rp_GetError(result));
         return SCPI_RES_ERR;
     }
 
     SCPI_ResultInt32(context, count);
 
-    RP_LOG(LOG_INFO, "*SOUR#:BURS:STAT? Successfully returned generate "
+    RP_LOG(LOG_INFO, "*SOUR#:BURS:NCYC? Successfully returned generate "
         "burst count value to client.\n");
+    return SCPI_RES_OK;
+}
+
+scpi_result_t RP_GenPhaseBits(scpi_t *context) {
+    
+    rp_channel_t channel;
+    int result, count;
+    int buf_idx = 0;
+
+    if (RP_ParseChBufArgv(context, &channel, &buf_idx) != RP_OK){
+        return SCPI_RES_ERR;
+    }
+
+    if(!SCPI_ParamInt32(context, &count, true)){
+        RP_LOG(LOG_ERR, "*SOUR#:BURS:PBITS Failed to parse "
+            "first parameter.\n");
+        return SCPI_RES_ERR;
+    }
+
+    result = prec_GenPhaseBits(channel, buf_idx, count);
+    if(result != RP_OK){
+        RP_LOG(LOG_ERR, "*SOUR#:BURS:PBITS Failed to set "
+            "phase bits : %s", rp_GetError(result));
+        return SCPI_RES_ERR;
+    }
+
+    RP_LOG(LOG_INFO, "*SOUR#:BURS:PBITs Successfully set generate phase bits .\n");
+    return SCPI_RES_OK;
+}
+
+scpi_result_t RP_GenPhaseBitsQ(scpi_t *context) {
+
+    rp_channel_t channel;
+    int result, count;
+    int buf_idx = 0;
+    
+    if (RP_ParseChBufArgv(context, &channel, &buf_idx) != RP_OK){
+        return SCPI_RES_ERR;
+    }
+
+    result = prec_GenGetPhaseBits(channel, buf_idx, &count);
+    if(result != RP_OK){
+        RP_LOG(LOG_ERR, "*SOUR#:BURS:PBITs? Failed to get generate "
+            "phase bits : %s\n", rp_GetError(result));
+        return SCPI_RES_ERR;
+    }
+
+    SCPI_ResultInt32(context, count);
+
+    RP_LOG(LOG_INFO, "*SOUR#:BURS:PBITS? Successfully returned generate "
+        "phase bits value to client.\n");
     return SCPI_RES_OK;
 }
 
