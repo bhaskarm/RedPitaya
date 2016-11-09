@@ -134,10 +134,17 @@ int prec_generate_getFrequency(rp_channel_t channel, int buf_idx, float *frequen
     return RP_OK;
 }
 
-int prec_generate_setWrapCounter(rp_channel_t channel, int buf_idx, uint32_t size) {
+int prec_generate_setStartCounter(rp_channel_t channel, int buf_idx, uint32_t start_addr) {
     CHANNEL_ACTION(channel,
-            generate->properties_chA[buf_idx].pointerEnd = 65536 * size - 1,
-            generate->properties_chB[buf_idx].pointerEnd = 65536 * size - 1)
+            generate->properties_chA[buf_idx].pointerStart = 65536 * start_addr - 1,
+            generate->properties_chB[buf_idx].pointerStart = 65536 * start_addr - 1)
+    return RP_OK;
+}
+
+int prec_generate_setWrapCounter(rp_channel_t channel, int buf_idx, uint32_t end_addr) {
+    CHANNEL_ACTION(channel,
+            generate->properties_chA[buf_idx].pointerEnd = 65536 * end_addr - 1,
+            generate->properties_chB[buf_idx].pointerEnd = 65536 * end_addr - 1)
     return RP_OK;
 }
 
@@ -193,6 +200,17 @@ int prec_generate_getTriggerEventCondition(uint32_t *value) {
     return RP_OK;
 }
 
+int prec_generate_singleTrigger(uint32_t channel_idx) {
+    // simultaneously trigger both channels
+    if (channel_idx == 1) {
+        return cmn_SetBits((uint32_t *) generate, 0x00000001, 0xFFFFFFFF);
+    } else if (channel_idx == 2) {
+        return cmn_SetBits((uint32_t *) generate, 0x00010000, 0xFFFFFFFF);
+    } else {
+        return cmn_SetBits((uint32_t *) generate, 0x00000000, 0xFFFFFFFF); // no trigger
+    }
+}
+
 int prec_generate_simultaneousTrigger() {
     // simultaneously trigger both channels
     return cmn_SetBits((uint32_t *) generate, 0x00010001, 0xFFFFFFFF);
@@ -214,17 +232,18 @@ int prec_generate_writeData(rp_channel_t channel, int buf_idx, float *data, uint
 
     volatile ch_properties_t *properties;
     ECHECK(getChannelPropertiesAddress(&properties, channel, buf_idx));
-    prec_generate_setWrapCounter(channel, buf_idx, length);
+    prec_generate_setStartCounter(channel, buf_idx, start);
+    prec_generate_setWrapCounter(channel, buf_idx, start+length);
 
-    printf("Driver stage buffer load: buf_idx %d, length %d, 2 samples - %f %f\n", buf_idx, length, data[0], data[1]);
+    printf("Driver stage buffer load: buf_idx %d, start %d, length %d, 2 samples - %f %f\n", buf_idx, start, length, data[0], data[1]);
 
     //rp_calib_params_t calib = calib_GetParams();
     int dc_offs = 0;//channel == RP_CH_1 ? calib.be_ch1_dc_offs: calib.be_ch2_dc_offs;
     uint32_t amp_max = 0; //channel == RP_CH_1 ? calib.be_ch1_fs: calib.be_ch2_fs;
 
-    for(int i = start; i < start+BUFFER_LENGTH; i++) {
-        dataOut[i % BUFFER_LENGTH] = cmn_CnvVToCnt(DATA_BIT_LENGTH, data[i-start], AMPLITUDE_MAX, false, amp_max, dc_offs, 0.0);
+    for(int i = start; i < start+length; i++) {
+        dataOut[i] = cmn_CnvVToCnt(DATA_BIT_LENGTH, data[i-start], AMPLITUDE_MAX, false, amp_max, dc_offs, 0.0);
     }
-    printf("Driver stage calculated data: 2 samples - %d %d\n", dataOut[0], dataOut[1]);
+    printf("Driver stage calculated data: 2 samples - %d %d\n", dataOut[start], dataOut[start+1]);
     return RP_OK;
 }

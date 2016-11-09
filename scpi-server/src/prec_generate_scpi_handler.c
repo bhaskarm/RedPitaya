@@ -18,7 +18,7 @@
 #include <math.h>
 
 #include "../../api/rpbase/src/prec_generate.h"
-#include "prec_generate.h"
+#include "prec_generate_scpi_handler.h"
 
 #include "common.h"
 #include "scpi/parser.h"
@@ -433,7 +433,7 @@ scpi_result_t RP_GenArbitraryWaveFormFixedPoint(scpi_t *context) {
         buffer[samp_cnt] = buffer[samp_cnt] - 1.0; //Change from unipolar to bipolar
     }
 
-    result = prec_GenArbWaveform(channel, buf_idx, buffer, size);
+    result = prec_GenArbWaveform(channel, buf_idx, buffer, buf_idx*BUFFER_LENGTH, size);
     if(result != RP_OK){
         RP_LOG(LOG_ERR, "*SOUR#:TRAC:FIXD:DATA Failed to "
             "set arbitrary waveform data: %s\n", rp_GetError(result));
@@ -466,7 +466,7 @@ scpi_result_t RP_GenArbitraryWaveForm(scpi_t *context) {
         return SCPI_RES_ERR;
     }
 
-    result = prec_GenArbWaveform(channel, buf_idx, buffer, size);
+    result = prec_GenArbWaveform(channel, buf_idx, buffer, buf_idx*BUFFER_LENGTH, size);
     if(result != RP_OK){
         RP_LOG(LOG_ERR, "*SOUR#:TRAC:DATA:DATA Failed to "
             "set arbitrary waveform data: %s\n", rp_GetError(result));

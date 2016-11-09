@@ -38,7 +38,7 @@ OBJECTS =	scpi-commands.o \
 		dpin.o \
 		apin.o \
 		acquire.o \
-		prec_generate.o \
+		prec_generate_scpi_handler.o \
 		common.o
 
 OBJS = $(patsubst %$(OBJEXT), $(OBJECTS_DIR)/%$(OBJEXT), $(OBJECTS))

@@ -13,8 +13,8 @@
  */
 
 
-#ifndef PREC_SCPI_GENERATE_H_
-#define PREC_SCPI_GENERATE_H_
+#ifndef PREC_GENERATE_SCPI_HANDLER_H_
+#define PREC_GENERATE_SCPI_HANDLER_H_
 
 #include "scpi/types.h"
 

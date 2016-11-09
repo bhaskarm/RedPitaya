@@ -1341,7 +1341,7 @@ int prec_GenPhase(rp_channel_t channel, int buf_idx, float phase);
 int prec_GenGetPhase(rp_channel_t channel, int buf_idx, float *phase);
 int prec_GenWaveform(rp_channel_t channel, int buf_idx, prec_waveform_t type);
 int prec_GenGetWaveform(rp_channel_t channel, int buf_idx, prec_waveform_t *type);
-int prec_GenArbWaveform(rp_channel_t channel, int buf_idx, float *waveform, uint32_t length);
+int prec_GenArbWaveform(rp_channel_t channel, int buf_idx, float *waveform, uint32_t start, uint32_t length);
 int prec_GenGetArbWaveform(rp_channel_t channel, int buf_idx, float *waveform, uint32_t *length);
 int prec_GenBurstCount(rp_channel_t channel, int buf_idx, int num);
 int prec_GenGetBurstCount(rp_channel_t channel, int buf_idx, int *num);

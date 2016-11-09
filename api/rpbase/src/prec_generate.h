@@ -90,7 +90,8 @@ int prec_generate_setDCOffset(rp_channel_t channel, int buf_idx, float offset);
 int prec_generate_getDCOffset(rp_channel_t channel, int buf_idx, float *offset);
 int prec_generate_setFrequency(rp_channel_t channel, int buf_idx, float frequency);
 int prec_generate_getFrequency(rp_channel_t channel, int buf_idx, float *frequency);
-int prec_generate_setWrapCounter(rp_channel_t channel, int buf_idx, uint32_t size);
+int prec_generate_setStartCounter(rp_channel_t channel, int buf_idx, uint32_t start_addr);
+int prec_generate_setWrapCounter(rp_channel_t channel, int buf_idx, uint32_t end_addr);
 int prec_generate_setTriggerSource(rp_channel_t channel, unsigned short value);
 int prec_generate_getTriggerSource(rp_channel_t channel, uint32_t *value);
 int prec_generate_setBurstCount(rp_channel_t channel, int buf_idx, uint32_t num);
@@ -100,6 +101,7 @@ int prec_generate_getPhaseBits(rp_channel_t channel, int buf_idx, uint32_t *pbit
 int prec_generate_setTriggerEventCondition(unsigned short value);
 int prec_generate_getTriggerEventCondition(uint32_t *value);
 
+int prec_generate_singleTrigger(uint32_t channel_idx);
 int prec_generate_simultaneousTrigger();
 int prec_generate_Synchronise();
 

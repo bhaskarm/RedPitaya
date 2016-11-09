@@ -964,7 +964,7 @@ int prec_GenGetWaveform(rp_channel_t channel, int buf_idx, prec_waveform_t *type
     return RP_OK;
 }
 
-int prec_GenArbWaveform(rp_channel_t channel, int buf_idx, float *waveform, uint32_t length) {
+int prec_GenArbWaveform(rp_channel_t channel, int buf_idx, float *waveform, uint32_t start_addr, uint32_t length) {
     //return prec_gen_setArbWaveform(channel, buf_idx, waveform, length);
     // Check if data is normalized
     float min = FLT_MAX, max = -FLT_MAX; // initial values
@@ -985,20 +985,18 @@ int prec_GenArbWaveform(rp_channel_t channel, int buf_idx, float *waveform, uint
     CHANNEL_ACTION(channel,
             pointer = chA_arbitraryData,
             pointer = chB_arbitraryData)
+
     for(i = 0; i < length; i++) {
-        pointer[i] = waveform[i];
-    }
-    for(i = length; i < BUFFER_LENGTH; i++) { // clear the rest of the buffer
-        pointer[i] = 0;
+        pointer[i] = waveform[i]; // save into a temporary float buffer
     }
 
     if (channel == RP_CH_1) {
         chA_arb_size = length;
-        return prec_generate_writeData(channel, buf_idx, pointer, 0, length);
+        return prec_generate_writeData(channel, buf_idx, pointer, start_addr, length);
     }
     else if (channel == RP_CH_2) {
         chA_arb_size = length;
-        return prec_generate_writeData(channel, buf_idx, pointer, 0, length);
+        return prec_generate_writeData(channel, buf_idx, pointer, start_addr, length);
     }
     else {
         return RP_EPN;
@@ -1083,8 +1081,11 @@ int prec_GenTrigger(uint32_t channel) {
     //All channels are enabled for now, fix this
     switch (channel) {
         case 0:
+            return prec_generate_singleTrigger(0); // no trigger
         case 1:
+            return prec_generate_singleTrigger(1);
         case 2:
+            return prec_generate_singleTrigger(2);
         case 3:
             return prec_generate_simultaneousTrigger();
         default:
