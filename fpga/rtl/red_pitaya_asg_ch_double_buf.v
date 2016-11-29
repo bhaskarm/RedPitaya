@@ -79,18 +79,14 @@ reg   [  14-1: 0] dac_buf [0:(1<<RSZ)-1] ;
 reg   [  14-1: 0] dac_rd    ;
 reg   [  14-1: 0] dac_rdat  ;
 reg   [ RSZ-1: 0] dac_rp    ;
-reg   [RSZ+15: 0] dac_ptr   ; // read pointer
-reg   [RSZ+15: 0] dac_ptrp  ; // previour read pointer
-wire  [RSZ+16: 0] dac_npnt  ; // next read pointer
-wire  [RSZ+16: 0] dac_npnt_sub ;
-wire              dac_npnt_sub_neg;
+reg   [RSZ+15+2: 0] dac_ptr   ; // read pointer, 2 extra bits to prevent rollover in calculations
 
 reg   [  28-1: 0] dac_mult  ;
 reg   [  15-1: 0] dac_sum   ;
 
 wire     [  14-1: 0] set_amp_i     ;  //!< set amplitude scale
 wire     [  14-1: 0] set_dc_i      ;  //!< set output offset
-wire     [RSZ+15: 0] set_end_i    ;  //!< set table data end
+wire     [RSZ+15+2: 0] set_end_i    ;  //!< set table data end, add extra bits to prevent rollover
 wire     [RSZ+15: 0] set_step_i    ;  //!< set pointer step
 wire     [RSZ+15: 0] set_start_i     ;  //!< set reset offset
 wire     [  16-1: 0] set_ncyc_i    ;  //!< set number of cycle
@@ -118,8 +114,8 @@ assign cyc_done_o = cyc_done;
 // read
 always @(posedge dac_clk_i)
 begin
-   buf_rpnt_o <= dac_ptr[RSZ+15:16];
-   dac_rp     <= dac_ptr[RSZ+15:16];
+   buf_rpnt_o <= dac_ptr[RSZ+15:16]; // 2 top bits of the ptr are thrown out because they are only for overflow prevention
+   dac_rp     <= dac_ptr[RSZ+15:16]; // 2 top bits of the ptr are thrown out because they are only for overflow prevention
    dac_rd     <= dac_buf[dac_rp] ;
    dac_rdat   <= dac_rd ;  // improve timing
 end
@@ -154,7 +150,7 @@ wire             ext_trig_n   ;
 // The config for the current buffer
 assign  set_amp_i      = set_amp_all_i   [ (14*(current_buf)) +: 14];
 assign  set_dc_i       = set_dc_all_i    [ (14*(current_buf)) +: 14];
-assign  set_end_i     = set_end_all_i  [ ((RSZ+16)*(current_buf)) +: (RSZ+16)];
+assign  set_end_i     = {2'b00, set_end_all_i  [ ((RSZ+16)*(current_buf)) +: (RSZ+16)]} ; // 2 extra bits to prevent roll over
 assign  set_step_i     = set_step_all_i  [ ((RSZ+16)*(current_buf)) +: (RSZ+16)];
 assign  set_start_i      = set_start_all_i   [ ((RSZ+16)*(current_buf)) +: (RSZ+16)];
 assign  set_ncyc_i     = set_ncyc_all_i  [ (16*(current_buf)) +: 16];
@@ -197,29 +193,29 @@ always @(posedge dac_clk_i) begin
    if (dac_rstn_i == 1'b0 || set_rst_i == 1'b1) begin
       current_buf <= 2'b00;
       cyc_cnt <= 16'h0000;
-      dac_ptr <= {RSZ+16{1'b0}};
+      dac_ptr <= {RSZ+16+2{1'b0}};
    end else begin
      case(asg_state)
        SM_IDLE       : begin
            current_buf <= 2'b00;
            cyc_cnt <= 16'h0000;
-           dac_ptr <= {RSZ+16{1'b0}};
+           dac_ptr <= {RSZ+16+2{1'b0}};
        end
        SM_START_PTR  : begin // This state is traversed once at the start and never again
            current_buf <= current_buf;
            cyc_cnt <= set_ncyc_i;
-           dac_ptr <= set_start_i;
+           dac_ptr <= {2'b00, set_start_i}; // 2 extra bits to prevent roll over
        end
        SM_DRIVE_DAC  : begin
-           if (dac_ptr + set_step_i >= set_end_i) begin
+           if (dac_ptr + set_step_i > set_end_i) begin
              if (cyc_cnt == 16'h0001 || cyc_cnt == 16'h0000) begin // All cycles done, Next buffer is ready to begin
                current_buf <= current_buf + 1;
                cyc_cnt <= next_ncyc_i;
-               dac_ptr <= next_start_i;
+               dac_ptr <= {2'b00, next_start_i}; // 2 extra bits to prevent roll over
              end else begin // 1 Cycle is done but more cycles are left in the same buffer
                current_buf <= current_buf;
                cyc_cnt <= cyc_cnt - 1;
-               dac_ptr <= set_start_i;
+               dac_ptr <= set_start_i; // 2 extra bits to prevent roll over
              end
            end else begin // Just step to next sample
              dac_ptr <= dac_ptr + set_step_i;
@@ -230,12 +226,12 @@ always @(posedge dac_clk_i) begin
        SM_START_NEXT_BUF: begin // Deprecated state that would go to the next buffer
            current_buf <= current_buf;
            cyc_cnt <= set_ncyc_i;
-           dac_ptr <= set_start_i;
+           dac_ptr <= set_start_i; // 2 extra bits to prevent roll over
        end
        default : begin
            current_buf <= 2'b00;
            cyc_cnt <= 16'h0000;
-           dac_ptr <= {RSZ+16{1'b0}};
+           dac_ptr <= {RSZ+16+2{1'b0}};
        end
      endcase
    end
@@ -259,7 +255,7 @@ always @(*) begin
             buf_done = 1'b0;
         end
         SM_DRIVE_DAC : begin
-            if (dac_ptr + set_step_i >= set_end_i) begin
+            if (dac_ptr + set_step_i > set_end_i) begin
               if (cyc_cnt == 16'h0001 || cyc_cnt == 16'h0000) begin
                 next_asg_state = SM_DRIVE_DAC; //SM_START_PTR;
                 cyc_done = 1'b1;

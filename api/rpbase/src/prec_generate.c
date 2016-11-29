@@ -136,15 +136,15 @@ int prec_generate_getFrequency(rp_channel_t channel, int buf_idx, float *frequen
 
 int prec_generate_setStartCounter(rp_channel_t channel, int buf_idx, uint32_t start_addr) {
     CHANNEL_ACTION(channel,
-            generate->properties_chA[buf_idx].pointerStart = 65536 * start_addr - 1,
-            generate->properties_chB[buf_idx].pointerStart = 65536 * start_addr - 1)
+            generate->properties_chA[buf_idx].pointerStart = 65536 * start_addr,
+            generate->properties_chB[buf_idx].pointerStart = 65536 * start_addr)
     return RP_OK;
 }
 
 int prec_generate_setWrapCounter(rp_channel_t channel, int buf_idx, uint32_t end_addr) {
     CHANNEL_ACTION(channel,
-            generate->properties_chA[buf_idx].pointerEnd = 65536 * end_addr - 1,
-            generate->properties_chB[buf_idx].pointerEnd = 65536 * end_addr - 1)
+            generate->properties_chA[buf_idx].pointerEnd = 65536 * end_addr,
+            generate->properties_chB[buf_idx].pointerEnd = 65536 * end_addr)
     return RP_OK;
 }
 
@@ -233,7 +233,7 @@ int prec_generate_writeData(rp_channel_t channel, int buf_idx, float *data, uint
     volatile ch_properties_t *properties;
     ECHECK(getChannelPropertiesAddress(&properties, channel, buf_idx));
     prec_generate_setStartCounter(channel, buf_idx, start);
-    prec_generate_setWrapCounter(channel, buf_idx, start+length);
+    prec_generate_setWrapCounter(channel, buf_idx, start+length-1);
 
     printf("Driver stage buffer load: buf_idx %d, start %d, length %d, 2 samples - %f %f\n", buf_idx, start, length, data[0], data[1]);
 

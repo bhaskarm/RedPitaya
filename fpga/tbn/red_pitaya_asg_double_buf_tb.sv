@@ -101,9 +101,9 @@ initial begin
 
   // CH0 DAC settings
   bus.write(`CH_OFFSET+32'h00004,{1'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
-  bus.write(`CH_OFFSET+32'h00008,{16'h3ffc, 16'h0}          );  // table size
+  bus.write(`CH_OFFSET+32'h00008,{16'h3f, 16'h0}          );  // table size
   bus.write(`CH_OFFSET+32'h0000C,{16'h0, 16'h0}             );  // reset offset
-  bus.write(`CH_OFFSET+32'h00010,{16'h34, 16'h0}             );  // table step
+  bus.write(`CH_OFFSET+32'h00010,{16'h1, 16'h0}             );  // table step
   bus.write(`CH_OFFSET+32'h00018,{16'h0, 16'd1}                   );  // number of cycles
   bus.write(`CH_OFFSET+32'h0001C,{8'h0, 8'hff, 16'd0}             );  // phase btsi and number of repetitions
   bus.write(`CH_OFFSET+32'h00020,{32'd0}                          );  // number of 1us delay between repetitions
@@ -111,7 +111,7 @@ initial begin
   bus.write(`CH_OFFSET+32'h00024,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
   bus.write(`CH_OFFSET+32'h00028,{16'h7ffc, 16'h0}          );  // table size
   bus.write(`CH_OFFSET+32'h0002C,{16'h4000, 16'h0}             );  // reset offset
-  bus.write(`CH_OFFSET+32'h00030,{16'h34, 16'h0}             );  // table step
+  bus.write(`CH_OFFSET+32'h00030,{16'h33, 16'h0}             );  // table step
   bus.write(`CH_OFFSET+32'h00038,{16'h0, 16'd2}                   );  // number of cycles
   bus.write(`CH_OFFSET+32'h0003C,{16'h0, 16'd0}                   );  // number of repetitions
   bus.write(`CH_OFFSET+32'h00040,{32'd0}                          );  // number of 1us delay between repetitions
@@ -119,7 +119,7 @@ initial begin
   bus.write(`CH_OFFSET+32'h00044,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
   bus.write(`CH_OFFSET+32'h00048,{16'hbffc, 16'h0}          );  // table size
   bus.write(`CH_OFFSET+32'h0004C,{16'h8000, 16'h0}             );  // reset offset
-  bus.write(`CH_OFFSET+32'h00050,{16'h34, 16'h0}             );  // table step
+  bus.write(`CH_OFFSET+32'h00050,{16'h32, 16'h0}             );  // table step
   bus.write(`CH_OFFSET+32'h00058,{16'h0, 16'd3}                   );  // number of cycles
   bus.write(`CH_OFFSET+32'h0005C,{16'h0, 16'd0}                   );  // number of repetitions
   bus.write(`CH_OFFSET+32'h00060,{32'd0}                          );  // number of 1us delay between repetitions
@@ -127,7 +127,7 @@ initial begin
   bus.write(`CH_OFFSET+32'h00064,{2'h0,-14'd500, 2'h0, 14'h2F00}  );  // DC offset, amplitude
   bus.write(`CH_OFFSET+32'h00068,{16'hfffc, 16'h0}          );  // table size
   bus.write(`CH_OFFSET+32'h0006C,{16'hc000, 16'h0}             );  // reset offset
-  bus.write(`CH_OFFSET+32'h00070,{16'h34, 16'h0}             );  // table step
+  bus.write(`CH_OFFSET+32'h00070,{16'h31, 16'h0}             );  // table step
   bus.write(`CH_OFFSET+32'h00078,{16'h0, 16'd4}                   );  // number of cycles
   bus.write(`CH_OFFSET+32'h0007C,{16'h0, 16'd0}                   );  // number of repetitions
   bus.write(`CH_OFFSET+32'h00080,{32'd0}                          );  // number of 1us delay between repetitions
