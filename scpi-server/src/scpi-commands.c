@@ -24,6 +24,7 @@
 #include "acquire.h"
 #include "generate.h"
 #include "prec_generate_scpi_handler.h"
+#include "prec_axi_acquire_scpi_handler.h"
 #include "scpi/error.h"
 #include "scpi/ieee488.h"
 #include "scpi/minimal.h"
@@ -223,6 +224,11 @@ static const scpi_command_t scpi_commands[] = {
     {.pattern = "SOUR#:TRIG:SOUR", .callback            = RP_GenTriggerSource,},
     {.pattern = "SOUR#:TRIG:SOUR?", .callback           = RP_GenTriggerSourceQ,},
     {.pattern = "SOUR#:TRIG:IMM", .callback             = RP_GenTrigger,},
+
+    /* AXI DDR Acquire */
+    {.pattern = "AXIACQ:START", .callback                  = RP_AxiAcqStart,},
+    {.pattern = "AXIACQ:STOP", .callback                   = RP_AxiAcqStop,},
+    {.pattern = "AXIACQ:RST", .callback                    = RP_AxiAcqReset,},
 
     SCPI_CMD_LIST_END
 };

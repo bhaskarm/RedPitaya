@@ -23,7 +23,7 @@ OBJS = adc_reader.o
 SRCS = $(subst .o,.c, $(OBJS)))
 
 # Executable name
-TARGET=adc_reader
+TARGET=adc_reader_dual_chan
 
 # GCC compiling & linking flags
 CFLAGS=-g -std=gnu99 -Wall -Werror

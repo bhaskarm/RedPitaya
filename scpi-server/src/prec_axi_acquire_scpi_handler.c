@@ -13,6 +13,12 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include "prec_axi_acquire_scpi_handler.h"
+
+#include "common.h"
+//#include "scpi/parser.h"
+//#include "scpi/units.h"
+
 
 /* configuration constants */
 #define SERVER_IP_ADDR          "192.168.2.101"
@@ -31,6 +37,7 @@
 #define RAM_A_SIZE              0x0C000000UL
 #define RAM_B_ADDRESS           0x14000000UL
 #define RAM_B_SIZE              0x0C000000UL
+#define UDP_BUFFER_SIZE         SEND_BLOCK_SIZE*4 // UDP buffer used to store data read from RAM before transmissing over UDP. 4x the transmit size to buffer stuck packets
 
 
 /* data types */
@@ -130,7 +137,7 @@ static struct queue queue_b = {
  * main without paramater evaluation - all configuration is done through
  * constants for the purposes of this example.
  */
-int main(int argc, char **argv)
+int start_all_threads(void)
 {
 	int rc;
 	int mem_fd;
@@ -510,5 +517,72 @@ static void *send_worker(void *data)
 send_worker_exit:
 	printf("Send worker exiting...\n");
 	return NULL;
+}
+
+scpi_result_t RP_AxiAcqStart(scpi_t *context) {
+    int result = RP_OK;
+    
+    start_all_threads();
+    if (RP_OK != result) {
+        RP_LOG(LOG_ERR, "*AXIACQ:START Failed to start Red Pitaya acquire: %s\n", rp_GetError(result));
+        return SCPI_RES_ERR;
+    }
+
+    RP_LOG(LOG_INFO, "*AXIACQ:START Successful started Red Pitaya acquire.\n");
+    return SCPI_RES_OK;
+}   
+    
+scpi_result_t RP_AxiAcqStop(scpi_t *context) {
+    int result = RP_OK;
+    
+    if (RP_OK != result) {
+        RP_LOG(LOG_ERR, "*AXIACQ:STOP Failed to stop Red Pitaya acquisition: %s\n", rp_GetError(result));
+        return SCPI_RES_ERR;
+    }
+
+    RP_LOG(LOG_INFO, "*AXIACQ:STOP Successful stopped Red Pitaya acquire.\n");
+    return SCPI_RES_OK;
+}
+
+scpi_result_t RP_AxiAcqReset(scpi_t *context) {
+    int result = RP_OK;
+
+    if (RP_OK != result) {
+        RP_LOG(LOG_ERR, "*AXIACQ:RST Failed to reset Red Pitaya acquire: %s\n", rp_GetError(result));
+        return SCPI_RES_ERR;
+    }
+
+    context->binary_output = false;
+
+    RP_LOG(LOG_INFO, "*AXIACQ:RST Successful reset  Red Pitaya acquire.\n");
+    return SCPI_RES_OK;
+}
+
+scpi_result_t RP_AxiAcqStartQ(scpi_t * context) {
+    return SCPI_RES_OK;
+}
+scpi_result_t RP_AxiAcqStopQ(scpi_t * context) {
+    return SCPI_RES_OK;
+}
+scpi_result_t RP_AxiAcqThreshold(scpi_t * context) {
+    return SCPI_RES_OK;
+}
+scpi_result_t RP_AxiAcqThresholdQ(scpi_t * context) {
+    return SCPI_RES_OK;
+}
+scpi_result_t RP_AxiAcqBurstRepetitions(scpi_t * context) {
+    return SCPI_RES_OK;
+}
+scpi_result_t RP_AxiAcqBurstRepetitionsQ(scpi_t * context) {
+    return SCPI_RES_OK;
+}
+scpi_result_t RP_AxiAcqTriggerSource(scpi_t * context) {
+    return SCPI_RES_OK;
+}
+scpi_result_t RP_AxiAcqTriggerSourceQ(scpi_t * context) {
+    return SCPI_RES_OK;
+}
+scpi_result_t RP_AxiAcqTrigger(scpi_t *context) {
+    return SCPI_RES_OK;
 }
 

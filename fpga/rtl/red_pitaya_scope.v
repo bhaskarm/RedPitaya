@@ -48,7 +48,7 @@
  */
 
 module red_pitaya_scope #(
-  parameter RSZ = 3  // RAM size 2^RSZ
+  parameter RSZ = 13  // RAM size 2^RSZ
 )(
    // ADC
    input                 adc_clk_i       ,  // ADC clock
