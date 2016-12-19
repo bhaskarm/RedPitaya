@@ -19,24 +19,23 @@
 //#include "scpi/parser.h"
 //#include "scpi/units.h"
 
-
 /* configuration constants */
 #define SERVER_IP_ADDR          "192.168.2.101"
 #define SERVER_IP_PORT_A        5001
 #define SERVER_IP_PORT_B        5002
-#define ACQUISITION_LENGTH      200000          /* samples */
+#define ACQUISITION_LENGTH      0x06000000UL          /* samples */
 #define PRE_TRIGGER_LENGTH      40000           /* samples */
 #define DECIMATION              DE_1            /* one of enum decimation */
 #define TRIGGER_MODE            TR_MANUAL       /* one of enum trigger */
 #define TRIGGER_THRESHOLD       0               /* ADC counts, 2048 ≃ +0.25V */
 
 /* internal constants */
-#define READ_BLOCK_SIZE         16384
-#define SEND_BLOCK_SIZE         17752
+#define READ_BLOCK_SIZE         16384           // bytes
+#define SEND_BLOCK_SIZE         17752           // bytes
 #define RAM_A_ADDRESS           0x08000000UL
-#define RAM_A_SIZE              0x0C000000UL
+#define RAM_A_SIZE              0x0C000000UL    // bytes
 #define RAM_B_ADDRESS           0x14000000UL
-#define RAM_B_SIZE              0x0C000000UL
+#define RAM_B_SIZE              0x0C000000UL    // bytes
 #define UDP_BUFFER_SIZE         SEND_BLOCK_SIZE*4 // UDP buffer used to store data read from RAM before transmissing over UDP. 4x the transmit size to buffer stuck packets
 
 
@@ -73,6 +72,8 @@ struct queue {
 	pthread_t       sender;
 	int             started;
 	unsigned int    read_end;
+	unsigned int    sent_end;
+	unsigned int    num_sent;
 	uint8_t         *buf;
 	int             sock_fd;
 };
@@ -102,14 +103,14 @@ struct queue {
 		} \
 	} while (0)
 
-static void scope_reset(void);
+//static void scope_reset(void);
 static void scope_set_filters(enum equalizer eq, int shaping, volatile uint32_t *base);
 static void scope_setup_input_parameters(enum decimation dec, enum equalizer ch_a_eq, enum equalizer ch_b_eq, int ch_a_shaping, int ch_b_shaping);
 static void scope_setup_trigger_parameters(int thresh_a, int thresh_b, int hyst_a, int hyst_b, int deadtime);
 static void scope_setup_axi_recording(void);
 static void scope_activate_trigger(enum trigger trigger);
 static void read_worker(struct queue *a, struct queue *b);
-static void *send_worker(void *data);
+//static void *send_worker(void *data);
 
 
 /* module global variables */
@@ -120,6 +121,8 @@ static struct queue queue_a = {
 	.mutex = PTHREAD_MUTEX_INITIALIZER,
 	.started = 0,
 	.read_end = 0,
+	.sent_end = 0,
+	.num_sent = 0,
 	.buf = NULL,
 	.sock_fd = -1,
 };
@@ -127,10 +130,12 @@ static struct queue queue_b = {
 	.mutex = PTHREAD_MUTEX_INITIALIZER,
 	.started = 0,
 	.read_end = 0,
+	.sent_end = 0,
+	.num_sent = 0,
 	.buf = NULL,
 	.sock_fd = -1,
 };
-
+static uint8_t acq_active;
 
 /* functions */
 /*
@@ -164,8 +169,8 @@ int start_all_threads(void)
 	scope = smap;
 
 	/* allocate cacheable buffers */
-	queue_a.buf = malloc(ACQUISITION_LENGTH * 2);
-	queue_b.buf = malloc(ACQUISITION_LENGTH * 2);
+	queue_a.buf = malloc(UDP_BUFFER_SIZE * 2);
+	queue_b.buf = malloc(UDP_BUFFER_SIZE * 2);
 	if (queue_a.buf == NULL || queue_b.buf == NULL) {
 		fprintf(stderr, "malloc failed, %s - buf a %p buf b %p\n",
 		        strerror(errno), queue_a.buf, queue_b.buf);
@@ -203,27 +208,27 @@ int start_all_threads(void)
 	}
 
 	/* initialize scope */
-	scope_reset();
+	// Bhaskarm - gui resets scope scope_reset();
 	scope_setup_input_parameters(DECIMATION, EQ_LV, EQ_LV, 1, 1);
 	scope_setup_trigger_parameters(TRIGGER_THRESHOLD, TRIGGER_THRESHOLD, 50, 50, 1250);
 	scope_setup_axi_recording();
 
 	/* start socket senders */
-	rc = pthread_create(&queue_a.sender, NULL, send_worker, &queue_a);
-	if (rc != 0) {
-		fprintf(stderr, "start sender A failed, %s\n", strerror(rc));
-		rc = -6;
-		goto main_exit;
-	}
-	queue_a.started = 1;
-
-	rc = pthread_create(&queue_b.sender, NULL, send_worker, &queue_b);
-	if (rc != 0) {
-		fprintf(stderr, "start sender B failed, %s\n", strerror(rc));
-		rc = -6;
-		goto main_exit;
-	}
-	queue_b.started = 1;
+	//rc = pthread_create(&queue_a.sender, NULL, send_worker, &queue_a);
+	//if (rc != 0) {
+//		fprintf(stderr, "start sender A failed, %s\n", strerror(rc));
+//		rc = -6;
+//		goto main_exit;
+//	}
+//	queue_a.started = 1;
+//
+//	rc = pthread_create(&queue_b.sender, NULL, send_worker, &queue_b);
+//	if (rc != 0) {
+//		fprintf(stderr, "start sender B failed, %s\n", strerror(rc));
+//		rc = -6;
+//		goto main_exit;
+//	}
+//	queue_b.started = 1;
 
 	/* start reader in main-thread */
 	read_worker(&queue_a, &queue_b);
@@ -258,10 +263,10 @@ main_exit:
 	return rc;
 }
 
-static void scope_reset(void)
-{
-	*(uint32_t *)(scope + 0x00000) = 2;     /* reset scope */
-}
+//static void scope_reset(void)
+//{
+//	*(uint32_t *)(scope + 0x00000) = 2;     /* reset scope */
+//}
 
 static void scope_set_filters(enum equalizer eq,
                               int shaping,
@@ -312,8 +317,8 @@ static void scope_setup_trigger_parameters(int thresh_a,
                                            int hyst_b,
                                            int deadtime)
 {
-	*(uint32_t *)(scope + 0x00008) = thresh_a;      /* channel a trigger threshold */
-	*(uint32_t *)(scope + 0x0000c) = thresh_b;      /* channel b trigger threshold */
+	//bhaskarm - threshold set by gui *(uint32_t *)(scope + 0x00008) = thresh_a;      /* channel a trigger threshold */
+	//bhaskarm - threshold set by gui *(uint32_t *)(scope + 0x0000c) = thresh_b;      /* channel b trigger threshold */
 	/* the legacy recording logic controls when the trigger mode will be reset. we want
 	 * that to happen as soon as possible (because that's the signal that a trigger event
 	 * occured, and the pre-trigger samples are already waiting for transmission), so set
@@ -340,9 +345,9 @@ static void scope_setup_axi_recording(void)
 static void scope_activate_trigger(enum trigger trigger)
 {
 	/* TODO maybe use the 'keep armed' flag without reset, to have better pre-trigger data when a trigger immediately follows the previous recording */
-	*(uint32_t *)(scope + 0x00000) = 3;             /* reset and arm scope */
-	*(uint32_t *)(scope + 0x00000) = 0;             /* armed for trigger */
-	*(uint32_t *)(scope + 0x00004) = trigger;       /* trigger source */
+	*(uint32_t *)(scope + 0x00000) = 1;             /* arm scope */
+	//*(uint32_t *)(scope + 0x00000) = 0;             /* armed for trigger */
+	//Bhaskarm - Trigger is set using the ACQ SCPI commands. *(uint32_t *)(scope + 0x00004) = trigger;       /* trigger source */
 }
 
 /*
@@ -353,121 +358,90 @@ static void scope_activate_trigger(enum trigger trigger)
  */
 static void read_worker(struct queue *a, struct queue *b)
 {
-	unsigned int start_pos_a, start_pos_b;
 	unsigned int curr_pos_a, curr_pos_b;
-	unsigned int read_pos_a, read_pos_b;
-	size_t length_a, length_b;
-	int a_first, a_ready, b_first, b_ready;
-	int did_something;
+	unsigned int read_a_done, read_b_done;
+	unsigned int send_a_done, send_b_done;
+	unsigned int send_pos = 0;
+	ssize_t sent;
+	size_t length;
 
-	do {
-	        printf("Arming read worker...\n");
-		a_first = b_first = 1;
-		a_ready = b_ready = 0;
+	printf("Arming read worker...\n");
 
-		scope_activate_trigger(TRIGGER_MODE);
+	scope_activate_trigger(TRIGGER_MODE);
 
-		/* wait for trigger */
-		while (*(uint32_t *)(scope + 0x00004))
-			usleep(5);
+	/* wait for trigger */
+	while (*(uint32_t *)(scope + 0x00004)) {
+	        //printf("Trigger value %0x\n", *(uint32_t *)(scope + 0x00004));
+		usleep(5);
+	}
 
-		start_pos_a = *(uint32_t *)(scope + 0x00060);   /* channel a trigger pointer */
-		start_pos_b = *(uint32_t *)(scope + 0x00080);   /* channel b trigger pointer */
+        read_a_done = 0;
+        read_b_done = 0;
+        while (read_a_done == 0 && read_b_done == 0) {
+	    usleep(5);
+	    curr_pos_a = *(uint32_t *)(scope + 0x00064);    /* channel a current write pointer */
+	    curr_pos_b = *(uint32_t *)(scope + 0x00084);    /* channel b current write pointer */
+	    curr_pos_a -= RAM_A_ADDRESS;
+	    curr_pos_b -= RAM_B_ADDRESS;
+            if (curr_pos_a >= (ACQUISITION_LENGTH - PRE_TRIGGER_LENGTH)* 2) {
+                printf("Channel A read complete\n");
+                read_a_done = 1;
+            } else {
+                //printf("Curr position A = %0x\n", curr_pos_a);
+            }
+            if (curr_pos_b >= (ACQUISITION_LENGTH - PRE_TRIGGER_LENGTH)* 2) {
+                printf("Channel B read complete\n");
+                read_b_done = 1;
+            } else {
+                //printf("Curr position B = %0x\n", curr_pos_b);
+            }
+        }
+        // Send all channel A data
+        send_a_done = 0;
+        send_pos = 0;
+        while (send_a_done == 0) {
+            if (send_pos >= ACQUISITION_LENGTH*2) {
+	        printf("Channel A send complete\n");
+                send_a_done = 1;
+            } else {
+	        length = (ACQUISITION_LENGTH*2) - send_pos;
+	        if (length > SEND_BLOCK_SIZE)
+	            sent = send(a->sock_fd, buf_a + send_pos, SEND_BLOCK_SIZE, 0);
+	        else
+	            sent = send(a->sock_fd, buf_a + send_pos, length, 0);
 
-		start_pos_a = CIRCULAR_SUB(start_pos_a - RAM_A_ADDRESS, PRE_TRIGGER_LENGTH * 2, RAM_A_SIZE);
-		start_pos_b = CIRCULAR_SUB(start_pos_b - RAM_B_ADDRESS, PRE_TRIGGER_LENGTH * 2, RAM_B_SIZE);
+	        if (sent > 0) {
+	            //printf("Send one block for channel a. Send pos = %0x, Sent length = %0x\n", send_pos, sent);
+                    send_pos += sent;
+	        } else {
+	            printf("Channel A send complete\n");
+                    send_a_done = 1;
+	        }
+	    }
+	}
+        // Send all channel B data
+        send_b_done = 0;
+        send_pos = 0;
+        while (send_b_done == 0) {
+            if (send_pos >= ACQUISITION_LENGTH*2) {
+	        printf("Channel B send complete\n");
+                send_b_done = 1;
+            } else {
+	        length = (ACQUISITION_LENGTH*2) - send_pos;
+	        if (length > SEND_BLOCK_SIZE)
+	            sent = send(b->sock_fd, buf_b + send_pos, SEND_BLOCK_SIZE, 0);
+	        else
+	            sent = send(b->sock_fd, buf_b + send_pos, length, 0);
 
-		did_something = 1;
-
-		do {
-			if (!did_something)
-				usleep(5);
-			did_something = 0;
-
-			/* get buffer positions */
-			if (pthread_mutex_lock(&a->mutex) != 0)
-				goto read_worker_exit;
-			read_pos_a = a->read_end;
-			if (pthread_mutex_unlock(&a->mutex) != 0)
-				goto read_worker_exit;
-
-			if (pthread_mutex_lock(&b->mutex) != 0)
-				goto read_worker_exit;
-			read_pos_b = b->read_end;
-			if (pthread_mutex_unlock(&b->mutex) != 0)
-				goto read_worker_exit;
-
-			/* before starting, test if senders are ready */
-			if (a_first && read_pos_a == 0) {
-				a_first = 0;
-				a_ready = 1;
-			}
-			if (b_first && read_pos_b == 0) {
-				b_first = 0;
-				b_ready = 1;
-			}
-
-			/* get current recording positions */
-			curr_pos_a = *(uint32_t *)(scope + 0x00064);    /* channel a current write pointer */
-			curr_pos_b = *(uint32_t *)(scope + 0x00084);    /* channel b current write pointer */
-			curr_pos_a -= RAM_A_ADDRESS;
-			curr_pos_b -= RAM_B_ADDRESS;
-
-			/* calculate block sizes */
-			if (read_pos_a + READ_BLOCK_SIZE <= ACQUISITION_LENGTH * 2)
-				length_a = READ_BLOCK_SIZE;
-			else
-				length_a = ACQUISITION_LENGTH * 2 - read_pos_a;
-			if (read_pos_b + READ_BLOCK_SIZE <= ACQUISITION_LENGTH * 2)
-				length_b = READ_BLOCK_SIZE;
-			else
-				length_b = ACQUISITION_LENGTH * 2 - read_pos_b;
-
-			/* copy if sender is ready and a full block is available in the dma ram */
-			if (a_ready && CIRCULAR_DIST(start_pos_a, curr_pos_a, RAM_A_SIZE) >= length_a) {
-				CIRCULARSRC_MEMCPY(a->buf + read_pos_a, buf_a, start_pos_a, RAM_A_SIZE, length_a);
-				start_pos_a = CIRCULAR_ADD(start_pos_a, length_a, RAM_A_SIZE);
-
-				if (read_pos_a + length_a >= ACQUISITION_LENGTH * 2) {
-	                                printf("CH A all samples read\n");
-					a_ready = 0; /* stop if all samples were copied */
-                                }
-				if (pthread_mutex_lock(&a->mutex) != 0)
-					goto read_worker_exit;
-				if (a->read_end == read_pos_a)
-					a->read_end += length_a;
-				else
-					a_ready = 0; /* stop if sender resetted read_end */
-				if (pthread_mutex_unlock(&a->mutex) != 0)
-					goto read_worker_exit;
-
-				did_something = 1;
-			}
-			if (b_ready && CIRCULAR_DIST(start_pos_b, curr_pos_b, RAM_B_SIZE) > length_b) {
-				CIRCULARSRC_MEMCPY(b->buf + read_pos_b, buf_b, start_pos_b, RAM_B_SIZE, length_b);
-				start_pos_b = CIRCULAR_ADD(start_pos_b, length_b, RAM_B_SIZE);
-
-				if (read_pos_b + length_b >= ACQUISITION_LENGTH * 2) {
-	                                printf("CH B all samples read\n");
-					b_ready = 0; /* stop if all samples were copied */
-                                }
-				if (pthread_mutex_lock(&b->mutex) != 0)
-					goto read_worker_exit;
-				if (b->read_end == read_pos_b)
-					b->read_end += length_b;
-				else
-					b_ready = 0; /* stop if sender resetted read_end */
-				if (pthread_mutex_unlock(&b->mutex) != 0)
-					goto read_worker_exit;
-
-				did_something = 1;
-			}
-		} while (a_first || a_ready || b_first || b_ready);
-	} while (1);
-
-read_worker_exit:
-	printf("All read worker exiting...\n");
-	return;
+	        if (sent > 0) {
+	            //printf("Send one block for channel b. Send pos = %0x, Sent length = %0x\n", send_pos, sent);
+                    send_pos += sent;
+	        } else {
+	            printf("Channel B send complete\n");
+                    send_b_done = 1;
+	        }
+	    }
+	}
 }
 
 /*
@@ -477,24 +451,15 @@ read_worker_exit:
  * will wait until read_end advances from 0 and start all over. access to read_end
  * is protected by queue->mutex.
  */
-static void *send_worker(void *data)
+/*static void *send_worker(void *data)
 {
 	struct queue *q = (struct queue *)data;
 	unsigned int send_pos = 0;
 	ssize_t sent;
 	size_t length;
 
-	do {
-		if (pthread_mutex_lock(&q->mutex) != 0)
-			goto send_worker_exit;
-		if (q->read_end >= ACQUISITION_LENGTH * 2 && send_pos >= ACQUISITION_LENGTH * 2) {
-			send_pos = 0;
-			q->read_end = 0;
-		}
-		length = q->read_end - send_pos;
-		if (pthread_mutex_unlock(&q->mutex) != 0)
-			goto send_worker_exit;
-
+	while (acq_active == 1) {
+		length = CIRCULAR_SUB(q->read_end, send_pos, UDP_BUFFER_SIZE);
 		if (length > 0) {
 			do {
 				if (length > SEND_BLOCK_SIZE)
@@ -502,26 +467,25 @@ static void *send_worker(void *data)
 				else
 					sent = send(q->sock_fd, q->buf + send_pos, length, 0);
 				if (sent > 0) {
-					send_pos += sent;
+					//CIRCULAR_ADD(send_pos, sent, UDP_BUFFER_SIZE);
 					length -= sent;
 				}
 			} while (sent >= 0 && length > 0);
 
-			if (sent < 0)
+			if (sent < 0 || acq_active == 0)
 				goto send_worker_exit;
 		} else {
 			usleep(5);
 		}
-	} while (1);
+	}
 
 send_worker_exit:
 	printf("Send worker exiting...\n");
 	return NULL;
 }
-
+*/
 scpi_result_t RP_AxiAcqStart(scpi_t *context) {
     int result = RP_OK;
-    
     start_all_threads();
     if (RP_OK != result) {
         RP_LOG(LOG_ERR, "*AXIACQ:START Failed to start Red Pitaya acquire: %s\n", rp_GetError(result));
@@ -535,6 +499,7 @@ scpi_result_t RP_AxiAcqStart(scpi_t *context) {
 scpi_result_t RP_AxiAcqStop(scpi_t *context) {
     int result = RP_OK;
     
+    acq_active = 0;    
     if (RP_OK != result) {
         RP_LOG(LOG_ERR, "*AXIACQ:STOP Failed to stop Red Pitaya acquisition: %s\n", rp_GetError(result));
         return SCPI_RES_ERR;
@@ -545,16 +510,6 @@ scpi_result_t RP_AxiAcqStop(scpi_t *context) {
 }
 
 scpi_result_t RP_AxiAcqReset(scpi_t *context) {
-    int result = RP_OK;
-
-    if (RP_OK != result) {
-        RP_LOG(LOG_ERR, "*AXIACQ:RST Failed to reset Red Pitaya acquire: %s\n", rp_GetError(result));
-        return SCPI_RES_ERR;
-    }
-
-    context->binary_output = false;
-
-    RP_LOG(LOG_INFO, "*AXIACQ:RST Successful reset  Red Pitaya acquire.\n");
     return SCPI_RES_OK;
 }
 
@@ -564,25 +519,27 @@ scpi_result_t RP_AxiAcqStartQ(scpi_t * context) {
 scpi_result_t RP_AxiAcqStopQ(scpi_t * context) {
     return SCPI_RES_OK;
 }
-scpi_result_t RP_AxiAcqThreshold(scpi_t * context) {
+scpi_result_t RP_AxiAcqTriggerLevel(scpi_t *context) {
     return SCPI_RES_OK;
 }
-scpi_result_t RP_AxiAcqThresholdQ(scpi_t * context) {
+
+scpi_result_t RP_AxiAcqTriggerLevelQ(scpi_t *context) {
     return SCPI_RES_OK;
 }
+
 scpi_result_t RP_AxiAcqBurstRepetitions(scpi_t * context) {
     return SCPI_RES_OK;
 }
+
 scpi_result_t RP_AxiAcqBurstRepetitionsQ(scpi_t * context) {
     return SCPI_RES_OK;
 }
+
 scpi_result_t RP_AxiAcqTriggerSource(scpi_t * context) {
     return SCPI_RES_OK;
 }
+
 scpi_result_t RP_AxiAcqTriggerSourceQ(scpi_t * context) {
-    return SCPI_RES_OK;
-}
-scpi_result_t RP_AxiAcqTrigger(scpi_t *context) {
     return SCPI_RES_OK;
 }
 
