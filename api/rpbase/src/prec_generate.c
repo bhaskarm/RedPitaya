@@ -238,7 +238,7 @@ int prec_generate_writeData(rp_channel_t channel, int buf_idx, float *data, uint
     printf("Driver stage buffer load: buf_idx %d, start %d, length %d, 2 samples - %f %f\n", buf_idx, start, length, data[0], data[1]);
 
     //rp_calib_params_t calib = calib_GetParams();
-    int dc_offs = 0;//channel == RP_CH_1 ? calib.be_ch1_dc_offs: calib.be_ch2_dc_offs;
+    int dc_offs = 0; //channel == RP_CH_1 ? calib.be_ch1_dc_offs: calib.be_ch2_dc_offs;
     uint32_t amp_max = 0; //channel == RP_CH_1 ? calib.be_ch1_fs: calib.be_ch2_fs;
 
     for(int i = start; i < start+length; i++) {

@@ -228,10 +228,7 @@ static const scpi_command_t scpi_commands[] = {
     /* AXI DDR Acquire */
     {.pattern = "AXIACQ:START", .callback                  = RP_AxiAcqStart,},
     {.pattern = "AXIACQ:STOP", .callback                   = RP_AxiAcqStop,},
-    {.pattern = "AXIACQ:RST", .callback                    = RP_AxiAcqReset,},
-    {.pattern = "AXIACQ:TRIG", .callback                   = RP_AcqTriggerSrc,},
-    {.pattern = "AXIACQ:TRIG:LEV", .callback               = RP_AcqTriggerLevel,},
-    {.pattern = "AXIACQ:BUF", .callback              = RP_AcqBufferSizeQ,},
+    {.pattern = "AXIACQ:LEN", .callback            	  = RP_AxiAcqSampleLength,},
 
     SCPI_CMD_LIST_END
 };

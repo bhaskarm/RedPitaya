@@ -23,13 +23,8 @@ scpi_result_t RP_AxiAcqStartQ(scpi_t * context);
 scpi_result_t RP_AxiAcqStop(scpi_t * context);
 scpi_result_t RP_AxiAcqStopQ(scpi_t * context);
 scpi_result_t RP_AxiAcqReset(scpi_t * context);
-scpi_result_t RP_AxiAcqThreshold(scpi_t * context);
-scpi_result_t RP_AxiAcqThresholdQ(scpi_t * context);
-scpi_result_t RP_AxiAcqBurstRepetitions(scpi_t * context);
-scpi_result_t RP_AxiAcqBurstRepetitionsQ(scpi_t * context);
-scpi_result_t RP_AxiAcqTriggerSource(scpi_t * context);
-scpi_result_t RP_AxiAcqTriggerSourceQ(scpi_t * context);
-scpi_result_t RP_AxiAcqTrigger(scpi_t *context);
+scpi_result_t RP_AxiAcqSampleLength(scpi_t * context);
+scpi_result_t RP_AxiAcqSampleLengthQ(scpi_t * context);
 
 // Hack to add uin32 parser command
 scpi_bool_t SCPI_ParamBufferUInt32(scpi_t * context, uint32_t *data, uint32_t *size, scpi_bool_t mandatory);

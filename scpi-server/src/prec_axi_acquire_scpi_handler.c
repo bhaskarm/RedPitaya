@@ -25,9 +25,9 @@
 #define SERVER_IP_PORT_B        5002
 #define ACQUISITION_LENGTH      0x06000000UL          /* samples */
 #define PRE_TRIGGER_LENGTH      40000           /* samples */
-#define DECIMATION              DE_1            /* one of enum decimation */
-#define TRIGGER_MODE            TR_MANUAL       /* one of enum trigger */
-#define TRIGGER_THRESHOLD       0               /* ADC counts, 2048 ≃ +0.25V */
+#define DECIMATION              DE_1            //Deprecated /* one of enum decimation */
+#define TRIGGER_MODE            TR_MANUAL       //Deprecated /* one of enum trigger */ 
+#define TRIGGER_THRESHOLD       0               //Dperecated /* ADC counts, 2048 ≃ +0.25V */
 
 /* internal constants */
 #define READ_BLOCK_SIZE         16384           // bytes
@@ -136,6 +136,7 @@ static struct queue queue_b = {
 	.sock_fd = -1,
 };
 static uint8_t acq_active;
+static uint32_t acq_length = 0x400;
 
 /* functions */
 /*
@@ -210,6 +211,7 @@ int start_all_threads(void)
 	/* initialize scope */
 	// Bhaskarm - gui resets scope scope_reset();
 	scope_setup_input_parameters(DECIMATION, EQ_LV, EQ_LV, 1, 1);
+	// Bhaskarm - trigger setting is unused in this function
 	scope_setup_trigger_parameters(TRIGGER_THRESHOLD, TRIGGER_THRESHOLD, 50, 50, 1250);
 	scope_setup_axi_recording();
 
@@ -304,8 +306,8 @@ static void scope_setup_input_parameters(enum decimation dec,
                                          int ch_a_shaping,
                                          int ch_b_shaping)
 {
-	*(uint32_t *)(scope + 0x00014) = dec;                           /* decimation */
-	*(uint32_t *)(scope + 0x00028) = (dec != DE_OFF) ? 1 : 0;       /* enable averaging */
+	//*(uint32_t *)(scope + 0x00014) = dec;                           /* decimation */
+	//*(uint32_t *)(scope + 0x00028) = (dec != DE_OFF) ? 1 : 0;       /* enable averaging */
 
 	scope_set_filters(ch_a_eq, ch_a_shaping, (uint32_t *)(scope + 0x00030)); /* filter coeff base channel a */
 	scope_set_filters(ch_b_eq, ch_b_shaping, (uint32_t *)(scope + 0x00040)); /* filter coeff base channel b */
@@ -333,10 +335,10 @@ static void scope_setup_axi_recording(void)
 {
 	*(uint32_t *)(scope + 0x00050) = RAM_A_ADDRESS;                 /* buffer a start */
 	*(uint32_t *)(scope + 0x00054) = RAM_A_ADDRESS + RAM_A_SIZE;    /* buffer a stop */
-	*(uint32_t *)(scope + 0x00058) = ACQUISITION_LENGTH - PRE_TRIGGER_LENGTH + 64; /* channel a post trigger samples */
+	*(uint32_t *)(scope + 0x00058) = acq_length - PRE_TRIGGER_LENGTH + 64; /* channel a post trigger samples */
 	*(uint32_t *)(scope + 0x00070) = RAM_B_ADDRESS;                 /* buffer b start */
 	*(uint32_t *)(scope + 0x00074) = RAM_B_ADDRESS + RAM_B_SIZE;    /* buffer b stop */
-	*(uint32_t *)(scope + 0x00078) = ACQUISITION_LENGTH - PRE_TRIGGER_LENGTH + 64; /* channel b post trigger samples */
+	*(uint32_t *)(scope + 0x00078) = acq_length - PRE_TRIGGER_LENGTH + 64; /* channel b post trigger samples */
 
 	*(uint32_t *)(scope + 0x0005c) = 1;     /* enable channel a axi */
 	*(uint32_t *)(scope + 0x0007c) = 1;     /* enable channel b axi */
@@ -383,13 +385,13 @@ static void read_worker(struct queue *a, struct queue *b)
 	    curr_pos_b = *(uint32_t *)(scope + 0x00084);    /* channel b current write pointer */
 	    curr_pos_a -= RAM_A_ADDRESS;
 	    curr_pos_b -= RAM_B_ADDRESS;
-            if (curr_pos_a >= (ACQUISITION_LENGTH - PRE_TRIGGER_LENGTH)* 2) {
+            if (curr_pos_a >= (acq_length - PRE_TRIGGER_LENGTH)* 2) {
                 printf("Channel A read complete\n");
                 read_a_done = 1;
             } else {
                 //printf("Curr position A = %0x\n", curr_pos_a);
             }
-            if (curr_pos_b >= (ACQUISITION_LENGTH - PRE_TRIGGER_LENGTH)* 2) {
+            if (curr_pos_b >= (acq_length - PRE_TRIGGER_LENGTH)* 2) {
                 printf("Channel B read complete\n");
                 read_b_done = 1;
             } else {
@@ -400,11 +402,11 @@ static void read_worker(struct queue *a, struct queue *b)
         send_a_done = 0;
         send_pos = 0;
         while (send_a_done == 0) {
-            if (send_pos >= ACQUISITION_LENGTH*2) {
+            if (send_pos >= acq_length*2) {
 	        printf("Channel A send complete\n");
                 send_a_done = 1;
             } else {
-	        length = (ACQUISITION_LENGTH*2) - send_pos;
+	        length = (acq_length*2) - send_pos;
 	        if (length > SEND_BLOCK_SIZE)
 	            sent = send(a->sock_fd, buf_a + send_pos, SEND_BLOCK_SIZE, 0);
 	        else
@@ -423,11 +425,11 @@ static void read_worker(struct queue *a, struct queue *b)
         send_b_done = 0;
         send_pos = 0;
         while (send_b_done == 0) {
-            if (send_pos >= ACQUISITION_LENGTH*2) {
+            if (send_pos >= acq_length*2) {
 	        printf("Channel B send complete\n");
                 send_b_done = 1;
             } else {
-	        length = (ACQUISITION_LENGTH*2) - send_pos;
+	        length = (acq_length*2) - send_pos;
 	        if (length > SEND_BLOCK_SIZE)
 	            sent = send(b->sock_fd, buf_b + send_pos, SEND_BLOCK_SIZE, 0);
 	        else
@@ -447,7 +449,7 @@ static void read_worker(struct queue *a, struct queue *b)
 /*
  * sends samples from a struct queue. synchronisation with the queue is done via
  * queue->read_end. send_worker will send data from 0 to read_end and will reset
- * read_end to 0 once ACQUISITION_LENGTH samples have been transmitted. then it
+ * read_end to 0 once acq_length samples have been transmitted. then it
  * will wait until read_end advances from 0 and start all over. access to read_end
  * is protected by queue->mutex.
  */
@@ -509,6 +511,24 @@ scpi_result_t RP_AxiAcqStop(scpi_t *context) {
     return SCPI_RES_OK;
 }
 
+scpi_result_t RP_AxiAcqSampleLength(scpi_t * context) {
+    uint32_t value;
+
+    /* Read acquisition length parameter */
+    if (!SCPI_ParamUInt32(context, &value, true)) {
+        RP_LOG(LOG_ERR, "*AXIACQ:LEN is missing first parameter.\n");
+        return SCPI_RES_ERR;
+    }
+    acq_length = value + PRE_TRIGGER_LENGTH; // The value from SCPI is the actual samples after trigger
+
+    RP_LOG(LOG_INFO, "*AXIACQ:LEN Successfully set the acquisition length.\n");
+    return SCPI_RES_OK;
+}
+
+scpi_result_t RP_AxiAcqSampleLengthQ(scpi_t * context) {
+    return SCPI_RES_OK;
+}
+
 scpi_result_t RP_AxiAcqReset(scpi_t *context) {
     return SCPI_RES_OK;
 }
@@ -519,27 +539,3 @@ scpi_result_t RP_AxiAcqStartQ(scpi_t * context) {
 scpi_result_t RP_AxiAcqStopQ(scpi_t * context) {
     return SCPI_RES_OK;
 }
-scpi_result_t RP_AxiAcqTriggerLevel(scpi_t *context) {
-    return SCPI_RES_OK;
-}
-
-scpi_result_t RP_AxiAcqTriggerLevelQ(scpi_t *context) {
-    return SCPI_RES_OK;
-}
-
-scpi_result_t RP_AxiAcqBurstRepetitions(scpi_t * context) {
-    return SCPI_RES_OK;
-}
-
-scpi_result_t RP_AxiAcqBurstRepetitionsQ(scpi_t * context) {
-    return SCPI_RES_OK;
-}
-
-scpi_result_t RP_AxiAcqTriggerSource(scpi_t * context) {
-    return SCPI_RES_OK;
-}
-
-scpi_result_t RP_AxiAcqTriggerSourceQ(scpi_t * context) {
-    return SCPI_RES_OK;
-}
-
