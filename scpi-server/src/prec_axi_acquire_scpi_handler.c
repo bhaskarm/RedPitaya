@@ -23,14 +23,13 @@
 #define SERVER_IP_ADDR          "192.168.2.101"
 #define SERVER_IP_PORT_A        5001
 #define SERVER_IP_PORT_B        5002
-#define ACQUISITION_LENGTH      0x06000000UL          /* samples */
-#define PRE_TRIGGER_LENGTH      40000           /* samples */
+//#define ACQUISITION_LENGTH      0x06000000UL        //Deprecated  /* samples */
+#define PRE_TRIGGER_LENGTH      40 //40000           /* samples */
 #define DECIMATION              DE_1            //Deprecated /* one of enum decimation */
 #define TRIGGER_MODE            TR_MANUAL       //Deprecated /* one of enum trigger */ 
 #define TRIGGER_THRESHOLD       0               //Dperecated /* ADC counts, 2048 ≃ +0.25V */
 
 /* internal constants */
-#define READ_BLOCK_SIZE         16384           // bytes
 #define SEND_BLOCK_SIZE         17752           // bytes
 #define RAM_A_ADDRESS           0x08000000UL
 #define RAM_A_SIZE              0x0C000000UL    // bytes
@@ -109,7 +108,7 @@ static void scope_setup_input_parameters(enum decimation dec, enum equalizer ch_
 static void scope_setup_trigger_parameters(int thresh_a, int thresh_b, int hyst_a, int hyst_b, int deadtime);
 static void scope_setup_axi_recording(void);
 static void scope_activate_trigger(enum trigger trigger);
-static void read_worker(struct queue *a, struct queue *b);
+void read_worker(struct queue *a, struct queue *b);
 //static void *send_worker(void *data);
 
 
@@ -151,6 +150,7 @@ int start_all_threads(void)
 	struct sockaddr_in srv_addr;
 
 	/* acquire pointers to mapped bus regions of fpga and dma ram */
+        RP_LOG(LOG_INFO, "START_ALL: Getting dev/mem.\n");
 	mem_fd = open("/dev/mem", O_RDWR);
 	if (mem_fd < 0) {
 		fprintf(stderr, "open /dev/mem failed, %s\n", strerror(errno));
@@ -158,6 +158,7 @@ int start_all_threads(void)
 		goto main_exit;
 	}
 
+        RP_LOG(LOG_INFO, "START_ALL: Getting smap.\n");
 	smap = mmap(NULL, 0x00100000UL, PROT_WRITE | PROT_READ, MAP_SHARED, mem_fd, 0x40100000UL);
 	buf_a = mmap(NULL, RAM_A_SIZE, PROT_READ, MAP_SHARED, mem_fd, RAM_A_ADDRESS);
 	buf_b = mmap(NULL, RAM_B_SIZE, PROT_READ, MAP_SHARED, mem_fd, RAM_B_ADDRESS);
@@ -170,6 +171,7 @@ int start_all_threads(void)
 	scope = smap;
 
 	/* allocate cacheable buffers */
+        RP_LOG(LOG_INFO, "START_ALL: Getting queue buffer.\n");
 	queue_a.buf = malloc(UDP_BUFFER_SIZE * 2);
 	queue_b.buf = malloc(UDP_BUFFER_SIZE * 2);
 	if (queue_a.buf == NULL || queue_b.buf == NULL) {
@@ -180,6 +182,7 @@ int start_all_threads(void)
 	}
 
 	/* setup udp sockets */
+        RP_LOG(LOG_INFO, "START_ALL: Getting UDP sockets.\n");
 	queue_a.sock_fd = socket(PF_INET, SOCK_DGRAM, 0);
 	queue_b.sock_fd = socket(PF_INET, SOCK_DGRAM, 0);
 	if (queue_a.sock_fd < 0 || queue_b.sock_fd < 0) {
@@ -194,6 +197,7 @@ int start_all_threads(void)
 	srv_addr.sin_addr.s_addr = inet_addr(SERVER_IP_ADDR);
 	srv_addr.sin_port = htons(SERVER_IP_PORT_A);
 
+        RP_LOG(LOG_INFO, "START_ALL: Connecting UDP sockets.\n");
 	if (connect(queue_a.sock_fd, (struct sockaddr *)&srv_addr, sizeof(srv_addr)) < 0) {
 		fprintf(stderr, "connect A failed, %s\n", strerror(errno));
 		rc = -5;
@@ -210,9 +214,12 @@ int start_all_threads(void)
 
 	/* initialize scope */
 	// Bhaskarm - gui resets scope scope_reset();
+        RP_LOG(LOG_INFO, "START_ALL: Setting up scope decim.\n");
 	scope_setup_input_parameters(DECIMATION, EQ_LV, EQ_LV, 1, 1);
 	// Bhaskarm - trigger setting is unused in this function
+        RP_LOG(LOG_INFO, "START_ALL: Setting up scope level.\n");
 	scope_setup_trigger_parameters(TRIGGER_THRESHOLD, TRIGGER_THRESHOLD, 50, 50, 1250);
+        RP_LOG(LOG_INFO, "START_ALL: Setting up scope trigger.\n");
 	scope_setup_axi_recording();
 
 	/* start socket senders */
@@ -233,7 +240,9 @@ int start_all_threads(void)
 //	queue_b.started = 1;
 
 	/* start reader in main-thread */
+        RP_LOG(LOG_INFO, "START_ALL: Starting read worker.\n");
 	read_worker(&queue_a, &queue_b);
+        RP_LOG(LOG_INFO, "START_ALL: Read worker returned\n");
 
 main_exit:
 	/* cleanup */
@@ -358,16 +367,18 @@ static void scope_activate_trigger(enum trigger trigger)
  * queue->read_end for each block that was copied. rinse and repeat. access to
  * read_end is protected by queue->mutex.
  */
-static void read_worker(struct queue *a, struct queue *b)
+void read_worker(struct queue *a, struct queue *b)
 {
+        RP_LOG(LOG_INFO, "READ: read worker called.\n");
 	unsigned int curr_pos_a, curr_pos_b;
 	unsigned int read_a_done, read_b_done;
 	unsigned int send_a_done, send_b_done;
 	unsigned int send_pos = 0;
+	unsigned int temp_decim = 0;
 	ssize_t sent;
 	size_t length;
 
-	printf("Arming read worker...\n");
+        RP_LOG(LOG_INFO, "READ: Arming scope trig.\n");
 
 	scope_activate_trigger(TRIGGER_MODE);
 
@@ -376,7 +387,8 @@ static void read_worker(struct queue *a, struct queue *b)
 	        //printf("Trigger value %0x\n", *(uint32_t *)(scope + 0x00004));
 		usleep(5);
 	}
-
+        temp_decim = *(uint32_t *)(scope + 0x00014);
+        RP_LOG(LOG_INFO, "CFG: Decim = %d, Acq len = %d\n", temp_decim, acq_length);
         read_a_done = 0;
         read_b_done = 0;
         while (read_a_done == 0 && read_b_done == 0) {
@@ -386,13 +398,13 @@ static void read_worker(struct queue *a, struct queue *b)
 	    curr_pos_a -= RAM_A_ADDRESS;
 	    curr_pos_b -= RAM_B_ADDRESS;
             if (curr_pos_a >= (acq_length - PRE_TRIGGER_LENGTH)* 2) {
-                printf("Channel A read complete\n");
+                RP_LOG(LOG_INFO, "READ: CH A read complete\n");
                 read_a_done = 1;
             } else {
                 //printf("Curr position A = %0x\n", curr_pos_a);
             }
             if (curr_pos_b >= (acq_length - PRE_TRIGGER_LENGTH)* 2) {
-                printf("Channel B read complete\n");
+                RP_LOG(LOG_INFO, "READ: CH B read complete\n");
                 read_b_done = 1;
             } else {
                 //printf("Curr position B = %0x\n", curr_pos_b);
@@ -403,7 +415,7 @@ static void read_worker(struct queue *a, struct queue *b)
         send_pos = 0;
         while (send_a_done == 0) {
             if (send_pos >= acq_length*2) {
-	        printf("Channel A send complete\n");
+                RP_LOG(LOG_INFO, "READ: CH A send done\n");
                 send_a_done = 1;
             } else {
 	        length = (acq_length*2) - send_pos;
@@ -413,10 +425,10 @@ static void read_worker(struct queue *a, struct queue *b)
 	            sent = send(a->sock_fd, buf_a + send_pos, length, 0);
 
 	        if (sent > 0) {
-	            //printf("Send one block for channel a. Send pos = %0x, Sent length = %0x\n", send_pos, sent);
+	            //RP_LOG(LOG_INFO, "Send one block for channel a. Send pos = %0x, Sent length = %0x\n", send_pos, sent);
                     send_pos += sent;
 	        } else {
-	            printf("Channel A send complete\n");
+                    RP_LOG(LOG_INFO, "READ: CH A send done\n");
                     send_a_done = 1;
 	        }
 	    }
@@ -426,7 +438,7 @@ static void read_worker(struct queue *a, struct queue *b)
         send_pos = 0;
         while (send_b_done == 0) {
             if (send_pos >= acq_length*2) {
-	        printf("Channel B send complete\n");
+                RP_LOG(LOG_INFO, "READ: CH B send done\n");
                 send_b_done = 1;
             } else {
 	        length = (acq_length*2) - send_pos;
@@ -436,10 +448,10 @@ static void read_worker(struct queue *a, struct queue *b)
 	            sent = send(b->sock_fd, buf_b + send_pos, length, 0);
 
 	        if (sent > 0) {
-	            //printf("Send one block for channel b. Send pos = %0x, Sent length = %0x\n", send_pos, sent);
+	            //RP_LOG(LOG_INFO, "Send one block for channel b. Send pos = %0x, Sent length = %0x\n", send_pos, sent);
                     send_pos += sent;
 	        } else {
-	            printf("Channel B send complete\n");
+                    RP_LOG(LOG_INFO, "READ: CH B send done\n");
                     send_b_done = 1;
 	        }
 	    }
@@ -488,6 +500,7 @@ send_worker_exit:
 */
 scpi_result_t RP_AxiAcqStart(scpi_t *context) {
     int result = RP_OK;
+    RP_LOG(LOG_INFO, "*AXIACQ:START Starting ADC threads.\n");
     start_all_threads();
     if (RP_OK != result) {
         RP_LOG(LOG_ERR, "*AXIACQ:START Failed to start Red Pitaya acquire: %s\n", rp_GetError(result));
