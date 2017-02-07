@@ -108,7 +108,7 @@ static void scope_setup_input_parameters(enum decimation dec, enum equalizer ch_
 static void scope_setup_trigger_parameters(int thresh_a, int thresh_b, int hyst_a, int hyst_b, int deadtime);
 static void scope_setup_axi_recording(void);
 static void scope_activate_trigger(enum trigger trigger);
-void read_worker(struct queue *a, struct queue *b);
+static void *read_worker(void *data);
 //static void *send_worker(void *data);
 
 
@@ -135,6 +135,7 @@ static struct queue queue_b = {
 	.sock_fd = -1,
 };
 static uint8_t acq_active;
+static uint8_t read_thread_active;
 static uint32_t acq_length = 0x400;
 
 /* functions */
@@ -148,6 +149,7 @@ int start_all_threads(void)
 	int mem_fd;
 	void *smap = MAP_FAILED;
 	struct sockaddr_in srv_addr;
+	pthread_t       read_n_sender;
 
 	/* acquire pointers to mapped bus regions of fpga and dma ram */
         RP_LOG(LOG_INFO, "START_ALL: Getting dev/mem.\n");
@@ -241,10 +243,18 @@ int start_all_threads(void)
 
 	/* start reader in main-thread */
         RP_LOG(LOG_INFO, "START_ALL: Starting read worker.\n");
-	read_worker(&queue_a, &queue_b);
-        RP_LOG(LOG_INFO, "START_ALL: Read worker returned\n");
+  	rc = pthread_create(&read_n_sender, NULL, read_worker, NULL);
+  	if (rc != 0) {
+  		fprintf(stderr, "start read+sender failed, %s\n", strerror(rc));
+  		rc = -6;
+  		goto main_exit;
+  	}
+  	read_thread_active = 1;
+	return rc;
+	//read_worker(&queue_a, &queue_b);
 
 main_exit:
+        RP_LOG(LOG_INFO, "START_ALL: Read worker thread aborted\n");
 	/* cleanup */
 	if (queue_a.started) {
 		pthread_cancel(queue_a.sender);
@@ -253,6 +263,10 @@ main_exit:
 	if (queue_b.started) {
 		pthread_cancel(queue_b.sender);
 		pthread_join(queue_b.sender, NULL);
+	}
+	if (read_thread_active) {
+		pthread_cancel(read_n_sender);
+		pthread_join(read_n_sender, NULL);
 	}
 	if (smap != MAP_FAILED)
 		munmap(smap, 0x00100000UL);
@@ -357,7 +371,7 @@ static void scope_activate_trigger(enum trigger trigger)
 {
 	/* TODO maybe use the 'keep armed' flag without reset, to have better pre-trigger data when a trigger immediately follows the previous recording */
 	*(uint32_t *)(scope + 0x00000) = 1;             /* arm scope */
-	//*(uint32_t *)(scope + 0x00000) = 0;             /* armed for trigger */
+	*(uint32_t *)(scope + 0x00000) = 0;             /* armed for trigger, reset this flag */
 	//Bhaskarm - Trigger is set using the ACQ SCPI commands. *(uint32_t *)(scope + 0x00004) = trigger;       /* trigger source */
 }
 
@@ -367,7 +381,7 @@ static void scope_activate_trigger(enum trigger trigger)
  * queue->read_end for each block that was copied. rinse and repeat. access to
  * read_end is protected by queue->mutex.
  */
-void read_worker(struct queue *a, struct queue *b)
+static void *read_worker(void *data)
 {
         RP_LOG(LOG_INFO, "READ: read worker called.\n");
 	unsigned int curr_pos_a, curr_pos_b;
@@ -383,8 +397,9 @@ void read_worker(struct queue *a, struct queue *b)
 	scope_activate_trigger(TRIGGER_MODE);
 
 	/* wait for trigger */
-	while (*(uint32_t *)(scope + 0x00004)) {
-	        //printf("Trigger value %0x\n", *(uint32_t *)(scope + 0x00004));
+	RP_LOG(LOG_INFO, "Trigger value initial %d\n", *(uint32_t *)(scope + 0x00004));
+	while (*(uint32_t *)(scope + 0x00004) && acq_active == 1) {
+	        //RP_LOG(LOG_INFO, "Trigger value %0x\n", *(uint32_t *)(scope + 0x00004));
 		usleep(5);
 	}
         temp_decim = *(uint32_t *)(scope + 0x00014);
@@ -413,16 +428,16 @@ void read_worker(struct queue *a, struct queue *b)
         // Send all channel A data
         send_a_done = 0;
         send_pos = 0;
-        while (send_a_done == 0) {
+        while (send_a_done == 0 && acq_active == 1) {
             if (send_pos >= acq_length*2) {
                 RP_LOG(LOG_INFO, "READ: CH A send done\n");
                 send_a_done = 1;
             } else {
 	        length = (acq_length*2) - send_pos;
 	        if (length > SEND_BLOCK_SIZE)
-	            sent = send(a->sock_fd, buf_a + send_pos, SEND_BLOCK_SIZE, 0);
+	            sent = send(queue_a.sock_fd, buf_a + send_pos, SEND_BLOCK_SIZE, 0);
 	        else
-	            sent = send(a->sock_fd, buf_a + send_pos, length, 0);
+	            sent = send(queue_a.sock_fd, buf_a + send_pos, length, 0);
 
 	        if (sent > 0) {
 	            //RP_LOG(LOG_INFO, "Send one block for channel a. Send pos = %0x, Sent length = %0x\n", send_pos, sent);
@@ -436,16 +451,16 @@ void read_worker(struct queue *a, struct queue *b)
         // Send all channel B data
         send_b_done = 0;
         send_pos = 0;
-        while (send_b_done == 0) {
+        while (send_b_done == 0 && acq_active == 1) {
             if (send_pos >= acq_length*2) {
                 RP_LOG(LOG_INFO, "READ: CH B send done\n");
                 send_b_done = 1;
             } else {
 	        length = (acq_length*2) - send_pos;
 	        if (length > SEND_BLOCK_SIZE)
-	            sent = send(b->sock_fd, buf_b + send_pos, SEND_BLOCK_SIZE, 0);
+	            sent = send(queue_b.sock_fd, buf_b + send_pos, SEND_BLOCK_SIZE, 0);
 	        else
-	            sent = send(b->sock_fd, buf_b + send_pos, length, 0);
+	            sent = send(queue_b.sock_fd, buf_b + send_pos, length, 0);
 
 	        if (sent > 0) {
 	            //RP_LOG(LOG_INFO, "Send one block for channel b. Send pos = %0x, Sent length = %0x\n", send_pos, sent);
@@ -456,6 +471,10 @@ void read_worker(struct queue *a, struct queue *b)
 	        }
 	    }
 	}
+        send_a_done = 0; // Turn off the send flags when you reach the end
+        send_b_done = 0;
+        acq_active  = 0;// turn off the acq_active flag too
+        return RP_OK;
 }
 
 /*
@@ -501,6 +520,7 @@ send_worker_exit:
 scpi_result_t RP_AxiAcqStart(scpi_t *context) {
     int result = RP_OK;
     RP_LOG(LOG_INFO, "*AXIACQ:START Starting ADC threads.\n");
+    acq_active = 1;
     start_all_threads();
     if (RP_OK != result) {
         RP_LOG(LOG_ERR, "*AXIACQ:START Failed to start Red Pitaya acquire: %s\n", rp_GetError(result));
@@ -550,5 +570,30 @@ scpi_result_t RP_AxiAcqStartQ(scpi_t * context) {
     return SCPI_RES_OK;
 }
 scpi_result_t RP_AxiAcqStopQ(scpi_t * context) {
+    return SCPI_RES_OK;
+}
+
+scpi_result_t RP_AxiAcqReadCalib(scpi_t * context) {
+    rp_calib_params_t calib;
+    float buffer[10];
+    //int result;
+
+    rp_CalibInit();
+    calib = rp_GetCalibrationSettings();
+
+    buffer[0] = calib.fe_ch1_fs_g_hi;
+    buffer[1] = calib.fe_ch2_fs_g_hi;
+    buffer[2] = calib.fe_ch1_fs_g_lo;
+    buffer[3] = calib.fe_ch2_fs_g_lo;
+    buffer[4] = calib.fe_ch1_lo_offs;
+    buffer[5] = calib.fe_ch2_lo_offs;
+    buffer[6] = calib.be_ch1_fs;     
+    buffer[7] = calib.be_ch2_fs;     
+    buffer[8] = calib.be_ch1_dc_offs;
+    buffer[9] = calib.be_ch2_dc_offs;
+
+    SCPI_ResultBufferFloat(context, buffer, 10);
+    RP_LOG(LOG_INFO, "AXIACQ:CALIB? Successfully "
+        "returned calibration data to client.\n");
     return SCPI_RES_OK;
 }

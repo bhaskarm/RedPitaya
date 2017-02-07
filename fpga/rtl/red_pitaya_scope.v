@@ -627,7 +627,6 @@ if (adc_rstn_i == 1'b0) begin
    ext_trig_debp <= 20'h0 ;
    ext_trig_debn <= 20'h0 ;
    asg_trig_in   <=  3'h0 ;
-   asg_trig_dp   <=  2'h0 ;
    asg_trig_dn   <=  2'h0 ;
    asg_trig_debp <= 20'h0 ;
    asg_trig_debn <= 20'h0 ;

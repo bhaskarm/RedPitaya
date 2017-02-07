@@ -22,6 +22,7 @@ scpi_result_t RP_AxiAcqStart(scpi_t * context);
 scpi_result_t RP_AxiAcqStartQ(scpi_t * context);
 scpi_result_t RP_AxiAcqStop(scpi_t * context);
 scpi_result_t RP_AxiAcqStopQ(scpi_t * context);
+scpi_result_t RP_AxiAcqReadCalib(scpi_t * context);
 scpi_result_t RP_AxiAcqReset(scpi_t * context);
 scpi_result_t RP_AxiAcqSampleLength(scpi_t * context);
 scpi_result_t RP_AxiAcqSampleLengthQ(scpi_t * context);

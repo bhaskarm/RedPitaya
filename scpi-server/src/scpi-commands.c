@@ -229,6 +229,7 @@ static const scpi_command_t scpi_commands[] = {
     {.pattern = "AXIACQ:START", .callback                  = RP_AxiAcqStart,},
     {.pattern = "AXIACQ:STOP", .callback                   = RP_AxiAcqStop,},
     {.pattern = "AXIACQ:LEN", .callback            	  = RP_AxiAcqSampleLength,},
+    {.pattern = "AXIACQ:CALIB?", .callback            	  = RP_AxiAcqReadCalib,},
 
     SCPI_CMD_LIST_END
 };
