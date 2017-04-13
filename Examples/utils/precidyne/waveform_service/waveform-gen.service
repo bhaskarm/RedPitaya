@@ -1,0 +1,10 @@
+[Unit]
+Description=Listener for GPIO switches to start waveform generation
+ 
+[Service]
+ExecStart=/root/waveform_service/generate_arbitrary_waveform
+StandardOutput=null
+ 
+[Install]
+WantedBy=multi-user.target
+Alias=waveform-gen.service
