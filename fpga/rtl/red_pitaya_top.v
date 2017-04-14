@@ -413,14 +413,14 @@ red_pitaya_hk i_hk (
   .sys_ack         (  sys_ack[0]                 )   // acknowledge signal
 );
 
-//IOBUF i_iobufp [8-1:0] (.O(exp_p_in), .IO(exp_p_io), .I(exp_p_out), .T(~exp_p_dir) ); // P port pins are used for ASG driven pins 
-IOBUF i_iobufn [8-1:0] (.O(exp_n_in), .IO(exp_n_io), .I(exp_n_out), .T(~exp_n_dir) );
 assign debug_dir_out = 8'hff; // One debug port is output
 assign debug_dir_in  = 8'h00; // One debug port is input
 assign debug_bus_0 = debug_bus_asg[7:0];
 assign debug_bus_1 = debug_bus_asg[15:8];
-IOBUF i_iobufp [8-1:0] (.O(), .IO(exp_p_io), .I(debug_bus_0), .T(~debug_dir_out) );
 //IOBUF i_iobufn [8-1:0] (.O(), .IO(exp_n_io), .I(debug_bus_1), .T(~debug_dir_out) ); // N port pins are driven as direct digital IO 
+IOBUF i_iobufn [8-1:0] (.O(exp_n_in), .IO(exp_n_io), .I(exp_n_out), .T(~exp_n_dir) );
+//IOBUF i_iobufp [8-1:0] (.O(exp_p_in), .IO(exp_p_io), .I(exp_p_out), .T(~exp_p_dir) ); // P port pins are used for ASG driven pins 
+IOBUF i_iobufp [8-1:0] (.O(), .IO(exp_p_io), .I(debug_bus_0), .T(~debug_dir_out) );
 
 //---------------------------------------------------------------------------------
 //  Oscilloscope application
@@ -433,7 +433,7 @@ red_pitaya_scope i_scope (
   .adc_b_i         (  adc_b                      ),  // CH 2
   .adc_clk_i       (  adc_clk                    ),  // clock
   .adc_rstn_i      (  adc_rstn                   ),  // reset - active low
-  .trig_ext_i      (  exp_p_in[0]                ),  // external trigger
+  .trig_ext_i      (  exp_n_in[7]                ),  // external trigger
   .trig_asg_i      (  trig_asg_out               ),  // ASG trigger
   // AXI0 master                 // AXI1 master
   .axi0_clk_o    (axi0_clk   ),  .axi1_clk_o    (axi1_clk   ),
@@ -466,8 +466,8 @@ red_pitaya_asg_double_buf i_asg (
   .dac_b_o         (  asg_b                      ),  // CH 2
   .dac_clk_i       (  adc_clk                    ),  // clock
   .dac_rstn_i      (  adc_rstn                   ),  // reset - active low
-  .trig_a_i        (  exp_p_in[0]                ),
-  .trig_b_i        (  exp_p_in[0]                ),
+  .trig_a_i        (  exp_n_in[7]                ),
+  .trig_b_i        (  exp_n_in[7]                ),
   .trig_out_o      (  trig_asg_out               ),
   // System bus
   .sys_addr        (  sys_addr                   ),  // address

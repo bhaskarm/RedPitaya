@@ -864,8 +864,8 @@ int prec_GenReset() {
     // Do not set the DAC data to absolute zero since it might not correspond to 0v output. Reset state machine and set amplitude to zero
     //ECHECK(prec_GenOutDisable(RP_CH_1));
     //ECHECK(prec_GenOutDisable(RP_CH_2));
-    ECHECK(prec_GenTriggerSource(RP_CH_1, RP_GEN_TRIG_SRC_INTERNAL));
-    ECHECK(prec_GenTriggerSource(RP_CH_2, RP_GEN_TRIG_SRC_INTERNAL));
+    ECHECK(prec_GenTriggerSource(RP_CH_1, RP_GEN_TRIG_SRC_NONE));
+    ECHECK(prec_GenTriggerSource(RP_CH_2, RP_GEN_TRIG_SRC_NONE));
     for (int buf_idx=0; buf_idx<4; buf_idx++) {
         ECHECK(prec_GenFreq(RP_CH_1, buf_idx, 0));
         ECHECK(prec_GenFreq(RP_CH_2, buf_idx, 0));
@@ -1056,6 +1056,9 @@ int prec_GenGetPhaseBits(rp_channel_t channel, int buf_idx, int *num) {
 
 int prec_GenTriggerSource(rp_channel_t channel, rp_trig_src_t src) {
     //return prec_gen_setTriggerSource(channel, src);
+    if (src == RP_GEN_TRIG_SRC_NONE) {
+        return prec_generate_setTriggerSource(channel, 0);
+    }
     if (src == RP_GEN_TRIG_SRC_INTERNAL) {
         return prec_generate_setTriggerSource(channel, 1);
     }

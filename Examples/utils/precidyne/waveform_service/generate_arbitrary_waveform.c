@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <unistd.h>
 
-#include "redpitaya/rp.h"
 #include "redpitaya/rp.h"
 
 #define M_PI 3.14159265358979323846
@@ -62,6 +62,7 @@ int main(int argc, char **argv){
         //# This for loop actually calculates the sample values for each waveform
 	//fp0=fopen("./ch_0_out.dat", "w+");
 	//fp1=fopen("./ch_1_out.dat", "w+");
+	prec_GenReset();
         for (i=0; i<BUF_SIZE; i++) {
             radians = (2 * M_PI * (i * SAMPLE_PERIOD) * baseFreq);
             g1_time = radians + g1_delay;
@@ -97,7 +98,7 @@ int main(int argc, char **argv){
 	    }
 	}
 
-        printf("Start wavegen listen service\n");
+        //printf("Start wavegen listen service\n");
         rp_DpinSetDirection(RP_DIO0_N, RP_OUT);
         rp_DpinSetDirection(RP_DIO1_N, RP_OUT);
         rp_DpinSetDirection(RP_DIO2_N, RP_IN);
@@ -105,10 +106,10 @@ int main(int argc, char **argv){
 
         //# Now transmit the calculated samples to the FPGA memory one buffer at a time. It takes about a second to transmit 16k samples which fills 1 of the 4 buffers. The delay mainly comes from the SCPI receiver parser being slow
         //# Channel 1
-        result = prec_GenArbWaveform(RP_CH_1, 0, g4, 0*BUF_SIZE, g4_num_samp);
-        result = prec_GenArbWaveform(RP_CH_1, 1, g1, 1*BUF_SIZE, g1_num_samp);
-        result = prec_GenArbWaveform(RP_CH_1, 2, g5, 2*BUF_SIZE, g5_num_samp);
-        result = prec_GenArbWaveform(RP_CH_1, 3, g3, 3*BUF_SIZE, g3_num_samp);
+        prec_GenArbWaveform(RP_CH_1, 0, g4, 0*BUF_SIZE, g4_num_samp);
+        prec_GenArbWaveform(RP_CH_1, 1, g1, 1*BUF_SIZE, g1_num_samp);
+        prec_GenArbWaveform(RP_CH_1, 2, g5, 2*BUF_SIZE, g5_num_samp);
+        prec_GenArbWaveform(RP_CH_1, 3, g3, 3*BUF_SIZE, g3_num_samp);
         phase_bits = (2<<6) + (1<<4) + (0<<2) + 1;
         prec_GenPhaseBits(RP_CH_1, 0, phase_bits); // Bad design, phase bits are always sent to BUF 0
 
@@ -125,10 +126,10 @@ int main(int argc, char **argv){
         //rp_DpinSetState(RP_DIO0_N, RP_LOW);
 
         //# Channel 2
-        result = prec_GenArbWaveform(RP_CH_2, 0, g4, 0*BUF_SIZE, g4_num_samp);
-        result = prec_GenArbWaveform(RP_CH_2, 1, g2, 1*BUF_SIZE, g2_num_samp);
-        result = prec_GenArbWaveform(RP_CH_2, 2, g5, 2*BUF_SIZE, g5_num_samp);
-        result = prec_GenArbWaveform(RP_CH_2, 3, g2, 3*BUF_SIZE, g2_num_samp);
+        prec_GenArbWaveform(RP_CH_2, 0, g4, 0*BUF_SIZE, g4_num_samp);
+        prec_GenArbWaveform(RP_CH_2, 1, g2, 1*BUF_SIZE, g2_num_samp);
+        prec_GenArbWaveform(RP_CH_2, 2, g5, 2*BUF_SIZE, g5_num_samp);
+        prec_GenArbWaveform(RP_CH_2, 3, g2, 3*BUF_SIZE, g2_num_samp);
         phase_bits = (2<<6) + (1<<4) + (0<<2) + 1;
         prec_GenPhaseBits(RP_CH_2, 0, phase_bits); // Bad design, phase bits are always sent to BUF 0
 
@@ -145,21 +146,29 @@ int main(int argc, char **argv){
         //rp_DpinSetState(RP_DIO1_N, RP_LOW);
 
         //# Trigger logic
-        //prec_GenTrigger(0);// Trigger only 1 channel (0 or 1)
         start_state = RP_HIGH;
         stop_state = RP_HIGH;
         is_started = 0;
+        // Flush any old values in GPIO read logic
+        for (int fls_idx=0; fls_idx<10; fls_idx++) {
+            usleep(10000); // Sleep for 10ms
+            rp_DpinGetState(RP_DIO2_N, &start_state);
+            rp_DpinGetState(RP_DIO3_N, &stop_state);
+        }
         while (1) {
+            usleep(10000); // Sleep for 10ms
             rp_DpinGetState(RP_DIO2_N, &start_state);
             if (start_state == RP_LOW  && is_started == 0) { // if not started
                 printf("Start trigger seen\n");
-                prec_GenTrigger(2); // Trigger both channels
+                prec_GenTrigger(3); // Trigger both channels
                 for (int buf_idx=0; buf_idx<4; buf_idx++) {
                     prec_GenAmp(RP_CH_1, buf_idx, 0.1);
                     prec_GenAmp(RP_CH_2, buf_idx, 0.1);
                 }
                 rp_DpinSetState(RP_DIO0_N, RP_HIGH);
                 rp_DpinSetState(RP_DIO1_N, RP_HIGH);
+                rp_DpinSetState(RP_LED0, RP_HIGH);
+                rp_DpinSetState(RP_LED1, RP_HIGH);
                 is_started = 1;
             }
             rp_DpinGetState(RP_DIO3_N, &stop_state);
@@ -171,6 +180,8 @@ int main(int argc, char **argv){
                 }
                 rp_DpinSetState(RP_DIO0_N, RP_LOW);
                 rp_DpinSetState(RP_DIO1_N, RP_LOW);
+                rp_DpinSetState(RP_LED0, RP_LOW);
+                rp_DpinSetState(RP_LED1, RP_LOW);
                 //prec_GenReset(); // Reset the Wave gen to stop it
                 is_started = 0;
             }
