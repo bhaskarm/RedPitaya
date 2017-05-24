@@ -1,10 +1,10 @@
 [Unit]
 Description=Listener for GPIO switches to start waveform generation
-After=multi-user.target
  
 [Service]
 ExecStart=/root/waveform_service/generate_arbitrary_waveform
-StandardOutput=syslog+console
+Type=simple
  
 [Install]
 Alias=waveform-gen.service
+WantedBy=default.target

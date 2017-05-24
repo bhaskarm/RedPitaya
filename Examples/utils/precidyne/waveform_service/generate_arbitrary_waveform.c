@@ -45,6 +45,7 @@ int main(int argc, char **argv){
         rp_pinState_t start_state, stop_state;
         double baseFreq = 1.25e+6; // base frequency from which all harmonics are derived
         
+        //printf("Start wavegen listen service\n");
 	/* Print error, if rp_Init() function failed */
 	if(rp_Init() != RP_OK){
 	    fprintf(stderr, "Rp api init failed!\n");
@@ -62,7 +63,6 @@ int main(int argc, char **argv){
         //# This for loop actually calculates the sample values for each waveform
 	//fp0=fopen("./ch_0_out.dat", "w+");
 	//fp1=fopen("./ch_1_out.dat", "w+");
-	prec_GenReset();
         for (i=0; i<BUF_SIZE; i++) {
             radians = (2 * M_PI * (i * SAMPLE_PERIOD) * baseFreq);
             g1_time = radians + g1_delay;
@@ -98,79 +98,79 @@ int main(int argc, char **argv){
 	    }
 	}
 
-        //printf("Start wavegen listen service\n");
-        rp_DpinSetDirection(RP_DIO0_N, RP_OUT);
-        rp_DpinSetDirection(RP_DIO1_N, RP_OUT);
+        usleep(400); // Sleep for 100us
         rp_DpinSetDirection(RP_DIO2_N, RP_IN);
         rp_DpinSetDirection(RP_DIO3_N, RP_IN);
-
-        //# Now transmit the calculated samples to the FPGA memory one buffer at a time. It takes about a second to transmit 16k samples which fills 1 of the 4 buffers. The delay mainly comes from the SCPI receiver parser being slow
-        //# Channel 1
-        prec_GenArbWaveform(RP_CH_1, 0, g4, 0*BUF_SIZE, g4_num_samp);
-        prec_GenArbWaveform(RP_CH_1, 1, g1, 1*BUF_SIZE, g1_num_samp);
-        prec_GenArbWaveform(RP_CH_1, 2, g5, 2*BUF_SIZE, g5_num_samp);
-        prec_GenArbWaveform(RP_CH_1, 3, g3, 3*BUF_SIZE, g3_num_samp);
-        phase_bits = (2<<6) + (1<<4) + (0<<2) + 1;
-        prec_GenPhaseBits(RP_CH_1, 0, phase_bits); // Bad design, phase bits are always sent to BUF 0
-
-        for (int buf_idx=0; buf_idx<4; buf_idx++) {
-            prec_GenWaveform(RP_CH_1, buf_idx, PREC_WAVEFORM_ARBITRARY);
-            prec_GenAmp(RP_CH_1, buf_idx, 0.1);
-            prec_GenOffset(RP_CH_1, buf_idx, 0.0);
-            prec_GenFreq(RP_CH_1, buf_idx, 7629.39453125); // Strange value guarantees one sample step at a time (16k samples at 125msps)-> pointerStep = (uint32_t) round(65536 * (frequency / DAC_FREQUENCY) * BUFFER_LENGTH);
-            prec_GenBurstCount(RP_CH_1, buf_idx, 1);
-        }
-        prec_GenOutEnable(RP_CH_1);
-        rp_DpinSetState(RP_DIO0_N, RP_HIGH);
-        //prec_GenOutDisable(RP_CH_1);
-        //rp_DpinSetState(RP_DIO0_N, RP_LOW);
-
-        //# Channel 2
-        prec_GenArbWaveform(RP_CH_2, 0, g4, 0*BUF_SIZE, g4_num_samp);
-        prec_GenArbWaveform(RP_CH_2, 1, g2, 1*BUF_SIZE, g2_num_samp);
-        prec_GenArbWaveform(RP_CH_2, 2, g5, 2*BUF_SIZE, g5_num_samp);
-        prec_GenArbWaveform(RP_CH_2, 3, g2, 3*BUF_SIZE, g2_num_samp);
-        phase_bits = (2<<6) + (1<<4) + (0<<2) + 1;
-        prec_GenPhaseBits(RP_CH_2, 0, phase_bits); // Bad design, phase bits are always sent to BUF 0
-
-        for (int buf_idx=0; buf_idx<4; buf_idx++) {
-            prec_GenWaveform(RP_CH_2, buf_idx, PREC_WAVEFORM_ARBITRARY);
-            prec_GenAmp(RP_CH_2, buf_idx, 0.1);
-            prec_GenOffset(RP_CH_2, buf_idx, 0.0);
-            prec_GenFreq(RP_CH_2, buf_idx, 7629.39453125); // Strange value guarantees one sample step at a time (16k samples at 125msps)-> pointerStep = (uint32_t) round(65536 * (frequency / DAC_FREQUENCY) * BUFFER_LENGTH);
-            prec_GenBurstCount(RP_CH_2, buf_idx, 1);
-        }
-        prec_GenOutEnable(RP_CH_2);
-        rp_DpinSetState(RP_DIO1_N, RP_HIGH);
-        //prec_GenOutDisable(RP_CH_2);
-        //rp_DpinSetState(RP_DIO1_N, RP_LOW);
 
         //# Trigger logic
         start_state = RP_HIGH;
         stop_state = RP_HIGH;
         is_started = 0;
         // Flush any old values in GPIO read logic
-        for (int fls_idx=0; fls_idx<10; fls_idx++) {
-            usleep(10000); // Sleep for 10ms
-            rp_DpinGetState(RP_DIO2_N, &start_state);
-            rp_DpinGetState(RP_DIO3_N, &stop_state);
-        }
+        usleep(100); // Sleep for 100us
+        rp_DpinGetState(RP_DIO2_N, &start_state);
+        rp_DpinGetState(RP_DIO3_N, &stop_state);
         while (1) {
-            usleep(10000); // Sleep for 10ms
+            usleep(50000); // Sleep for 50ms
+            //## Check the start button to see if it is active low
             rp_DpinGetState(RP_DIO2_N, &start_state);
             if (start_state == RP_LOW  && is_started == 0) { // if not started
                 printf("Start trigger seen\n");
-                prec_GenTrigger(3); // Trigger both channels
+                //### Set the direction for the output enable signals
+                rp_DpinSetDirection(RP_DIO0_N, RP_OUT);
+                rp_DpinSetDirection(RP_DIO1_N, RP_OUT);
+                //### Reset the waveform gen before loading all buffers and config
+	        prec_GenReset();
+                //# Now transmit the calculated samples to the FPGA memory one buffer at a time. 
+                //# Channel 1
+                prec_GenArbWaveform(RP_CH_1, 0, g4, 0*BUF_SIZE, g4_num_samp);
+                prec_GenArbWaveform(RP_CH_1, 1, g1, 1*BUF_SIZE, g1_num_samp);
+                prec_GenArbWaveform(RP_CH_1, 2, g5, 2*BUF_SIZE, g5_num_samp);
+                prec_GenArbWaveform(RP_CH_1, 3, g3, 3*BUF_SIZE, g3_num_samp);
+                phase_bits = (2<<6) + (1<<4) + (0<<2) + 1;
+                prec_GenPhaseBits(RP_CH_1, 0, phase_bits); // Bad design, phase bits are always sent to BUF 0
+ 
+                for (int buf_idx=0; buf_idx<4; buf_idx++) {
+                    prec_GenWaveform(RP_CH_1, buf_idx, PREC_WAVEFORM_ARBITRARY);
+                    prec_GenAmp(RP_CH_1, buf_idx, 0.1);
+                    prec_GenOffset(RP_CH_1, buf_idx, 0.0);
+                    prec_GenFreq(RP_CH_1, buf_idx, 7629.39453125); // Strange value guarantees one sample step at a time (16k samples at 125msps)-> pointerStep = (uint32_t) round(65536 * (frequency / DAC_FREQUENCY) * BUFFER_LENGTH);
+                    prec_GenBurstCount(RP_CH_1, buf_idx, 1);
+                }
+                prec_GenOutEnable(RP_CH_1);
+                //prec_GenOutDisable(RP_CH_1);
+ 
+                //# Channel 2
+                prec_GenArbWaveform(RP_CH_2, 0, g4, 0*BUF_SIZE, g4_num_samp);
+                prec_GenArbWaveform(RP_CH_2, 1, g2, 1*BUF_SIZE, g2_num_samp);
+                prec_GenArbWaveform(RP_CH_2, 2, g5, 2*BUF_SIZE, g5_num_samp);
+                prec_GenArbWaveform(RP_CH_2, 3, g2, 3*BUF_SIZE, g2_num_samp);
+                phase_bits = (2<<6) + (1<<4) + (0<<2) + 1;
+                prec_GenPhaseBits(RP_CH_2, 0, phase_bits); // Bad design, phase bits are always sent to BUF 0
+ 
+                for (int buf_idx=0; buf_idx<4; buf_idx++) {
+                    prec_GenWaveform(RP_CH_2, buf_idx, PREC_WAVEFORM_ARBITRARY);
+                    prec_GenAmp(RP_CH_2, buf_idx, 0.1);
+                    prec_GenOffset(RP_CH_2, buf_idx, 0.0);
+                    prec_GenFreq(RP_CH_2, buf_idx, 7629.39453125); // Strange value guarantees one sample step at a time (16k samples at 125msps)-> pointerStep = (uint32_t) round(65536 * (frequency / DAC_FREQUENCY) * BUFFER_LENGTH);
+                    prec_GenBurstCount(RP_CH_2, buf_idx, 1);
+                }
+                prec_GenOutEnable(RP_CH_2);
+                //prec_GenOutDisable(RP_CH_2);
+
                 for (int buf_idx=0; buf_idx<4; buf_idx++) {
                     prec_GenAmp(RP_CH_1, buf_idx, 0.1);
                     prec_GenAmp(RP_CH_2, buf_idx, 0.1);
                 }
+                prec_GenTrigger(3); // Trigger both channels
+                //# Light up both leds and both enable pins
                 rp_DpinSetState(RP_DIO0_N, RP_HIGH);
                 rp_DpinSetState(RP_DIO1_N, RP_HIGH);
                 rp_DpinSetState(RP_LED0, RP_HIGH);
                 rp_DpinSetState(RP_LED1, RP_HIGH);
                 is_started = 1;
             }
+            //## Check the stop button to see if it is active low
             rp_DpinGetState(RP_DIO3_N, &stop_state);
             if (stop_state == RP_LOW  && is_started == 1) { // if started
                 printf("Stop trigger \n");
@@ -186,7 +186,6 @@ int main(int argc, char **argv){
                 is_started = 0;
             }
         }
-            
         printf("%d %f %f %f %d Junk output", result, x[0], dc[0], g2[0], g2_num_samp);
 	rp_Release();
 
