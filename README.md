@@ -1,4 +1,6 @@
-## This is a fork that does high speed ADC transmission over ethernet. It will also include high speed DAC waveform generation over ethernet at a later time.
+
+## This is the last stable version of RedPitaya bhaskarm fork. This is a fork that does high speed ADC transmission over ethernet. It also includes high speed DAC waveform generation over ethernet. The code is based on OS 0.94 and might not work on newer OS versions.
+
 
 # Red Pitaya ecosystem and applications
 
